@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CS Master Schedule | Mohamed Ali</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@400;600;900&family=Cairo:wght@700;900&display=swap" rel="stylesheet">
+</head>
+<body class="bg-[#050505] text-white antialiased">
+
+    <div id="toastContainer" class="fixed top-24 left-1/2 transform -translate-x-1/2 z-50 flex flex-col gap-2 w-full max-w-md px-4"></div>
+
+    <header class="header-glass sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 h-20 flex justify-between items-center">
+            <div class="flex items-center gap-3 sm:gap-4">
+                <div class="logo-container">
+                    <div class="logo-glow"></div>
+                    <i class="fas fa-graduation-cap text-2xl sm:text-3xl text-blue-400"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg sm:text-2xl font-black tracking-wider" style="font-family: 'Orbitron', sans-serif;">
+                        CS <span class="text-blue-400">SHOROUK</span>
+                    </h1>
+                    <p class="text-[8px] sm:text-[10px] text-white/40 tracking-[0.2em] sm:tracking-[0.3em] uppercase hidden sm:block">Computer Science Department</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-2 sm:gap-4">
+                <a href="https://sha.edu.eg/" target="_blank" class="header-link hidden sm:flex">
+                    <i class="fas fa-university"></i>
+                    <span>Academy</span>
+                </a>
+                <a href="https://t.me/CS_SHA_4BOT" target="_blank" class="header-link telegram">
+                    <i class="fab fa-telegram"></i>
+                    <span class="hidden sm:inline">Telegram</span>
+                </a>
+                
+                <div class="flex gap-1 sm:gap-2" id="editButtons">
+                    <button id="confirmBtn" onclick="disableEditing(true)" class="hidden action-btn confirm text-xs sm:text-sm px-2 sm:px-4 py-1 sm:py-2">
+                        <i class="fas fa-check"></i> <span class="hidden sm:inline">Confirm</span>
+                    </button>
+                    <button id="cancelBtn" onclick="disableEditing(false)" class="hidden action-btn cancel text-xs sm:text-sm px-2 sm:px-4 py-1 sm:py-2">
+                        <i class="fas fa-times"></i> <span class="hidden sm:inline">Cancel</span>
+                    </button>
+                    <button onclick="enableEditing()" id="editModeBtn" class="action-btn edit text-xs sm:text-sm px-2 sm:px-4 py-1 sm:py-2">
+                        <i class="fas fa-edit"></i> <span class="hidden sm:inline">Edit</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-[95rem] mx-auto px-2 sm:px-4 py-6 sm:py-10">
+        <!-- Controls -->
+        <div class="flex flex-col lg:flex-row gap-3 sm:gap-4 justify-center mb-8 sm:mb-12 items-center">
+            <select id="sectionSelect" class="main-select" onchange="changeSection(this.value)">
+                <option value="">-- Select Section --</option>
+                <option value="1" selected>Section 1</option>
+                <option value="2">Section 2</option>
+                <option value="3">Section 3</option>
+                <option value="4">Section 4</option>
+                <option value="5">Section 5</option>
+                <option value="6">Section 6</option>
+                <option value="7">Section 7</option>
+                <option value="8">Section 8</option>
+                <option value="9">Section 9</option>
+                <option value="10">Section 10</option>
+                <option value="11">Section 11</option>
+                <option value="12">Section 12</option>
+                <option value="13">Section 13</option>
+                <option value="14">Section 14</option>
+                <option value="15">Section 15</option>
+                <option value="16">Section 16</option>
+            </select>
+            
+            <div class="flex flex-wrap gap-2 sm:gap-3 justify-center">
+                <button onclick="showGroupSchedule('A')" id="groupABtn" class="action-btn group-a text-xs sm:text-sm px-3 sm:px-6 py-2 sm:py-4">
+                    <i class="fas fa-users"></i> <span class="hidden sm:inline">Group A</span><span class="sm:hidden">Grp A</span>
+                </button>
+                <button onclick="showGroupSchedule('B')" id="groupBBtn" class="action-btn group-b text-xs sm:text-sm px-3 sm:px-6 py-2 sm:py-4">
+                    <i class="fas fa-users"></i> <span class="hidden sm:inline">Group B</span><span class="sm:hidden">Grp B</span>
+                </button>
+                <button onclick="downloadTable()" id="downloadBtn" class="action-btn download text-xs sm:text-sm px-3 sm:px-6 py-2 sm:py-4">
+                    <i class="fas fa-download"></i> <span class="hidden sm:inline">Download</span><span class="sm:hidden">PNG</span>
+                </button>
+                <button onclick="downloadGroupPDF()" id="pdfBtn" class="hidden action-btn pdf text-xs sm:text-sm px-3 sm:px-6 py-2 sm:py-4">
+                    <i class="fas fa-file-pdf"></i> <span class="hidden sm:inline">Save PDF</span><span class="sm:hidden">PDF</span>
+                </button>
+                <button onclick="backToSection()" id="backBtn" class="hidden action-btn back text-xs sm:text-sm px-3 sm:px-6 py-2 sm:py-4">
+                    <i class="fas fa-arrow-left"></i> <span class="hidden sm:inline">Back</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Section View (Default) -->
+        <div id="sectionView" class="table-card">
+            <div id="captureArea">
+                <div class="flex flex-col sm:flex-row justify-between items-center mb-6 sm:mb-8 gap-4">
+                    <h2 id="tableTitle" class="section-title text-2xl sm:text-4xl">Section 1</h2>
+                    <div id="sectionTimeBadge" class="time-badge">9:15 - 3:45</div>
+                </div>
+                
+                <div class="overflow-x-auto scrollbar-hide">
+                    <table class="w-full border-separate border-spacing-2">
+                        <thead>
+                            <tr class="text-white/40 text-[8px] sm:text-[10px] font-black uppercase tracking-[0.1em] sm:tracking-[0.2em]">
+                                <th class="p-1 sm:p-2 text-left w-16 sm:w-24">Day</th>
+                                <th class="period-label">
+                                    <div class="period-num">1-2</div>
+                                    <div class="period-time">9:15-10:45</div>
+                                </th>
+                                <th class="period-label">
+                                    <div class="period-num">3-4</div>
+                                    <div class="period-time">10:55-12:25</div>
+                                </th>
+                                <th class="period-label">
+                                    <div class="period-num">5-6</div>
+                                    <div class="period-time">12:45-2:10</div>
+                                </th>
+                                <th class="period-label">
+                                    <div class="period-num">7-8</div>
+                                    <div class="period-time">2:20-3:45</div>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody"></tbody>
+                    </table>
+                </div>
+
+                <div class="signature-area mt-10 sm:mt-16 flex flex-col sm:flex-row justify-between items-center gap-4 border-t border-white/10 pt-6 sm:pt-8">
+                    <div class="text-center sm:text-left">
+                        <span class="text-[8px] sm:text-[9px] text-blue-400 font-black tracking-[0.2em] sm:tracking-[0.4em] uppercase block mb-1">Designed & Developed By</span>
+                        <h3 class="name-text text-lg sm:text-2xl">Mohamed Ali</h3>
+                    </div>
+                    <div class="text-center sm:text-right">
+                        <p class="text-[8px] sm:text-[10px] font-bold text-white/30 italic mb-2">Shorouk Academy • CS Dept • 2026</p>
+                        <div class="flex gap-3 justify-center sm:justify-end">
+                            <a href="https://sha.edu.eg/" target="_blank" class="social-link">
+                                <i class="fas fa-globe"></i>
+                            </a>
+                            <a href="https://t.me/CS_SHA_4BOT" target="_blank" class="social-link telegram">
+                                <i class="fab fa-telegram"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Group View (Hidden by default) -->
+        <div id="groupView" class="hidden group-table-container">
+            <div class="flex flex-col sm:flex-row justify-between items-center mb-6 sm:mb-8 gap-4">
+                <h2 id="groupTitle" class="section-title text-2xl sm:text-4xl">Group A Schedule</h2>
+                <div id="groupTimeInfo" class="time-badge">All Sections Overview</div>
+            </div>
+
+            <div class="group-table-wrapper">
+                <table class="group-table" id="groupTable">
+                    <thead>
+                        <tr>
+                            <th class="section-header">SECTION</th>
+                            <th class="day-header">SUNDAY</th>
+                            <th class="day-header">MONDAY</th>
+                            <th class="day-header">TUESDAY</th>
+                            <th class="day-header">WEDNESDAY</th>
+                            <th class="day-header">THURSDAY</th>
+                        </tr>
+                    </thead>
+                    <tbody id="groupTableBody"></tbody>
+                </table>
+            </div>
+
+            <div class="signature-area mt-10 sm:mt-16 flex flex-col sm:flex-row justify-between items-center gap-4 border-t border-white/10 pt-6 sm:pt-8">
+                <div class="text-center sm:text-left">
+                    <span class="text-[8px] sm:text-[9px] text-blue-400 font-black tracking-[0.2em] sm:tracking-[0.4em] uppercase block mb-1">Designed & Developed By</span>
+                    <h3 class="name-text text-lg sm:text-2xl">Mohamed Ali</h3>
+                </div>
+                <div class="text-center sm:text-right">
+                    <p class="text-[8px] sm:text-[10px] font-bold text-white/30 italic mb-2">Shorouk Academy • CS Dept • 2026</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
