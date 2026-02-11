@@ -1,911 +1,726 @@
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@400;600;900&family=Cairo:wght@700;900&display=swap');
+// كل البيانات - 16 سكشن مع الأوقات والمدد
+const periodInfo = {
+    "1-2": { time: "9:15-10:45", duration: "90 min" },
+    "3-4": { time: "10:55-12:25", duration: "90 min" },
+    "5-6": { time: "12:45-2:10", duration: "85 min" },
+    "7-8": { time: "2:20-3:45", duration: "85 min" }
+};
 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+const allSections = {
+    // Group A - Sections 1-8
+    "1": {
+        group: "A",
+        data: {
+            "Sunday": { 
+                "1-2": {n:"Business Administration 💼", t:"L", d:"Dr. Sameh Mohamed", r:"مدرج 1 إعلام"}, 
+                "5-6": {n:"Data Structure 🌳", t:"L", d:"Dr. Osama Shafik", r:"مدرج 5 إعلام"} 
+            },
+            "Monday": { 
+                "1-2": {n:"System Analysis 📊", t:"S", d:"T.A Esraa Ezzat", r:"Lab 103"}, 
+                "3-4": {n:"Web Programming 🌐", t:"L", d:"Dr. Mohamed Mostafa", r:"مدرج 5 إعلام"}, 
+                "5-6": {n:"Computer Network 🔌", t:"L", d:"Dr. Hesham Abo el-fotoh", r:"مدرج 5 إعلام"}, 
+                "7-8": {n:"Computer Network 🔌", t:"S", d:"T.A Esraa Safwat", r:"Lab 105"} 
+            },
+            "Tuesday": {
+                "1-2": {n:"Web Programming 🌐", t:"S", d:"T.A Karen", r:"Lab 103 AI"},
+                "5-6": {n:"Data Structure 🌳", t:"S", d:"T.A Asmaa Hassan", r:"Lab 105"}
+            },
+            "Wednesday": {
+                "1-2": {n:"Human Rights ⚖️", t:"L", d:"Dr. Ahmed Noaman", r:"مدرج 5 إعلام"},
+                "5-6": {n:"System Analysis 📊", t:"L", d:"Dr. Magdy Elhenawy", r:"مدرج 7 علوم حاسب"}
+            },
+            "Thursday": {}
+        }
+    },
+    "2": {
+        group: "A",
+        data: {
+            "Sunday": { 
+                "1-2": {n:"Business Administration 💼", t:"L", d:"Dr. Sameh Mohamed", r:"مدرج 1 إعلام"}, 
+                "3-4": {n:"Web Programming 🌐", t:"S", d:"T.A Karen", r:"Lab 105"},
+                "5-6": {n:"Data Structure 🌳", t:"L", d:"Dr. Osama Shafik", r:"مدرج 5 إعلام"},
+                "7-8": {n:"Computer Network 🔌", t:"S", d:"T.A Rowyda", r:"Lab 303"}
+            },
+            "Monday": { 
+                "3-4": {n:"Web Programming 🌐", t:"L", d:"Dr. Mohamed Mostafa", r:"مدرج 5 إعلام"}, 
+                "5-6": {n:"Computer Network 🔌", t:"L", d:"Dr. Hesham Abo el-fotoh", r:"مدرج 5 إعلام"}, 
+                "7-8": {n:"System Analysis 📊", t:"S", d:"T.A Esraa Ezzat", r:"Lab 222 AI"} 
+            },
+            "Wednesday": {
+                "1-2": {n:"Human Rights ⚖️", t:"L", d:"Dr. Ahmed Noaman", r:"مدرج 5 إعلام"},
+                "5-6": {n:"System Analysis 📊", t:"L", d:"Dr. Magdy Elhenawy", r:"مدرج 7 علوم حاسب"},
+                "7-8": {n:"Data Structure 🌳", t:"S", d:"T.A Nadeen", r:"Lab 104"}
+            },
+            "Thursday": {}
+        }
+    },
+    "3": {
+        group: "A",
+        data: {
+            "Sunday": { 
+                "1-2": {n:"Business Administration 💼", t:"L", d:"Dr. Sameh Mohamed", r:"مدرج 1 إعلام"}, 
+                "5-6": {n:"Data Structure 🌳", t:"L", d:"Dr. Osama Shafik", r:"مدرج 5 إعلام"} 
+            },
+            "Monday": { 
+                "1-2": {n:"Computer Network 🔌", t:"S", d:"T.A Esraa Safwat", r:"Lab 105"}, 
+                "3-4": {n:"Web Programming 🌐", t:"L", d:"Dr. Mohamed Mostafa", r:"مدرج 5 إعلام"}, 
+                "5-6": {n:"Computer Network 🔌", t:"L", d:"Dr. Hesham Abo el-fotoh", r:"مدرج 5 إعلام"}, 
+                "7-8": {n:"Data Structure 🌳", t:"S", d:"T.A Asmaa Hassan", r:"Lab 101"} 
+            },
+            "Wednesday": {
+                "1-2": {n:"Human Rights ⚖️", t:"L", d:"Dr. Ahmed Noaman", r:"مدرج 5 إعلام"},
+                "3-4": {n:"Web Programming 🌐", t:"S", d:"T.A Karen", r:"Lab 303"},
+                "5-6": {n:"System Analysis 📊", t:"L", d:"Dr. Magdy Elhenawy", r:"مدرج 7 علوم حاسب"},
+                "7-8": {n:"System Analysis 📊", t:"S", d:"T.A Ethar", r:"Lab 101"}
+            },
+            "Thursday": {}
+        }
+    },
+    "4": {
+        group: "A",
+        data: {
+            "Sunday": { 
+                "1-2": {n:"Business Administration 💼", t:"L", d:"Dr. Sameh Mohamed", r:"مدرج 1 إعلام"}, 
+                "5-6": {n:"Data Structure 🌳", t:"L", d:"Dr. Osama Shafik", r:"مدرج 5 إعلام"} 
+            },
+            "Monday": { 
+                "3-4": {n:"Web Programming 🌐", t:"L", d:"Dr. Mohamed Mostafa", r:"مدرج 5 إعلام"}, 
+                "5-6": {n:"Computer Network 🔌", t:"L", d:"Dr. Hesham Abo el-fotoh", r:"مدرج 5 إعلام"}
+            },
+            "Tuesday": {
+                "1-2": {n:"Data Structure 🌳", t:"S", d:"T.A Asmaa Hassan", r:"Lab 102"},
+                "3-4": {n:"System Analysis 📊", t:"S", d:"T.A Ethar", r:"Lab 201 AI"},
+                "5-6": {n:"Computer Network 🔌", t:"S", d:"T.A Rowyda", r:"Lab 002"}
+            },
+            "Wednesday": {
+                "1-2": {n:"Human Rights ⚖️", t:"L", d:"Dr. Ahmed Noaman", r:"مدرج 5 إعلام"},
+                "5-6": {n:"System Analysis 📊", t:"L", d:"Dr. Magdy Elhenawy", r:"مدرج 7 علوم حاسب"},
+                "7-8": {n:"Web Programming 🌐", t:"S", d:"T.A Asmaa Ghoniem", r:"Lab 103"}
+            },
+            "Thursday": {}
+        }
+    },
+    "5": {
+        group: "A",
+        data: {
+            "Sunday": { 
+                "1-2": {n:"Business Administration 💼", t:"L", d:"Dr. Sameh Mohamed", r:"مدرج 1 إعلام"}, 
+                "5-6": {n:"Data Structure 🌳", t:"L", d:"Dr. Osama Shafik", r:"مدرج 5 إعلام"} 
+            },
+            "Monday": { 
+                "1-2": {n:"Web Programming 🌐", t:"S", d:"T.A Asmaa Ghoniem", r:"Lab 002"}, 
+                "3-4": {n:"Web Programming 🌐", t:"L", d:"Dr. Mohamed Mostafa", r:"مدرج 5 إعلام"}, 
+                "5-6": {n:"Computer Network 🔌", t:"L", d:"Dr. Hesham Abo el-fotoh", r:"مدرج 5 إعلام"}, 
+                "7-8": {n:"System Analysis 📊", t:"S", d:"T.A Ethar", r:"Lab 205"} 
+            },
+            "Tuesday": {
+                "3-4": {n:"Computer Network 🔌", t:"S", d:"T.A Rowyda", r:"Lab 218 AI"},
+                "7-8": {n:"Data Structure 🌳", t:"S", d:"T.A Asmaa Hassan", r:"Lab 104"}
+            },
+            "Wednesday": {
+                "1-2": {n:"Human Rights ⚖️", t:"L", d:"Dr. Ahmed Noaman", r:"مدرج 5 إعلام"},
+                "5-6": {n:"System Analysis 📊", t:"L", d:"Dr. Magdy Elhenawy", r:"مدرج 7 علوم حاسب"}
+            },
+            "Thursday": {}
+        }
+    },
+    "6": {
+        group: "A",
+        data: {
+            "Sunday": { 
+                "1-2": {n:"Business Administration 💼", t:"L", d:"Dr. Sameh Mohamed", r:"مدرج 1 إعلام"}, 
+                "3-4": {n:"System Analysis 📊", t:"S", d:"T.A Esraa Ezzat", r:"Lab 218 AI"},
+                "5-6": {n:"Data Structure 🌳", t:"L", d:"Dr. Osama Shafik", r:"مدرج 5 إعلام"} 
+            },
+            "Monday": { 
+                "3-4": {n:"Web Programming 🌐", t:"L", d:"Dr. Mohamed Mostafa", r:"مدرج 5 إعلام"}, 
+                "5-6": {n:"Computer Network 🔌", t:"L", d:"Dr. Hesham Abo el-fotoh", r:"مدرج 5 إعلام"}, 
+                "7-8": {n:"Data Structure 🌳", t:"S", d:"T.A Yoser", r:"Lab 104"} 
+            },
+            "Tuesday": {
+                "1-2": {n:"Web Programming 🌐", t:"S", d:"T.A Asmaa Ghoniem", r:"Lab 203"},
+                "7-8": {n:"Computer Network 🔌", t:"S", d:"T.A Reham", r:"Lab 303"}
+            },
+            "Wednesday": {
+                "1-2": {n:"Human Rights ⚖️", t:"L", d:"Dr. Ahmed Noaman", r:"مدرج 5 إعلام"},
+                "5-6": {n:"System Analysis 📊", t:"L", d:"Dr. Magdy Elhenawy", r:"مدرج 7 علوم حاسب"}
+            },
+            "Thursday": {}
+        }
+    },
+    "7": {
+        group: "A",
+        data: {
+            "Sunday": { 
+                "1-2": {n:"Business Administration 💼", t:"L", d:"Dr. Sameh Mohamed", r:"مدرج 1 إعلام"}, 
+                "5-6": {n:"Data Structure 🌳", t:"L", d:"Dr. Osama Shafik", r:"مدرج 5 إعلام"} 
+            },
+            "Monday": { 
+                "3-4": {n:"Web Programming 🌐", t:"L", d:"Dr. Mohamed Mostafa", r:"مدرج 5 إعلام"}, 
+                "5-6": {n:"Computer Network 🔌", t:"L", d:"Dr. Hesham Abo el-fotoh", r:"مدرج 5 إعلام"}, 
+                "7-8": {n:"Web Programming 🌐", t:"S", d:"T.A Asmaa Ghoniem", r:"Lab 203 AI"} 
+            },
+            "Wednesday": {
+                "1-2": {n:"Human Rights ⚖️", t:"L", d:"Dr. Ahmed Noaman", r:"مدرج 5 إعلام"},
+                "3-4": {n:"Data Structure 🌳", t:"S", d:"T.A Yoser", r:"Lab 201 AI"},
+                "5-6": {n:"System Analysis 📊", t:"L", d:"Dr. Magdy Elhenawy", r:"مدرج 7 علوم حاسب"}
+            },
+            "Thursday": {
+                "1-2": {n:"System Analysis 📊", t:"S", d:"T.A Layla", r:"Lab 101"},
+                "5-6": {n:"Computer Network 🔌", t:"S", d:"T.A Nadeem", r:"Lab 004"}
+            }
+        }
+    },
+    "8": {
+        group: "A",
+        data: {
+            "Sunday": { 
+                "1-2": {n:"Business Administration 💼", t:"L", d:"Dr. Sameh Mohamed", r:"مدرج 1 إعلام"}, 
+                "3-4": {n:"Web Programming 🌐", t:"S", d:"T.A Asmaa Ghoniem", r:"Lab 002"},
+                "5-6": {n:"Data Structure 🌳", t:"L", d:"Dr. Osama Shafik", r:"مدرج 5 إعلام"} 
+            },
+            "Monday": { 
+                "1-2": {n:"Data Structure 🌳", t:"S", d:"T.A Yoser", r:"Lab 104"}, 
+                "3-4": {n:"Web Programming 🌐", t:"L", d:"Dr. Mohamed Mostafa", r:"مدرج 5 إعلام"}, 
+                "5-6": {n:"Computer Network 🔌", t:"L", d:"Dr. Hesham Abo el-fotoh", r:"مدرج 5 إعلام"}
+            },
+            "Wednesday": {
+                "1-2": {n:"Human Rights ⚖️", t:"L", d:"Dr. Ahmed Noaman", r:"مدرج 5 إعلام"},
+                "5-6": {n:"System Analysis 📊", t:"L", d:"Dr. Magdy Elhenawy", r:"مدرج 7 علوم حاسب"}
+            },
+            "Thursday": {
+                "1-2": {n:"Computer Network 🔌", t:"S", d:"T.A Nadeen", r:"Lab 218 AI"},
+                "7-8": {n:"System Analysis 📊", t:"S", d:"T.A Layla", r:"Lab 218 AI"}
+            }
+        }
+    },
+    
+    // Group B - Sections 9-16
+    "9": {
+        group: "B",
+        data: {
+            "Sunday": { 
+                "3-4": {n:"Business Administration 💼", t:"L", d:"Dr. Sameh Mohamed", r:"مدرج 1 إعلام"}, 
+                "5-6": {n:"Web Programming 🌐", t:"S", d:"T.A Asmaa Ghoniem", r:"Lab 201 AI"},
+                "7-8": {n:"Computer Network 🔌", t:"L", d:"Dr. Hesham Abo el-fotoh", r:"مدرج 5 إعلام"} 
+            },
+            "Monday": { 
+                "1-2": {n:"Data Structure 🌳", t:"L", d:"Dr. Osama Shafik", r:"مدرج 5 إعلام"}, 
+                "3-4": {n:"Data Structure 🌳", t:"S", d:"T.A Yoser", r:"Lab 303"},
+                "5-6": {n:"System Analysis 📊", t:"L", d:"Dr. Magdy Elhenawy", r:"مدرج 7 علوم حاسب"}
+            },
+            "Tuesday": {
+                "5-6": {n:"Computer Network 🔌", t:"S", d:"T.A Reham", r:"Lab 203"},
+                "7-8": {n:"System Analysis 📊", t:"S", d:"T.A Layla", r:"Lab 201 AI"}
+            },
+            "Wednesday": {
+                "3-4": {n:"Human Rights ⚖️", t:"L", d:"Dr. Ahmed Noaman", r:"مدرج 5 إعلام"},
+                "5-6": {n:"Web Programming 🌐", t:"L", d:"Dr. Mohamed Mostafa", r:"مدرج 5 إعلام"}
+            },
+            "Thursday": {}
+        }
+    },
+    "10": {
+        group: "B",
+        data: {
+            "Sunday": { 
+                "1-2": {n:"Web Programming 🌐", t:"S", d:"T.A Asmaa Ghoniem", r:"Lab 105"},
+                "3-4": {n:"Business Administration 💼", t:"L", d:"Dr. Sameh Mohamed", r:"مدرج 1 إعلام"}, 
+                "7-8": {n:"Computer Network 🔌", t:"L", d:"Dr. Hesham Abo el-fotoh", r:"مدرج 5 إعلام"} 
+            },
+            "Monday": { 
+                "1-2": {n:"Data Structure 🌳", t:"L", d:"Dr. Osama Shafik", r:"مدرج 5 إعلام"}, 
+                "3-4": {n:"Computer Network 🔌", t:"S", d:"T.A Nadeen", r:"Lab 002"},
+                "5-6": {n:"System Analysis 📊", t:"L", d:"Dr. Magdy Elhenawy", r:"مدرج 7 علوم حاسب"}
+            },
+            "Tuesday": {
+                "3-4": {n:"System Analysis 📊", t:"S", d:"T.A Layla", r:"Lab 101"},
+                "7-8": {n:"Data Structure 🌳", t:"S", d:"T.A Reham", r:"Lab 102"}
+            },
+            "Wednesday": {
+                "3-4": {n:"Human Rights ⚖️", t:"L", d:"Dr. Ahmed Noaman", r:"مدرج 5 إعلام"},
+                "5-6": {n:"Web Programming 🌐", t:"L", d:"Dr. Mohamed Mostafa", r:"مدرج 5 إعلام"}
+            },
+            "Thursday": {}
+        }
+    },
+    "11": {
+        group: "B",
+        data: {
+            "Sunday": { 
+                "3-4": {n:"Business Administration 💼", t:"L", d:"Dr. Sameh Mohamed", r:"مدرج 1 إعلام"}, 
+                "7-8": {n:"Computer Network 🔌", t:"L", d:"Dr. Hesham Abo el-fotoh", r:"مدرج 5 إعلام"} 
+            },
+            "Monday": { 
+                "1-2": {n:"Data Structure 🌳", t:"L", d:"Dr. Osama Shafik", r:"مدرج 5 إعلام"}, 
+                "5-6": {n:"System Analysis 📊", t:"L", d:"Dr. Magdy Elhenawy", r:"مدرج 7 علوم حاسب"},
+                "7-8": {n:"Web Programming 🌐", t:"S", d:"T.A Salma Ayman", r:"Lab 303"}
+            },
+            "Tuesday": {
+                "5-6": {n:"System Analysis 📊", t:"S", d:"T.A Layla", r:"Lab 104"},
+                "7-8": {n:"Computer Network 🔌", t:"S", d:"T.A Salma Ayman", r:"Lab 203"}
+            },
+            "Wednesday": {
+                "1-2": {n:"Data Structure 🌳", t:"S", d:"T.A Reham", r:"Lab 102"},
+                "3-4": {n:"Human Rights ⚖️", t:"L", d:"Dr. Ahmed Noaman", r:"مدرج 5 إعلام"},
+                "5-6": {n:"Web Programming 🌐", t:"L", d:"Dr. Mohamed Mostafa", r:"مدرج 5 إعلام"}
+            },
+            "Thursday": {}
+        }
+    },
+    "12": {
+        group: "B",
+        data: {
+            "Sunday": { 
+                "1-2": {n:"Web Programming 🌐", t:"S", d:"T.A Salma Ayman", r:"Lab 201 AI"}, 
+                "3-4": {n:"Business Administration 💼", t:"L", d:"Dr. Sameh Mohamed", r:"مدرج 1 إعلام"}, 
+                "7-8": {n:"Computer Network 🔌", t:"L", d:"Dr. Hesham Abo el-fotoh", r:"مدرج 5 إعلام"} 
+            },
+            "Monday": { 
+                "1-2": {n:"Data Structure 🌳", t:"L", d:"Dr. Osama Shafik", r:"مدرج 5 إعلام"}, 
+                "5-6": {n:"System Analysis 📊", t:"L", d:"Dr. Magdy Elhenawy", r:"مدرج 7 علوم حاسب"}
+            },
+            "Tuesday": {
+                "1-2": {n:"Computer Network 🔌", t:"S", d:"T.A Salma Ayman", r:"Lab 101"},
+                "7-8": {n:"System Analysis 📊", t:"S", d:"T.A Howida", r:"Lab 218 AI"}
+            },
+            "Wednesday": {
+                "3-4": {n:"Human Rights ⚖️", t:"L", d:"Dr. Ahmed Noaman", r:"مدرج 5 إعلام"},
+                "5-6": {n:"Web Programming 🌐", t:"L", d:"Dr. Mohamed Mostafa", r:"مدرج 5 إعلام"},
+                "7-8": {n:"Data Structure 🌳", t:"S", d:"T.A Rehab", r:"Lab 219 AI"}
+            },
+            "Thursday": {}
+        }
+    },
+    "13": {
+        group: "B",
+        data: {
+            "Sunday": { 
+                "3-4": {n:"Business Administration 💼", t:"L", d:"Dr. Sameh Mohamed", r:"مدرج 1 إعلام"}, 
+                "7-8": {n:"Computer Network 🔌", t:"L", d:"Dr. Hesham Abo el-fotoh", r:"مدرج 5 إعلام"} 
+            },
+            "Monday": { 
+                "1-2": {n:"Data Structure 🌳", t:"L", d:"Dr. Osama Shafik", r:"مدرج 5 إعلام"}, 
+                "3-4": {n:"Computer Network 🔌", t:"S", d:"T.A Salma Ayman", r:"Lab 105"},
+                "5-6": {n:"System Analysis 📊", t:"L", d:"Dr. Magdy Elhenawy", r:"مدرج 7 علوم حاسب"},
+                "7-8": {n:"Data Structure 🌳", t:"S", d:"T.A Rehab", r:"Lab 218 AI"}
+            },
+            "Wednesday": {
+                "3-4": {n:"Human Rights ⚖️", t:"L", d:"Dr. Ahmed Noaman", r:"مدرج 5 إعلام"},
+                "5-6": {n:"Web Programming 🌐", t:"L", d:"Dr. Mohamed Mostafa", r:"مدرج 5 إعلام"}
+            },
+            "Thursday": {
+                "3-4": {n:"System Analysis 📊", t:"S", d:"T.A Layla", r:"Lab 201 AI"},
+                "5-6": {n:"Computer Network 🔌", t:"S", d:"T.A Salma Ayman", r:"Lab 102"}
+            }
+        }
+    },
+    "14": {
+        group: "B",
+        data: {
+            "Sunday": { 
+                "3-4": {n:"Business Administration 💼", t:"L", d:"Dr. Sameh Mohamed", r:"مدرج 1 إعلام"}, 
+                "5-6": {n:"Computer Network 🔌", t:"S", d:"T.A Salma Ayman", r:"Lab 203"},
+                "7-8": {n:"Computer Network 🔌", t:"L", d:"Dr. Hesham Abo el-fotoh", r:"مدرج 5 إعلام"} 
+            },
+            "Monday": { 
+                "1-2": {n:"Data Structure 🌳", t:"L", d:"Dr. Osama Shafik", r:"مدرج 5 إعلام"}, 
+                "5-6": {n:"System Analysis 📊", t:"L", d:"Dr. Magdy Elhenawy", r:"مدرج 7 علوم حاسب"}
+            },
+            "Wednesday": {
+                "3-4": {n:"Human Rights ⚖️", t:"L", d:"Dr. Ahmed Noaman", r:"مدرج 5 إعلام"},
+                "5-6": {n:"Web Programming 🌐", t:"L", d:"Dr. Mohamed Mostafa", r:"مدرج 5 إعلام"},
+                "7-8": {n:"System Analysis 📊", t:"S", d:"T.A Howida", r:"Lab 222 AI"}
+            },
+            "Thursday": {
+                "1-2": {n:"Web Programming 🌐", t:"S", d:"T.A Salma Ayman", r:"Lab 105"},
+                "7-8": {n:"Data Structure 🌳", t:"S", d:"T.A Nadeen", r:"Lab 219 AI"}
+            }
+        }
+    },
+    "15": {
+        group: "B",
+        data: {
+            "Sunday": { 
+                "1-2": {n:"Data Structure 🌳", t:"S", d:"T.A Nadeen", r:"Lab 303"}, 
+                "3-4": {n:"Business Administration 💼", t:"L", d:"Dr. Sameh Mohamed", r:"مدرج 1 إعلام"}, 
+                "5-6": {n:"System Analysis 📊", t:"S", d:"T.A Howida", r:"Lab 105"},
+                "7-8": {n:"Computer Network 🔌", t:"L", d:"Dr. Hesham Abo el-fotoh", r:"مدرج 5 إعلام"} 
+            },
+            "Monday": { 
+                "1-2": {n:"Data Structure 🌳", t:"L", d:"Dr. Osama Shafik", r:"مدرج 5 إعلام"}, 
+                "5-6": {n:"System Analysis 📊", t:"L", d:"Dr. Magdy Elhenawy", r:"مدرج 7 علوم حاسب"}
+            },
+            "Wednesday": {
+                "3-4": {n:"Human Rights ⚖️", t:"L", d:"Dr. Ahmed Noaman", r:"مدرج 5 إعلام"},
+                "5-6": {n:"Web Programming 🌐", t:"L", d:"Dr. Mohamed Mostafa", r:"مدرج 5 إعلام"}
+            },
+            "Thursday": {
+                "1-2": {n:"Computer Network 🔌", t:"S", d:"T.A Salma Ayman", r:"Lab 104"},
+                "5-6": {n:"Web Programming 🌐", t:"S", d:"T.A Salma Ayman", r:"Lab 102"}
+            }
+        }
+    },
+    "16": {
+        group: "B",
+        data: {
+            "Sunday": { 
+                "3-4": {n:"Business Administration 💼", t:"L", d:"Dr. Sameh Mohamed", r:"مدرج 1 إعلام"}, 
+                "7-8": {n:"Computer Network 🔌", t:"L", d:"Dr. Hesham Abo el-fotoh", r:"مدرج 5 إعلام"} 
+            },
+            "Monday": { 
+                "1-2": {n:"Data Structure 🌳", t:"L", d:"Dr. Osama Shafik", r:"مدرج 5 إعلام"}, 
+                "3-4": {n:"Web Programming 🌐", t:"S", d:"T.A Karen", r:"Lab 201 AI"},
+                "5-6": {n:"System Analysis 📊", t:"L", d:"Dr. Magdy Elhenawy", r:"مدرج 7 علوم حاسب"}
+            },
+            "Wednesday": {
+                "1-2": {n:"Data Structure 🌳", t:"S", d:"T.A Nadeen", r:"Lab 104"},
+                "3-4": {n:"Human Rights ⚖️", t:"L", d:"Dr. Ahmed Noaman", r:"مدرج 5 إعلام"},
+                "5-6": {n:"Web Programming 🌐", t:"L", d:"Dr. Mohamed Mostafa", r:"مدرج 5 إعلام"}
+            },
+            "Thursday": {
+                "3-4": {n:"Computer Network 🔌", t:"S", d:"T.A Nadeen", r:"Lab 004"},
+                "7-8": {n:"System Analysis 📊", t:"S", d:"T.A Howida", r:"Lab 222 AI"}
+            }
+        }
+    }
+};
+
+let currentSection = "1";
+let originalContent = '';
+let isEditing = false;
+let isGroupView = false;
+let currentGroup = null;
+
+// Toast Notification
+function showToast(message, type = 'info') {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    
+    const icons = {
+        success: '<i class="fas fa-check-circle"></i>',
+        error: '<i class="fas fa-exclamation-circle"></i>',
+        info: '<i class="fas fa-info-circle"></i>'
+    };
+    
+    toast.innerHTML = `${icons[type]} ${message}`;
+    container.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.remove();
+    }, 3000);
 }
 
-body { 
-    font-family: 'Inter', sans-serif; 
-    background: #050505;
-    color: white;
-    overflow-x: hidden;
+// Change Section
+function changeSection(sectionNum) {
+    if(!sectionNum) return;
+    
+    currentSection = sectionNum;
+    isGroupView = false;
+    currentGroup = null;
+    
+    // Show section view, hide group view
+    document.getElementById('sectionView').classList.remove('hidden');
+    document.getElementById('groupView').classList.add('hidden');
+    
+    // Update buttons
+    document.getElementById('groupABtn').classList.remove('hidden');
+    document.getElementById('groupBBtn').classList.remove('hidden');
+    document.getElementById('downloadBtn').classList.remove('hidden');
+    document.getElementById('pdfBtn').classList.add('hidden');
+    document.getElementById('backBtn').classList.add('hidden');
+    
+    const section = allSections[sectionNum];
+    renderSectionTable(section.data, sectionNum);
+    showToast(`Section ${sectionNum} Loaded`, 'success');
 }
 
-/* Static Background */
-body::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: 
-        radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.03) 0%, transparent 50%),
-        radial-gradient(circle at 80% 50%, rgba(168, 85, 247, 0.03) 0%, transparent 50%);
-    pointer-events: none;
-    z-index: -1;
+// Render Section Table
+function renderSectionTable(data, sectionNum) {
+    const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday"];
+    const periods = ["1-2", "3-4", "5-6", "7-8"];
+    const body = document.getElementById('tableBody');
+    body.innerHTML = '';
+    
+    document.getElementById('tableTitle').innerText = `Section ${sectionNum}`;
+
+    days.forEach((day, index) => {
+        let row = document.createElement('tr');
+        row.className = 'day-row';
+        row.style.animationDelay = `${index * 0.05}s`;
+        
+        row.innerHTML = `<td class="font-black text-white/50 text-[10px] sm:text-[11px] pr-2 sm:pr-4 align-middle uppercase tracking-wider">${day}</td>`;
+        
+        periods.forEach((p, pIndex) => {
+            // Add break column after period 3-4 (index 1)
+            if (pIndex === 2) {
+                row.innerHTML += `
+                    <td>
+                        <div class="break-cell">
+                            <div class="break-line"></div>
+                            <span class="break-text">BREAK</span>
+                            <div class="break-line"></div>
+                        </div>
+                    </td>
+                `;
+            }
+            
+            const cell = data[day] ? data[day][p] : null;
+            if(cell) {
+                const roomHtml = cell.r.replace(/AI/g, '<span class="ai-highlight">AI</span>');
+                const isLecture = cell.t === 'L';
+                row.innerHTML += `
+                    <td>
+                        <div class="${isLecture ? 'lecture-card' : 'lab-card'}" onclick="showDetails('${day}', '${p}', '${sectionNum}')">
+                            <div class="font-black text-[9px] sm:text-[11px] mb-1 leading-tight text-white text-center">${cell.n}</div>
+                            <div class="text-[7px] sm:text-[9px] font-bold text-white/60 mb-1 text-center">${cell.d}</div>
+                            <div class="room-text">${roomHtml}</div>
+                        </div>
+                    </td>
+                `;
+            } else {
+                row.innerHTML += `
+                    <td>
+                        <div class="free-card">FREE</div>
+                    </td>
+                `;
+            }
+        });
+        
+        body.appendChild(row);
+    });
 }
 
-/* Header */
-.header-glass { 
-    background: rgba(5, 5, 5, 0.95); 
-    border-bottom: 1px solid rgba(255,255,255,0.05); 
-    backdrop-filter: blur(10px);
+// Show Group Schedule
+function showGroupSchedule(group) {
+    isGroupView = true;
+    currentGroup = group;
+    
+    // Hide section view, show group view
+    document.getElementById('sectionView').classList.add('hidden');
+    document.getElementById('groupView').classList.remove('hidden');
+    
+    // Update buttons
+    document.getElementById('groupABtn').classList.add('hidden');
+    document.getElementById('groupBBtn').classList.add('hidden');
+    document.getElementById('downloadBtn').classList.add('hidden');
+    document.getElementById('pdfBtn').classList.remove('hidden');
+    document.getElementById('backBtn').classList.remove('hidden');
+    
+    // Update select
+    document.getElementById('sectionSelect').value = "";
+    
+    renderGroupTable(group);
+    showToast(`Group ${group} Schedule Loaded`, 'success');
 }
 
-/* Logo */
-.logo-container {
-    position: relative;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 10px;
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(168, 85, 247, 0.1));
-    border: 1px solid rgba(255,255,255,0.1);
+// Render Group Table
+function renderGroupTable(group) {
+    const sections = group === 'A' ? ['1','2','3','4','5','6','7','8'] : ['9','10','11','12','13','14','15','16'];
+    const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday"];
+    const periods = ["1-2", "3-4", "5-6", "7-8"];
+    
+    document.getElementById('groupTitle').innerText = `Group ${group} Schedule`;
+    
+    const tbody = document.getElementById('groupTableBody');
+    tbody.innerHTML = '';
+    
+    sections.forEach((secNum, index) => {
+        const sec = allSections[secNum];
+        const tr = document.createElement('tr');
+        tr.style.animationDelay = `${index * 0.05}s`;
+        
+        // Section header
+        const th = document.createElement('th');
+        th.className = `section-header ${sec.group === 'B' ? 'group-b' : ''}`;
+        th.innerText = `SEC ${secNum.padStart(2, '0')}`;
+        tr.appendChild(th);
+        
+        // Days
+        days.forEach(day => {
+            const td = document.createElement('td');
+            td.className = 'period-cell';
+            
+            // Show all periods (including free ones)
+            periods.forEach(period => {
+                const cell = sec.data[day] && sec.data[day][period] ? sec.data[day][period] : null;
+                const info = periodInfo[period];
+                
+                if (cell) {
+                    const isLab = cell.t === 'S';
+                    
+                    const miniCard = document.createElement('div');
+                    miniCard.className = `mini-card ${isLab ? 'lab' : ''}`;
+                    miniCard.onclick = () => showDetails(day, period, secNum);
+                    
+                    miniCard.innerHTML = `
+                        <div class="mini-time">${period} | ${info.time} | ${info.duration}</div>
+                        <div class="mini-subject">${cell.n}</div>
+                        <div class="mini-doctor">${cell.d}</div>
+                        <div class="mini-room">${cell.r.replace(/AI/g, '<span style="color:#22d3ee;text-shadow:0 0 10px #22d3ee">AI</span>')}</div>
+                    `;
+                    
+                    td.appendChild(miniCard);
+                } else {
+                    // Show FREE slot
+                    const freeDiv = document.createElement('div');
+                    freeDiv.className = 'mini-free';
+                    freeDiv.innerHTML = `${period} | ${info.time}<br>FREE`;
+                    td.appendChild(freeDiv);
+                }
+            });
+            
+            tr.appendChild(td);
+        });
+        
+        tbody.appendChild(tr);
+    });
 }
 
-@media (min-width: 640px) {
-    .logo-container {
-        width: 50px;
-        height: 50px;
-        border-radius: 12px;
+// Back to Section View
+function backToSection() {
+    changeSection(currentSection);
+}
+
+// Show Details
+function showDetails(day, period, sectionNum) {
+    if(isEditing) return;
+    
+    const cell = allSections[sectionNum].data[day][period];
+    if(cell) {
+        showToast(`${cell.n} | ${cell.d} | ${cell.r}`, 'info');
     }
 }
 
-.logo-glow {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    border-radius: inherit;
-    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-    opacity: 0.2;
-    filter: blur(10px);
-}
-
-/* Header Links */
-.header-link {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 12px;
-    border-radius: 8px;
-    font-size: 0.7rem;
-    font-weight: 700;
-    text-decoration: none;
-    color: white;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.1);
-    transition: all 0.3s;
-}
-
-.header-link:hover {
-    background: rgba(59, 130, 246, 0.2);
-    border-color: rgba(59, 130, 246, 0.5);
-    transform: translateY(-2px);
-    box-shadow: 0 5px 20px rgba(59, 130, 246, 0.2);
-}
-
-.header-link.telegram:hover {
-    background: rgba(14, 165, 233, 0.2);
-    border-color: rgba(14, 165, 233, 0.5);
-    box-shadow: 0 5px 20px rgba(14, 165, 233, 0.2);
-}
-
-/* Action Buttons */
-.action-btn {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    border-radius: 10px;
-    font-weight: 700;
-    border: none;
-    cursor: pointer;
-    transition: all 0.3s;
-    white-space: nowrap;
-}
-
-@media (min-width: 640px) {
-    .action-btn {
-        gap: 6px;
-        border-radius: 12px;
-    }
-}
-
-.action-btn.edit {
-    background: rgba(255,255,255,0.1);
-    color: white;
-    border: 1px solid rgba(255,255,255,0.2);
-}
-
-.action-btn.edit:hover {
-    background: rgba(59, 130, 246, 0.3);
-    border-color: #3b82f6;
-    box-shadow: 0 5px 20px rgba(59, 130, 246, 0.3);
-}
-
-.action-btn.confirm {
-    background: #10b981;
-    color: black;
-    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
-}
-
-.action-btn.cancel {
-    background: #ef4444;
-    color: white;
-    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
-}
-
-.action-btn.group-a {
-    background: linear-gradient(135deg, #10b981, #059669);
-    color: white;
-    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
-}
-
-.action-btn.group-b {
-    background: linear-gradient(135deg, #f59e0b, #d97706);
-    color: white;
-    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
-}
-
-.action-btn.download {
-    background: linear-gradient(135deg, #3b82f6, #2563eb);
-    color: white;
-    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
-}
-
-.action-btn.pdf {
-    background: linear-gradient(135deg, #ef4444, #dc2626);
-    color: white;
-    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
-}
-
-.action-btn.back {
-    background: rgba(255,255,255,0.1);
-    color: white;
-    border: 1px solid rgba(255,255,255,0.2);
-}
-
-.action-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-}
-
-/* Select */
-.main-select { 
-    background: #111; 
-    border: 2px solid rgba(255,255,255,0.1); 
-    border-radius: 12px; 
-    padding: 0.75rem 1rem; 
-    color: white; 
-    font-weight: 700; 
-    width: 100%;
-    max-width: 280px;
-    font-size: 0.85rem;
-    cursor: pointer;
-    transition: all 0.3s;
-}
-
-@media (min-width: 640px) {
-    .main-select {
-        padding: 1rem 1.5rem;
-        font-size: 0.9rem;
-        border-radius: 1rem;
-        max-width: 300px;
-    }
-}
-
-.main-select:hover, .main-select:focus { 
-    border-color: #3b82f6; 
-    outline: none;
-    box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
-}
-
-/* Table Card */
-.table-card { 
-    background: #0a0a0a;
-    border-radius: 1.5rem; 
-    border: 1px solid rgba(255,255,255,0.05); 
-    padding: 1.5rem;
-}
-
-@media (min-width: 640px) {
-    .table-card {
-        border-radius: 2rem;
-        padding: 2rem;
-    }
-}
-
-@media (min-width: 1024px) {
-    .table-card {
-        padding: 3rem;
-    }
-}
-
-/* Section Title */
-.section-title {
-    font-family: 'Orbitron', sans-serif;
-    font-weight: 900; 
-    letter-spacing: -1px; 
-    color: #fff;
-    text-shadow: 0 0 30px rgba(59, 130, 246, 0.3);
-}
-
-.time-badge {
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(59, 130, 246, 0.05));
-    border: 1px solid rgba(59, 130, 246, 0.3);
-    padding: 8px 16px;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    font-weight: 700;
-    color: #60a5fa;
-}
-
-/* Period Labels */
-.period-label { 
-    background: rgba(59, 130, 246, 0.05); 
-    border-radius: 10px; 
-    padding: 6px 2px; 
-    border: 1px solid rgba(59, 130, 246, 0.1);
-    transition: all 0.3s;
-}
-
-@media (min-width: 640px) {
-    .period-label {
-        border-radius: 12px;
-        padding: 10px 4px;
-    }
-}
-
-.period-label:hover {
-    background: rgba(59, 130, 246, 0.1);
-    box-shadow: 0 0 15px rgba(59, 130, 246, 0.2);
-}
-
-.period-num {
-    font-size: 0.65rem;
-    font-weight: 900;
-    color: #60a5fa;
-    margin-bottom: 2px;
-}
-
-@media (min-width: 640px) {
-    .period-num {
-        font-size: 0.75rem;
-        margin-bottom: 3px;
-    }
-}
-
-.period-time {
-    font-size: 0.5rem;
-    color: rgba(255,255,255,0.6);
-    font-weight: 600;
-    margin-bottom: 2px;
-}
-
-@media (min-width: 640px) {
-    .period-time {
-        font-size: 0.6rem;
-        margin-bottom: 3px;
-    }
-}
-
-.period-duration {
-    font-size: 0.45rem;
-    color: #10b981;
-    font-weight: 700;
-}
-
-@media (min-width: 640px) {
-    .period-duration {
-        font-size: 0.55rem;
-    }
-}
-
-/* BREAK Header */
-.break-header {
-    background: rgba(245, 158, 11, 0.1);
-    border: 1px solid rgba(245, 158, 11, 0.3);
-    border-radius: 10px;
-    padding: 6px 2px;
-    transition: all 0.3s;
-}
-
-@media (min-width: 640px) {
-    .break-header {
-        border-radius: 12px;
-        padding: 10px 4px;
-    }
-}
-
-.break-icon {
-    font-size: 0.9rem;
-    margin-bottom: 2px;
-}
-
-@media (min-width: 640px) {
-    .break-icon {
-        font-size: 1.1rem;
-        margin-bottom: 4px;
-    }
-}
-
-.break-text {
-    font-size: 0.5rem;
-    font-weight: 900;
-    color: #fbbf24;
-    margin-bottom: 2px;
-}
-
-@media (min-width: 640px) {
-    .break-text {
-        font-size: 0.6rem;
-    }
-}
-
-.break-time {
-    font-size: 0.45rem;
-    color: rgba(255,255,255,0.6);
-    font-weight: 600;
-}
-
-@media (min-width: 640px) {
-    .break-time {
-        font-size: 0.55rem;
-    }
-}
-
-/* Cards with GLOW */
-.lecture-card, .lab-card {
-    min-width: 50px;
-    height: 80px; 
-    border-radius: 10px;
-    display: flex; 
-    flex-direction: column; 
-    align-items: center; 
-    justify-content: center;
-    padding: 4px; 
-    transition: all 0.3s;
-    position: relative;
-    overflow: hidden;
-    cursor: pointer;
-}
-
-@media (min-width: 640px) {
-    .lecture-card, .lab-card {
-        min-width: 80px;
-        height: 100px;
-        padding: 8px;
-        border-radius: 15px;
-    }
-}
-
-@media (min-width: 1024px) {
-    .lecture-card, .lab-card {
-        min-width: 120px;
-        height: 120px;
-        padding: 12px;
-        border-radius: 20px;
-    }
-}
-
-.lecture-card { 
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(59, 130, 246, 0.05));
-    border: 1px solid rgba(96, 165, 250, 0.4); 
-    box-shadow: 0 0 15px rgba(59, 130, 246, 0.15);
-}
-
-.lecture-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3), 0 0 20px rgba(59, 130, 246, 0.2);
-    border-color: rgba(96, 165, 250, 0.8);
-}
-
-.lab-card { 
-    background: linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(168, 85, 247, 0.05));
-    border: 1px solid rgba(192, 132, 252, 0.4); 
-    box-shadow: 0 0 15px rgba(168, 85, 247, 0.15);
-}
-
-.lab-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 30px rgba(168, 85, 247, 0.3), 0 0 20px rgba(168, 85, 247, 0.2);
-    border-color: rgba(192, 132, 252, 0.8);
-}
-
-/* FREE Card */
-.free-card {
-    min-width: 50px;
-    height: 80px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(255,255,255,0.03);
-    border: 1px dashed rgba(255,255,255,0.2);
-    color: rgba(255,255,255,0.4);
-    font-size: 0.7rem;
-    font-weight: 900;
-    font-family: 'Orbitron', sans-serif;
-    letter-spacing: 1px;
-}
-
-@media (min-width: 640px) {
-    .free-card {
-        min-width: 80px;
-        height: 100px;
-        font-size: 0.9rem;
-        border-radius: 15px;
-    }
-}
-
-@media (min-width: 1024px) {
-    .free-card {
-        min-width: 120px;
-        height: 120px;
-        font-size: 1.1rem;
-        border-radius: 20px;
-    }
-}
-
-/* Room Text with GLOW */
-.room-text { 
-    font-family: 'Cairo', sans-serif; 
-    font-size: 0.5rem; 
-    font-weight: 900; 
-    color: #fff; 
-    margin-top: 2px;
-    text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
-    direction: ltr;
-    text-align: center;
-}
-
-@media (min-width: 640px) {
-    .room-text {
-        font-size: 0.65rem;
-        margin-top: 4px;
-    }
-}
-
-@media (min-width: 1024px) {
-    .room-text {
-        font-size: 0.75rem;
-    }
-}
-
-.ai-highlight { 
-    color: #22d3ee !important; 
-    text-shadow: 0 0 10px #22d3ee, 0 0 20px #22d3ee !important; 
-    font-weight: 900;
-}
-
-/* Name Text */
-.name-text {
-    font-family: 'Orbitron', sans-serif; 
-    font-weight: 900; 
-    color: #fff;
-    letter-spacing: 2px;
-    text-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
-}
-
-/* Social Links */
-.social-link {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(255,255,255,0.05);
-    color: rgba(255,255,255,0.5);
-    text-decoration: none;
-    transition: all 0.3s;
-    border: 1px solid rgba(255,255,255,0.1);
-    font-size: 0.8rem;
-}
-
-@media (min-width: 640px) {
-    .social-link {
-        width: 35px;
-        height: 35px;
-        font-size: 0.9rem;
-    }
-}
-
-.social-link:hover {
-    background: rgba(59, 130, 246, 0.2);
-    color: #3b82f6;
-    border-color: #3b82f6;
-    transform: translateY(-3px);
-    box-shadow: 0 5px 15px rgba(59, 130, 246, 0.3);
-}
-
-.social-link.telegram:hover {
-    background: rgba(14, 165, 233, 0.2);
-    color: #0ea5e9;
-    border-color: #0ea5e9;
-    box-shadow: 0 5px 15px rgba(14, 165, 233, 0.3);
-}
-
-/* Edit Mode */
-[contenteditable="true"] { 
-    outline: 2px solid #10b981; 
-    background: rgba(16, 185, 129, 0.05) !important; 
-    border-radius: 4px;
-    padding: 2px 6px;
-}
-
-/* Scrollbar */
-.scrollbar-hide::-webkit-scrollbar {
-    display: none;
-}
-.scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-}
-
-/* Toast */
-.toast {
-    background: rgba(20, 20, 20, 0.95);
-    border: 1px solid rgba(255,255,255,0.1);
-    padding: 10px 16px;
-    border-radius: 10px;
-    font-weight: 600;
-    font-size: 0.8rem;
-    backdrop-filter: blur(10px);
-    animation: slideDown 0.3s, fadeOut 0.3s 2.7s forwards;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    margin: 0 auto;
-    max-width: 90%;
-}
-
-@media (min-width: 640px) {
-    .toast {
-        padding: 12px 24px;
-        font-size: 0.85rem;
-        max-width: none;
-    }
-}
-
-.toast.success { border-color: #10b981; color: #10b981; }
-.toast.error { border-color: #ef4444; color: #ef4444; }
-.toast.info { border-color: #3b82f6; color: #3b82f6; }
-
-@keyframes slideDown {
-    from { opacity: 0; transform: translateY(-20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes fadeOut {
-    to { opacity: 0; transform: translateY(-20px); }
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-/* Day Row Animation */
-.day-row {
-    animation: fadeIn 0.4s ease-out forwards;
-    opacity: 0;
-}
-
-.day-row:nth-child(1) { animation-delay: 0.05s; }
-.day-row:nth-child(2) { animation-delay: 0.1s; }
-.day-row:nth-child(3) { animation-delay: 0.15s; }
-.day-row:nth-child(4) { animation-delay: 0.2s; }
-.day-row:nth-child(5) { animation-delay: 0.25s; }
-
-/* ==================== GROUP TABLE STYLES ==================== */
-
-.group-table-container {
-    background: #0a0a0a;
-    border-radius: 1.5rem;
-    border: 1px solid rgba(255,255,255,0.05);
-    padding: 1.5rem;
-}
-
-@media (min-width: 640px) {
-    .group-table-container {
-        border-radius: 2rem;
-        padding: 2rem;
-    }
-}
-
-@media (min-width: 1024px) {
-    .group-table-container {
-        padding: 3rem;
-    }
-}
-
-.group-table-wrapper {
-    overflow-x: auto;
-    scrollbar-hide;
-}
-
-.group-table {
-    width: 100%;
-    min-width: 1000px;
-    border-collapse: separate;
-    border-spacing: 6px;
-}
-
-@media (min-width: 1280px) {
-    .group-table {
-        min-width: 1200px;
-        border-spacing: 8px;
-    }
-}
-
-/* Section Header (Left column) */
-.section-header {
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 12px;
-    padding: 15px 10px;
-    font-family: 'Orbitron', sans-serif;
-    font-size: 0.9rem;
-    font-weight: 900;
-    color: white;
-    text-align: center;
-    min-width: 80px;
-    position: sticky;
-    left: 0;
-    z-index: 10;
-}
-
-@media (min-width: 640px) {
-    .section-header {
-        font-size: 1rem;
-        padding: 20px 15px;
-        min-width: 100px;
-    }
-}
-
-@media (min-width: 1024px) {
-    .section-header {
-        font-size: 1.1rem;
-        border-radius: 15px;
-    }
-}
-
-/* Group B Section Header */
-.section-header.group-b {
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.05));
-    border-color: rgba(245, 158, 11, 0.3);
-    color: #fbbf24;
-}
-
-/* Day Headers (Top row) */
-.day-header {
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(59, 130, 246, 0.05));
-    border: 1px solid rgba(59, 130, 246, 0.3);
-    border-radius: 12px;
-    padding: 15px 10px;
-    font-family: 'Orbitron', sans-serif;
-    font-size: 0.85rem;
-    font-weight: 900;
-    color: #60a5fa;
-    text-shadow: 0 0 15px rgba(96, 165, 250, 0.5);
-    text-align: center;
-    min-width: 160px;
-}
-
-@media (min-width: 640px) {
-    .day-header {
-        font-size: 1rem;
-        padding: 20px 15px;
-        min-width: 180px;
-    }
-}
-
-@media (min-width: 1024px) {
-    .day-header {
-        font-size: 1.2rem;
-        border-radius: 15px;
-        min-width: 200px;
-    }
-}
-
-/* Period Cells */
-td.period-cell {
-    background: rgba(255,255,255,0.02);
-    border: 1px dashed rgba(255,255,255,0.1);
-    border-radius: 12px;
-    padding: 8px;
-    min-height: 120px;
-    vertical-align: top;
-    min-width: 160px;
-}
-
-@media (min-width: 640px) {
-    td.period-cell {
-        padding: 10px;
-        min-height: 140px;
-        min-width: 180px;
-        border-radius: 15px;
-    }
-}
-
-@media (min-width: 1024px) {
-    td.period-cell {
-        padding: 12px;
-        min-height: 160px;
-        min-width: 200px;
-    }
-}
-
-/* Mini Cards */
-.mini-card {
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(59, 130, 246, 0.05));
-    border: 1px solid rgba(96, 165, 250, 0.4);
-    border-radius: 10px;
-    padding: 8px;
-    margin-bottom: 6px;
-    box-shadow: 0 0 10px rgba(59, 130, 246, 0.1);
-    transition: all 0.3s;
-    cursor: pointer;
-}
-
-@media (min-width: 640px) {
-    .mini-card {
-        padding: 10px;
-        margin-bottom: 8px;
-        border-radius: 12px;
-    }
-}
-
-@media (min-width: 1024px) {
-    .mini-card {
-        padding: 12px;
-        border-radius: 15px;
-    }
-}
-
-.mini-card.lab {
-    background: linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(168, 85, 247, 0.05));
-    border: 1px solid rgba(192, 132, 252, 0.4);
-    box-shadow: 0 0 10px rgba(168, 85, 247, 0.1);
-}
-
-.mini-card:hover {
-    transform: scale(1.02);
-    box-shadow: 0 0 20px rgba(59, 130, 246, 0.25);
-}
-
-.mini-card.lab:hover {
-    box-shadow: 0 0 20px rgba(168, 85, 247, 0.25);
-}
-
-.mini-time {
-    font-size: 0.6rem;
-    color: rgba(255,255,255,0.5);
-    margin-bottom: 3px;
-    font-weight: 700;
-    font-family: 'Orbitron', sans-serif;
-}
-
-@media (min-width: 640px) {
-    .mini-time {
-        font-size: 0.65rem;
-        margin-bottom: 4px;
-    }
-}
-
-.mini-subject {
-    font-size: 0.75rem;
-    font-weight: 900;
-    margin-bottom: 2px;
-    line-height: 1.2;
-}
-
-@media (min-width: 640px) {
-    .mini-subject {
-        font-size: 0.8rem;
-        margin-bottom: 3px;
-    }
-}
-
-@media (min-width: 1024px) {
-    .mini-subject {
-        font-size: 0.85rem;
-    }
-}
-
-.mini-doctor {
-    font-size: 0.6rem;
-    color: rgba(255,255,255,0.7);
-    margin-bottom: 2px;
-}
-
-@media (min-width: 640px) {
-    .mini-doctor {
-        font-size: 0.65rem;
-    }
-}
-
-.mini-room {
-    font-family: 'Cairo', sans-serif;
-    font-size: 0.65rem;
-    font-weight: 900;
-    color: #22d3ee;
-    text-shadow: 0 0 8px rgba(34, 211, 238, 0.5);
-    direction: ltr;
-}
-
-@media (min-width: 640px) {
-    .mini-room {
-        font-size: 0.7rem;
-    }
-}
-
-@media (min-width: 1024px) {
-    .mini-room {
-        font-size: 0.75rem;
-    }
-}
-
-/* FREE slot in group table */
-.mini-free {
-    background: rgba(255,255,255,0.03);
-    border: 1px dashed rgba(255,255,255,0.15);
-    border-radius: 8px;
-    padding: 6px;
-    margin-bottom: 6px;
-    text-align: center;
-    color: rgba(255,255,255,0.3);
-    font-size: 0.7rem;
-    font-weight: 700;
-    font-family: 'Orbitron', sans-serif;
-}
-
-@media (min-width: 640px) {
-    .mini-free {
-        padding: 8px;
-        font-size: 0.75rem;
-    }
-}
-
-.empty-slot {
-    color: rgba(255,255,255,0.2);
-    text-align: center;
-    padding: 15px;
-    font-size: 0.8rem;
-    font-style: italic;
-}
-
-@media (min-width: 640px) {
-    .empty-slot {
-        padding: 20px;
-        font-size: 0.9rem;
-    }
-}
-
-/* Print Styles for PDF */
-@media print {
-    body {
-        background: white;
-        color: black;
+// Enable Editing
+function enableEditing() {
+    isEditing = true;
+    const captureArea = isGroupView ? document.getElementById('groupView') : document.getElementById('captureArea');
+    originalContent = captureArea.innerHTML;
+    
+    captureArea.contentEditable = "true";
+    document.getElementById('editModeBtn').classList.add('hidden');
+    document.getElementById('confirmBtn').classList.remove('hidden');
+    document.getElementById('cancelBtn').classList.remove('hidden');
+    
+    showToast('Edit Mode Enabled! Click any text to edit', 'info');
+}
+
+// Disable Editing
+function disableEditing(save) {
+    isEditing = false;
+    const captureArea = isGroupView ? document.getElementById('groupView') : document.getElementById('captureArea');
+    
+    if(!save) {
+        captureArea.innerHTML = originalContent;
+        showToast('Changes Discarded', 'error');
+    } else {
+        showToast('Changes Saved Successfully!', 'success');
     }
     
-    .header-glass, .action-btn, select {
-        display: none !important;
-    }
-    
-    .group-table-container {
-        border: 1px solid #ccc;
-        background: white;
-    }
-    
-    .mini-card {
-        border: 1px solid #999;
-        box-shadow: none !important;
-    }
+    captureArea.contentEditable = "false";
+    document.getElementById('editModeBtn').classList.remove('hidden');
+    document.getElementById('confirmBtn').classList.add('hidden');
+    document.getElementById('cancelBtn').classList.add('hidden');
 }
+
+// Download Table (PNG) - Fixed
+function downloadTable() {
+    const area = document.getElementById('captureArea');
+    
+    // Create a clone for capture
+    const clone = area.cloneNode(true);
+    clone.style.position = 'fixed';
+    clone.style.top = '-9999px';
+    clone.style.left = '-9999px';
+    clone.style.width = area.offsetWidth + 'px';
+    document.body.appendChild(clone);
+    
+    showToast('Generating Image...', 'info');
+    
+    html2canvas(clone, { 
+        backgroundColor: '#0a0a0a', 
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        logging: false,
+        width: area.offsetWidth,
+        height: area.offsetHeight
+    }).then(canvas => {
+        const link = document.createElement('a');
+        link.download = `CS_Schedule_Section_${currentSection}.png`;
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+        
+        document.body.removeChild(clone);
+        showToast('Downloaded Successfully!', 'success');
+    }).catch(err => {
+        document.body.removeChild(clone);
+        showToast('Download Failed', 'error');
+        console.error(err);
+    });
+}
+
+// Download Group PDF - Fixed
+function downloadGroupPDF() {
+    const { jsPDF } = window.jspdf;
+    
+    showToast('Generating PDF... This may take a moment', 'info');
+    
+    const element = document.getElementById('groupView');
+    
+    // Create clone for capture
+    const clone = element.cloneNode(true);
+    clone.style.position = 'fixed';
+    clone.style.top = '-9999px';
+    clone.style.left = '-9999px';
+    clone.style.width = '1400px'; // Fixed width for consistency
+    document.body.appendChild(clone);
+    
+    html2canvas(clone, {
+        backgroundColor: '#0a0a0a',
+        scale: 1.5,
+        useCORS: true,
+        allowTaint: true,
+        width: 1400,
+        windowWidth: 1400
+    }).then(canvas => {
+        const imgData = canvas.toDataURL('image/png');
+        
+        // A4 Landscape
+        const pdf = new jsPDF('l', 'mm', 'a4');
+        const pageWidth = 297;
+        const pageHeight = 210;
+        
+        const imgWidth = pageWidth;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        
+        let heightLeft = imgHeight;
+        let position = 0;
+        
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+        
+        while (heightLeft > 0) {
+            position = heightLeft - imgHeight;
+            pdf.addPage();
+            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
+        }
+        
+        pdf.save(`CS_Schedule_Group_${currentGroup}.pdf`);
+        
+        document.body.removeChild(clone);
+        showToast('PDF Downloaded Successfully!', 'success');
+    }).catch(err => {
+        document.body.removeChild(clone);
+        showToast('PDF Generation Failed', 'error');
+        console.error(err);
+    });
+}
+
+// Initial Render
+document.addEventListener('DOMContentLoaded', () => {
+    changeSection("1");
+});
