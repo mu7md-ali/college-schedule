@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CS Master Schedule | Mohamed Ali</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@400;600;900&family=Cairo:wght@700;900&display=swap" rel="stylesheet">
+</head>
+<body class="bg-[#050505] text-white antialiased">
+
+    <div id="toastContainer" class="fixed top-24 left-1/2 transform -translate-x-1/2 z-50 flex flex-col gap-2 w-full max-w-md px-4"></div>
+
+    <header class="header-glass sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 h-20 flex justify-between items-center">
+            <div class="flex items-center gap-3 sm:gap-4">
+                <div class="logo-container">
+                    <div class="logo-glow"></div>
+                    <i class="fas fa-graduation-cap text-2xl sm:text-3xl text-blue-400"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg sm:text-2xl font-black tracking-wider" style="font-family: 'Orbitron', sans-serif;">
+                        CS <span class="text-blue-400">SHOROUK</span>
+                    </h1>
+                    <p class="text-[8px] sm:text-[10px] text-white/40 tracking-[0.2em] sm:tracking-[0.3em] uppercase hidden sm:block">Computer Science Department</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-2 sm:gap-4">
+                <a href="https://sha.edu.eg/" target="_blank" class="header-link hidden sm:flex">
+                    <i class="fas fa-university"></i>
+                    <span>Academy</span>
+                </a>
+                <a href="https://t.me/CS_SHA_4BOT" target="_blank" class="header-link telegram">
+                    <i class="fab fa-telegram"></i>
+                    <span class="hidden sm:inline">Telegram</span>
+                </a>
+                
+                <div class="flex gap-1 sm:gap-2" id="editButtons">
+                    <button id="confirmBtn" onclick="disableEditing(true)" class="hidden action-btn confirm text-xs sm:text-sm px-2 sm:px-4 py-1 sm:py-2">
+                        <i class="fas fa-check"></i> <span class="hidden sm:inline">Confirm</span>
+                    </button>
+                    <button id="cancelBtn" onclick="disableEditing(false)" class="hidden action-btn cancel text-xs sm:text-sm px-2 sm:px-4 py-1 sm:py-2">
+                        <i class="fas fa-times"></i> <span class="hidden sm:inline">Cancel</span>
+                    </button>
+                    <button onclick="enableEditing()" id="editModeBtn" class="action-btn edit text-xs sm:text-sm px-2 sm:px-4 py-1 sm:py-2">
+                        <i class="fas fa-edit"></i> <span class="hidden sm:inline">Edit</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-[95rem] mx-auto px-2 sm:px-4 py-6 sm:py-10">
+        <!-- Controls -->
+        <div class="flex flex-col lg:flex-row gap-3 sm:gap-4 justify-center mb-8 sm:mb-12 items-center">
+            <select id="sectionSelect" class="main-select" onchange="changeSection(this.value)">
+                <option value="" selected>سكشن</option>
+                <option value="1">Section 1</option>
+                <option value="2">Section 2</option>
+                <option value="3">Section 3</option>
+                <option value="4">Section 4</option>
+                <option value="5">Section 5</option>
+                <option value="6">Section 6</option>
+                <option value="7">Section 7</option>
+                <option value="8">Section 8</option>
+                <option value="9">Section 9</option>
+                <option value="10">Section 10</option>
+                <option value="11">Section 11</option>
+                <option value="12">Section 12</option>
+                <option value="13">Section 13</option>
+                <option value="14">Section 14</option>
+                <option value="15">Section 15</option>
+                <option value="16">Section 16</option>
+                <option value="custom">Custom Section</option>
+            </select>
+            
+            <div class="flex flex-wrap gap-2 sm:gap-3 justify-center">
+                <button onclick="showGroupSchedule('A')" id="groupABtn" class="action-btn group-a text-xs sm:text-sm px-3 sm:px-6 py-2 sm:py-4">
+                    <i class="fas fa-users"></i> <span class="hidden sm:inline">Group A</span><span class="sm:hidden">Grp A</span>
+                </button>
+                <button onclick="showGroupSchedule('B')" id="groupBBtn" class="action-btn group-b text-xs sm:text-sm px-3 sm:px-6 py-2 sm:py-4">
+                    <i class="fas fa-users"></i> <span class="hidden sm:inline">Group B</span><span class="sm:hidden">Grp B</span>
+                </button>
+                <button onclick="downloadTable()" id="downloadBtn" class="action-btn download text-xs sm:text-sm px-3 sm:px-6 py-2 sm:py-4">
+                    <i class="fas fa-download"></i> <span class="hidden sm:inline">Download</span><span class="sm:hidden">PNG</span>
+                </button>
+                <button onclick="downloadGroupPDF()" id="pdfBtn" class="hidden action-btn pdf text-xs sm:text-sm px-3 sm:px-6 py-2 sm:py-4">
+                    <i class="fas fa-file-pdf"></i> <span class="hidden sm:inline">Save PDF</span><span class="sm:hidden">PDF</span>
+                </button>
+                <button onclick="backToSection()" id="backBtn" class="hidden action-btn back text-xs sm:text-sm px-3 sm:px-6 py-2 sm:py-4">
+                    <i class="fas fa-arrow-left"></i> <span class="hidden sm:inline">Back</span>
+                </button>
+                <button onclick="showAcademicCalendar()" id="calendarBtn" class="action-btn calendar text-xs sm:text-sm px-3 sm:px-6 py-2 sm:py-4">
+                    <i class="fas fa-calendar-alt"></i> <span class="hidden sm:inline">Academic Calendar</span><span class="sm:hidden">Calendar</span>
+                </button>
+                <button onclick="showSectionLayout()" id="layoutBtn" class="action-btn layout text-xs sm:text-sm px-3 sm:px-6 py-2 sm:py-4">
+                    <i class="fas fa-th"></i> <span class="hidden sm:inline">Section Layout</span><span class="sm:hidden">Layout</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Section View (Default) -->
+        <div id="sectionView" class="table-card">
+            <div id="captureArea">
+                <div class="flex flex-col sm:flex-row justify-between items-center mb-6 sm:mb-8 gap-4">
+                    <h2 id="tableTitle" class="section-title text-2xl sm:text-4xl">Section 1</h2>
+                    <div id="sectionTimeBadge" class="time-badge">9:15 - 3:45</div>
+                </div>
+                
+                <div class="overflow-x-auto scrollbar-hide">
+                    <table class="w-full border-separate border-spacing-2">
+                        <thead>
+                            <tr class="text-white/40 text-[7px] sm:text-[10px] font-black uppercase tracking-[0.05em] sm:tracking-[0.2em]">
+                                <th class="p-1 sm:p-2 text-left w-14 sm:w-24">Day</th>
+                                <th class="period-label">
+                                    <div class="period-num">1-2</div>
+                                    <div class="period-time">9:15-10:45</div>
+                                    <div class="period-duration">90 min</div>
+                                </th>
+                                <th class="period-label">
+                                    <div class="period-num">3-4</div>
+                                    <div class="period-time">10:55-12:25</div>
+                                    <div class="period-duration">90 min</div>
+                                </th>
+                                <th class="break-header">
+                                    <div class="break-icon">☕</div>
+                                    <div class="break-text">BREAK</div>
+                                    <div class="break-time">20 min</div>
+                                </th>
+                                <th class="period-label">
+                                    <div class="period-num">5-6</div>
+                                    <div class="period-time">12:45-2:10</div>
+                                    <div class="period-duration">85 min</div>
+                                </th>
+                                <th class="period-label">
+                                    <div class="period-num">7-8</div>
+                                    <div class="period-time">2:20-3:45</div>
+                                    <div class="period-duration">85 min</div>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody"></tbody>
+                    </table>
+                </div>
+
+                <div class="signature-area mt-10 sm:mt-16 flex flex-col sm:flex-row justify-between items-center gap-4 border-t border-white/10 pt-6 sm:pt-8">
+                    <div class="text-center sm:text-left">
+                        <span class="text-[8px] sm:text-[9px] text-blue-400 font-black tracking-[0.2em] sm:tracking-[0.4em] uppercase block mb-1">Designed & Developed By</span>
+                        <h3 class="name-text text-lg sm:text-2xl">Mohamed Ali</h3>
+                    </div>
+                    <div class="text-center sm:text-right">
+                        <p class="text-[8px] sm:text-[10px] font-bold text-white/30 italic mb-2">Shorouk Academy • CS Dept • 2026</p>
+                        <div class="flex gap-3 justify-center sm:justify-end">
+                            <a href="https://sha.edu.eg/" target="_blank" class="social-link">
+                                <i class="fas fa-globe"></i>
+                            </a>
+                            <a href="https://t.me/CS_SHA_4BOT" target="_blank" class="social-link telegram">
+                                <i class="fab fa-telegram"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Group View (Hidden by default) -->
+        <div id="groupView" class="hidden group-table-container">
+            <div class="flex flex-col sm:flex-row justify-between items-center mb-6 sm:mb-8 gap-4">
+                <h2 id="groupTitle" class="section-title text-2xl sm:text-4xl">Group A Schedule</h2>
+                <div id="groupTimeInfo" class="time-badge">All Sections Overview</div>
+            </div>
+
+            <div class="group-table-wrapper">
+                <table class="group-table" id="groupTable">
+                    <thead>
+                        <tr>
+                            <th class="section-header">SECTION</th>
+                            <th class="day-header">SUNDAY</th>
+                            <th class="day-header">MONDAY</th>
+                            <th class="day-header">TUESDAY</th>
+                            <th class="day-header">WEDNESDAY</th>
+                            <th class="day-header">THURSDAY</th>
+                        </tr>
+                    </thead>
+                    <tbody id="groupTableBody"></tbody>
+                </table>
+            </div>
+
+            <div class="signature-area mt-10 sm:mt-16 flex flex-col sm:flex-row justify-between items-center gap-4 border-t border-white/10 pt-6 sm:pt-8">
+                <div class="text-center sm:text-left">
+                    <span class="text-[8px] sm:text-[9px] text-blue-400 font-black tracking-[0.2em] sm:tracking-[0.4em] uppercase block mb-1">Designed & Developed By</span>
+                    <h3 class="name-text text-lg sm:text-2xl">Mohamed Ali</h3>
+                </div>
+                <div class="text-center sm:text-right">
+                    <p class="text-[8px] sm:text-[10px] font-bold text-white/30 italic mb-2">Shorouk Academy • CS Dept • 2026</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Academic Calendar Modal -->
+    <div id="calendarModal" class="modal hidden">
+        <div class="modal-content calendar-modal">
+            <div class="modal-header">
+                <h2 class="modal-title"><i class="fas fa-calendar-alt"></i> Academic Calendar 2025-2026</h2>
+                <button onclick="closeModal('calendarModal')" class="modal-close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="calendar-table-wrapper">
+                    <table class="calendar-table">
+                        <thead>
+                            <tr>
+                                <th class="cal-num">No.</th>
+                                <th class="cal-desc">Description</th>
+                                <th class="cal-day">Day</th>
+                                <th class="cal-date">Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="calendarTableBody">
+                            <tr><td>1</td><td>Start of the First Semester</td><td>Saturday</td><td>20 September 2025</td></tr>
+                            <tr><td>2</td><td>Start of Midterm Exams (First Semester)</td><td>Sunday</td><td>9 November 2025</td></tr>
+                            <tr><td>3</td><td>End of Midterm Exams (First Semester)</td><td>Thursday</td><td>13 November 2025</td></tr>
+                            <tr><td>4</td><td>Start of Final Exams (First Semester)</td><td>Saturday</td><td>03 January 2026</td></tr>
+                            <tr><td>5</td><td>End of Final Exams (First Semester)</td><td>Thursday</td><td>22 January 2026</td></tr>
+                            <tr><td>6</td><td>Start of Mid-Year Vacation</td><td>Saturday</td><td>24 January 2026</td></tr>
+                            <tr><td>7</td><td>End of Mid-Year Vacation</td><td>Thursday</td><td>05 February 2026</td></tr>
+                            <tr><td>8</td><td>Start of the Second Semester</td><td>Saturday</td><td>7 February 2026</td></tr>
+                            <tr><td>9</td><td>Start of Midterm Exams (Second Semester)</td><td>Tuesday</td><td>31 March 2026</td></tr>
+                            <tr><td>10</td><td>End of Midterm Exams (Second Semester)</td><td>Thursday</td><td>9 April 2026</td></tr>
+                            <tr><td>11</td><td>Start of Final Exams (Second Semester)</td><td>Saturday</td><td>16 May 2026</td></tr>
+                            <tr><td>12</td><td>End of Final Exams (Second Semester)</td><td>Thursday</td><td>18 June 2026</td></tr>
+                            <tr><td>13</td><td>Start of Graduation Project Discussions</td><td>Sunday</td><td>21 June 2026</td></tr>
+                            <tr><td>14</td><td>End of Graduation Project Discussions</td><td>Thursday</td><td>9 July 2026</td></tr>
+                            <tr><td>15</td><td>Sending Final Results to Ministry</td><td>Wednesday</td><td>11 July 2026</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section Layout Modal -->
+    <div id="layoutModal" class="modal hidden">
+        <div class="modal-content layout-modal">
+            <div class="modal-header">
+                <h2 class="modal-title"><i class="fas fa-th"></i> Section Layout</h2>
+                <button onclick="closeModal('layoutModal')" class="modal-close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="sections-grid">
+                    <!-- Section 1 -->
+                    <div class="section-card" data-section="1">
+                        <div class="section-number">01</div>
+                        <div class="section-image">
+                            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='150'%3E%3Crect fill='%23111' width='200' height='150'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23333' font-family='Arial' font-size='14'%3ESection 1%3C/text%3E%3C/svg%3E" alt="Section 1">
+                        </div>
+                        <div class="section-name">Section 1</div>
+                    </div>
+                    <!-- Section 2 -->
+                    <div class="section-card" data-section="2">
+                        <div class="section-number">02</div>
+                        <div class="section-image">
+                            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='150'%3E%3Crect fill='%23111' width='200' height='150'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23333' font-family='Arial' font-size='14'%3ESection 2%3C/text%3E%3C/svg%3E" alt="Section 2">
+                        </div>
+                        <div class="section-name">Section 2</div>
+                    </div>
+                    <!-- Section 3 -->
+                    <div class="section-card" data-section="3">
+                        <div class="section-number">03</div>
+                        <div class="section-image">
+                            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='150'%3E%3Crect fill='%23111' width='200' height='150'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23333' font-family='Arial' font-size='14'%3ESection 3%3C/text%3E%3C/svg%3E" alt="Section 3">
+                        </div>
+                        <div class="section-name">Section 3</div>
+                    </div>
+                    <!-- Section 4 -->
+                    <div class="section-card" data-section="4">
+                        <div class="section-number">04</div>
+                        <div class="section-image">
+                            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='150'%3E%3Crect fill='%23111' width='200' height='150'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23333' font-family='Arial' font-size='14'%3ESection 4%3C/text%3E%3C/svg%3E" alt="Section 4">
+                        </div>
+                        <div class="section-name">Section 4</div>
+                    </div>
+                    <!-- Section 5 -->
+                    <div class="section-card" data-section="5">
+                        <div class="section-number">05</div>
+                        <div class="section-image">
+                            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='150'%3E%3Crect fill='%23111' width='200' height='150'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23333' font-family='Arial' font-size='14'%3ESection 5%3C/text%3E%3C/svg%3E" alt="Section 5">
+                        </div>
+                        <div class="section-name">Section 5</div>
+                    </div>
+                    <!-- Section 6 -->
+                    <div class="section-card" data-section="6">
+                        <div class="section-number">06</div>
+                        <div class="section-image">
+                            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='150'%3E%3Crect fill='%23111' width='200' height='150'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23333' font-family='Arial' font-size='14'%3ESection 6%3C/text%3E%3C/svg%3E" alt="Section 6">
+                        </div>
+                        <div class="section-name">Section 6</div>
+                    </div>
+                    <!-- Section 7 -->
+                    <div class="section-card" data-section="7">
+                        <div class="section-number">07</div>
+                        <div class="section-image">
+                            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='150'%3E%3Crect fill='%23111' width='200' height='150'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23333' font-family='Arial' font-size='14'%3ESection 7%3C/text%3E%3C/svg%3E" alt="Section 7">
+                        </div>
+                        <div class="section-name">Section 7</div>
+                    </div>
+                    <!-- Section 8 -->
+                    <div class="section-card" data-section="8">
+                        <div class="section-number">08</div>
+                        <div class="section-image">
+                            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='150'%3E%3Crect fill='%23111' width='200' height='150'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23333' font-family='Arial' font-size='14'%3ESection 8%3C/text%3E%3C/svg%3E" alt="Section 8">
+                        </div>
+                        <div class="section-name">Section 8</div>
+                    </div>
+                    <!-- Section 9 -->
+                    <div class="section-card" data-section="9">
+                        <div class="section-number">09</div>
+                        <div class="section-image">
+                            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='150'%3E%3Crect fill='%23111' width='200' height='150'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23333' font-family='Arial' font-size='14'%3ESection 9%3C/text%3E%3C/svg%3E" alt="Section 9">
+                        </div>
+                        <div class="section-name">Section 9</div>
+                    </div>
+                    <!-- Section 10 -->
+                    <div class="section-card" data-section="10">
+                        <div class="section-number">10</div>
+                        <div class="section-image">
+                            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='150'%3E%3Crect fill='%23111' width='200' height='150'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23333' font-family='Arial' font-size='14'%3ESection 10%3C/text%3E%3C/svg%3E" alt="Section 10">
+                        </div>
+                        <div class="section-name">Section 10</div>
+                    </div>
+                    <!-- Section 11 -->
+                    <div class="section-card" data-section="11">
+                        <div class="section-number">11</div>
+                        <div class="section-image">
+                            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='150'%3E%3Crect fill='%23111' width='200' height='150'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23333' font-family='Arial' font-size='14'%3ESection 11%3C/text%3E%3C/svg%3E" alt="Section 11">
+                        </div>
+                        <div class="section-name">Section 11</div>
+                    </div>
+                    <!-- Section 12 -->
+                    <div class="section-card" data-section="12">
+                        <div class="section-number">12</div>
+                        <div class="section-image">
+                            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='150'%3E%3Crect fill='%23111' width='200' height='150'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23333' font-family='Arial' font-size='14'%3ESection 12%3C/text%3E%3C/svg%3E" alt="Section 12">
+                        </div>
+                        <div class="section-name">Section 12</div>
+                    </div>
+                    <!-- Section 13 -->
+                    <div class="section-card" data-section="13">
+                        <div class="section-number">13</div>
+                        <div class="section-image">
+                            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='150'%3E%3Crect fill='%23111' width='200' height='150'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23333' font-family='Arial' font-size='14'%3ESection 13%3C/text%3E%3C/svg%3E" alt="Section 13">
+                        </div>
+                        <div class="section-name">Section 13</div>
+                    </div>
+                    <!-- Section 14 -->
+                    <div class="section-card" data-section="14">
+                        <div class="section-number">14</div>
+                        <div class="section-image">
+                            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='150'%3E%3Crect fill='%23111' width='200' height='150'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23333' font-family='Arial' font-size='14'%3ESection 14%3C/text%3E%3C/svg%3E" alt="Section 14">
+                        </div>
+                        <div class="section-name">Section 14</div>
+                    </div>
+                    <!-- Section 15 -->
+                    <div class="section-card" data-section="15">
+                        <div class="section-number">15</div>
+                        <div class="section-image">
+                            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='150'%3E%3Crect fill='%23111' width='200' height='150'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23333' font-family='Arial' font-size='14'%3ESection 15%3C/text%3E%3C/svg%3E" alt="Section 15">
+                        </div>
+                        <div class="section-name">Section 15</div>
+                    </div>
+                    <!-- Section 16 -->
+                    <div class="section-card" data-section="16">
+                        <div class="section-number">16</div>
+                        <div class="section-image">
+                            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='150'%3E%3Crect fill='%23111' width='200' height='150'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23333' font-family='Arial' font-size='14'%3ESection 16%3C/text%3E%3C/svg%3E" alt="Section 16">
+                        </div>
+                        <div class="section-name">Section 16</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
