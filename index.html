@@ -1,246 +1,151 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>CS Master Schedule | Shorouk Academy</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>جدول كلية الحاسبات - جامعة الشروق</title>
     
-    <!-- CSS Files -->
+    <!-- CSS -->
     <link rel="stylesheet" href="style.css">
     
-    <!-- External Libraries -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     
-    <!-- Manifest for PWA -->
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#0a0f1c">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="CS Schedule">
+    <!-- html2canvas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
-    <!-- خلفية 010101 -->
-    <div class="matrix-bg" id="matrixBg"></div>
+    <!-- خلفية المصفوفة -->
+    <div class="matrix-bg"></div>
     
     <!-- إشعارات -->
-    <div id="toastContainer" class="toast-container"></div>
+    <div id="toast" class="toast"></div>
 
-    <!-- المساعد الذكي - الفهمان -->
+    <!-- الهيدر -->
+    <header>
+        <div class="container">
+            <div class="logo">
+                <i class="fas fa-university"></i>
+                <h1>CS <span>SHOROUK</span></h1>
+            </div>
+            <button class="ai-toggle-btn" onclick="toggleAI()">
+                <i class="fas fa-robot"></i>
+                <span>الفهمان</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- المساعد الذكي -->
     <div class="ai-assistant collapsed" id="aiAssistant">
         <div class="ai-header" onclick="toggleAI()">
-            <div class="ai-avatar">
-                <i class="fas fa-robot"></i>
-            </div>
-            <div class="ai-title">
-                <h3>الفهمان</h3>
-                <p>ذكاء اصطناعي • متصل</p>
-            </div>
-            <i class="fas fa-chevron-up toggle-icon"></i>
+            <i class="fas fa-robot"></i>
+            <h3>الفهمان</h3>
+            <i class="fas fa-chevron-down"></i>
         </div>
-        
         <div class="ai-body">
             <div class="ai-messages" id="aiMessages">
                 <div class="message bot">
-                    <div class="message-content">
-                        <p>أهلاً بيك يا باشا! 🤖</p>
-                        <p>أنا <strong>الفهمان</strong>، ذكاء اصطناعي لمساعدة طلاب كلية الحاسبات والمعلومات - <strong>جامعة الشروق</strong>.</p>
-                        <p>أسألني عن أي حاجة:</p>
-                        <p>• الأقسام والمواد<br>• الدكاترة والمعيدين<br>• مواعيد المحاضرات<br>• التقويم الدراسي<br>• وأي استفسار تاني</p>
-                    </div>
+                    <p>أهلاً بيك يا باشا! 🤖</p>
+                    <p>أنا الفهمان، ذكاء اصطناعي لمساعدة طلاب كلية الحاسبات - جامعة الشروق</p>
+                    <p>اسألني عن أي حاجة:</p>
+                    <p>• الأقسام والمواد<br>• الدكاترة<br>• مواعيد المحاضرات<br>• التقويم الدراسي</p>
                 </div>
             </div>
-            
             <div class="ai-input-area">
-                <input type="text" id="aiQuestion" placeholder="اكتب سؤالك هنا ..." onkeypress="if(event.key==='Enter') askAI()">
-                <button onclick="askAI()" id="aiSendBtn" class="ai-send-btn">
-                    <i class="fas fa-paper-plane"></i>
-                </button>
-            </div>
-            
-            <div class="ai-status" id="aiStatus">
-                <span class="status-dot"></span>
-                <span>متصل • جاهز للرد</span>
+                <input type="text" id="aiInput" placeholder="اكتب سؤالك هنا...">
+                <button onclick="askAI()"><i class="fas fa-paper-plane"></i></button>
             </div>
         </div>
     </div>
 
-    <!-- الهيدر -->
-    <header class="main-header">
-        <div class="header-container">
-            <div class="logo-wrapper">
-                <a href="https://sha.edu.eg/" target="_blank" class="logo-link">
-                    <div class="logo-icon">
-                        <i class="fas fa-university"></i>
-                    </div>
-                    <div class="logo-text">
-                        <h1>CS <span>SHOROUK</span></h1>
-                        <p>Computer Science Department</p>
-                    </div>
-                </a>
-            </div>
-            
-            <div class="header-actions">
-                <button onclick="toggleAI()" class="action-btn ai-btn" title="المساعد الذكي">
-                    <i class="fas fa-robot"></i>
-                    <span>الفهمان</span>
-                </button>
-            </div>
-        </div>
-    </header>
-
-    <main class="main-content">
-        <!-- شاشة الترحيب واختيار القسم -->
+    <main class="container">
+        <!-- شاشة اختيار القسم -->
         <div class="welcome-screen" id="welcomeScreen">
             <div class="welcome-card">
-                <div class="welcome-icon">
-                    <i class="fas fa-graduation-cap"></i>
-                </div>
-                <h2>CS Schedule</h2>
-                <p class="welcome-subtitle">اختر رقم القسم لعرض الجدول</p>
+                <i class="fas fa-graduation-cap"></i>
+                <h2>اختر رقم القسم</h2>
+                <select id="sectionSelect" onchange="changeSection(this.value)">
+                    <option value="">-- اختر القسم --</option>
+                    <option value="1">Section 1</option>
+                    <option value="2">Section 2</option>
+                    <option value="3">Section 3</option>
+                    <option value="4">Section 4</option>
+                    <option value="5">Section 5</option>
+                    <option value="6">Section 6</option>
+                    <option value="7">Section 7</option>
+                    <option value="8">Section 8</option>
+                    <option value="9">Section 9</option>
+                    <option value="10">Section 10</option>
+                    <option value="11">Section 11</option>
+                    <option value="12">Section 12</option>
+                    <option value="13">Section 13</option>
+                    <option value="14">Section 14</option>
+                    <option value="15">Section 15</option>
+                    <option value="16">Section 16</option>
+                </select>
                 
-                <div class="section-selector-wrapper">
-                    <select id="sectionSelect" class="section-select" onchange="changeSection(this.value)">
-                        <option value="" disabled selected>-- اختر القسم --</option>
-                        <option value="1">Section 1</option>
-                        <option value="2">Section 2</option>
-                        <option value="3">Section 3</option>
-                        <option value="4">Section 4</option>
-                        <option value="5">Section 5</option>
-                        <option value="6">Section 6</option>
-                        <option value="7">Section 7</option>
-                        <option value="8">Section 8</option>
-                        <option value="9">Section 9</option>
-                        <option value="10">Section 10</option>
-                        <option value="11">Section 11</option>
-                        <option value="12">Section 12</option>
-                        <option value="13">Section 13</option>
-                        <option value="14">Section 14</option>
-                        <option value="15">Section 15</option>
-                        <option value="16">Section 16</option>
-                    </select>
-                </div>
-                
-                <div class="welcome-features">
-                    <div class="feature">
-                        <i class="fas fa-users"></i>
-                        <span>عرض المجموعات A/B</span>
-                    </div>
-                    <div class="feature">
-                        <i class="fas fa-download"></i>
-                        <span>حفظ الصور بجودة عالية</span>
-                    </div>
-                    <div class="feature">
-                        <i class="fas fa-robot"></i>
-                        <span>مساعد ذكي 24/7</span>
-                    </div>
+                <div class="features">
+                    <div class="feature"><i class="fas fa-users"></i> عرض المجموعات A/B</div>
+                    <div class="feature"><i class="fas fa-download"></i> حفظ الصور</div>
+                    <div class="feature"><i class="fas fa-robot"></i> مساعد ذكي</div>
                 </div>
             </div>
         </div>
 
-        <!-- عناصر التحكم -->
-        <div class="controls-panel hidden" id="controlsPanel">
-            <div class="controls-container">
-                <div class="section-selector-wrapper small">
-                    <select id="sectionSelectMain" class="section-select" onchange="changeSection(this.value)">
-                        <option value="" disabled selected>اختر القسم</option>
-                    </select>
-                </div>
-                
-                <div class="controls-buttons">
-                    <button onclick="showGroup('A')" class="control-btn group-a" id="groupABtn">
-                        <i class="fas fa-users"></i>
-                        <span>Group A</span>
-                    </button>
-                    <button onclick="showGroup('B')" class="control-btn group-b" id="groupBBtn">
-                        <i class="fas fa-users"></i>
-                        <span>Group B</span>
-                    </button>
-                    <button onclick="downloadImage()" class="control-btn download" id="downloadBtn">
-                        <i class="fas fa-download"></i>
-                        <span>حفظ صورة</span>
-                    </button>
-                    <button onclick="backToSection()" class="control-btn back hidden" id="backBtn">
-                        <i class="fas fa-arrow-left"></i>
-                        <span>رجوع</span>
-                    </button>
-                </div>
-            </div>
+        <!-- عناصر التحكم (تظهر بعد اختيار القسم) -->
+        <div class="controls hidden" id="controls">
+            <select id="sectionSelectMain" onchange="changeSection(this.value)"></select>
+            <button class="btn-group-a" onclick="showGroup('A')">المجموعة A</button>
+            <button class="btn-group-b" onclick="showGroup('B')">المجموعة B</button>
+            <button class="btn-download" onclick="downloadTable()">حفظ الصورة</button>
+            <button class="btn-back hidden" id="backBtn" onclick="backToSection()">رجوع</button>
         </div>
 
         <!-- عرض الجدول -->
         <div class="schedule-view hidden" id="scheduleView">
-            <div class="schedule-card">
-                <div class="schedule-header">
-                    <h2 id="sectionTitle">Section 1</h2>
-                    <div class="time-badge" id="timeBadge">
-                        <i class="far fa-clock"></i>
-                        <span>9:15 - 3:45</span>
-                    </div>
-                </div>
-                
-                <div class="table-wrapper" id="captureArea">
-                    <table class="schedule-table" id="scheduleTable">
-                        <thead id="tableHeader"></thead>
-                        <tbody id="tableBody"></tbody>
-                    </table>
-                </div>
+            <div class="schedule-header">
+                <h2 id="sectionTitle">Section 1</h2>
+                <div class="time-info">9:15 - 3:45</div>
+            </div>
+            <div class="table-wrapper" id="tableWrapper">
+                <table id="scheduleTable">
+                    <thead id="tableHeader"></thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
             </div>
         </div>
 
         <!-- عرض المجموعات -->
         <div class="group-view hidden" id="groupView">
-            <div class="group-card">
-                <div class="group-header">
-                    <h2 id="groupTitle">Group A</h2>
-                    <div class="group-badge">
-                        <i class="fas fa-layer-group"></i>
-                        <span>جميع الأقسام</span>
-                    </div>
-                </div>
-                
-                <div class="group-table-wrapper">
-                    <table class="group-table" id="groupTable"></table>
-                </div>
+            <h2 id="groupTitle">المجموعة A</h2>
+            <div class="group-table-wrapper">
+                <table id="groupTable"></table>
             </div>
         </div>
 
         <!-- توقيع المطور -->
-        <div class="developer-signature">
-            <div class="signature-content">
-                <div class="signature-text">
-                    <p class="designed-by">Designed & Developed by</p>
-                    <a href="https://wa.me/201025114639" target="_blank" class="developer-name">Mohamed Ali</a>
-                    <p class="copyright">Shorouk Academy • Computer Science Department • 2026</p>
-                </div>
-            </div>
+        <div class="signature">
+            <p>تصميم وبرمجة <span>محمد علي</span></p>
+            <p class="copyright">كلية الحاسبات - جامعة الشروق 2026</p>
         </div>
     </main>
 
     <script src="script.js"></script>
     <script>
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js').catch(err => console.log(err));
-        }
-
         document.addEventListener('DOMContentLoaded', async () => {
-            const loaded = await loadData();
-            if (loaded) {
-                initMatrixBackground();
-                loadCustomSection();
-                
-                const mainSelect = document.getElementById('sectionSelectMain');
-                if (mainSelect) {
-                    for (let i = 1; i <= 16; i++) {
-                        const option = document.createElement('option');
-                        option.value = i;
-                        option.textContent = `Section ${i}`;
-                        mainSelect.appendChild(option);
-                    }
-                }
+            await loadData();
+            initMatrix();
+            
+            // إضافة خيارات القسم للقائمة الرئيسية
+            const mainSelect = document.getElementById('sectionSelectMain');
+            for (let i = 1; i <= 16; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = `Section ${i}`;
+                mainSelect.appendChild(option);
             }
         });
     </script>
