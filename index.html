@@ -12,8 +12,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Google Fonts - Modern Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Rajdhani:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- Manifest for PWA -->
     <link rel="manifest" href="manifest.json">
@@ -23,17 +23,13 @@
     <meta name="apple-mobile-web-app-title" content="CS Schedule">
 </head>
 <body>
-    <!-- ==================== خلفية 010101 متطورة ==================== -->
+    <!-- خلفية 010101 -->
     <div class="matrix-bg" id="matrixBg"></div>
     
-    <!-- ==================== عناصر الخلفية الإضافية ==================== -->
-    <div class="gradient-orb orb-1"></div>
-    <div class="gradient-orb orb-2"></div>
-    
-    <!-- ==================== إشعارات ==================== -->
+    <!-- إشعارات -->
     <div id="toastContainer" class="toast-container"></div>
 
-    <!-- ==================== المساعد الذكي - الفهمان ==================== -->
+    <!-- المساعد الذكي - الفهمان -->
     <div class="ai-assistant collapsed" id="aiAssistant">
         <div class="ai-header" onclick="toggleAI()">
             <div class="ai-avatar">
@@ -46,12 +42,12 @@
             <i class="fas fa-chevron-up toggle-icon"></i>
         </div>
         
-        <div class="ai-body" id="aiBody">
+        <div class="ai-body">
             <div class="ai-messages" id="aiMessages">
                 <div class="message bot">
                     <div class="message-content">
                         <p>أهلاً بيك يا باشا! 🤖</p>
-                        <p>أنا <strong>الفهمان</strong>، ذكاء اصطناعي متخصص لمساعدة طلاب كلية الحاسبات والمعلومات - جامعة الشروق.</p>
+                        <p>أنا <strong>الفهمان</strong>، ذكاء اصطناعي لمساعدة طلاب كلية الحاسبات والمعلومات - <strong>جامعة الشروق</strong>.</p>
                         <p>أسألني عن أي حاجة:</p>
                         <p>• الأقسام والمواد<br>• الدكاترة والمعيدين<br>• مواعيد المحاضرات<br>• التقويم الدراسي<br>• وأي استفسار تاني</p>
                     </div>
@@ -72,14 +68,13 @@
         </div>
     </div>
 
-    <!-- ==================== الهيدر الرئيسي ==================== -->
+    <!-- الهيدر -->
     <header class="main-header">
         <div class="header-container">
             <div class="logo-wrapper">
                 <a href="https://sha.edu.eg/" target="_blank" class="logo-link">
                     <div class="logo-icon">
                         <i class="fas fa-university"></i>
-                        <div class="logo-glow"></div>
                     </div>
                     <div class="logo-text">
                         <h1>CS <span>SHOROUK</span></h1>
@@ -89,7 +84,7 @@
             </div>
             
             <div class="header-actions">
-                <button onclick="toggleAI()" class="action-btn ai-btn" title="المساعد الذكي - الفهمان">
+                <button onclick="toggleAI()" class="action-btn ai-btn" title="المساعد الذكي">
                     <i class="fas fa-robot"></i>
                     <span>الفهمان</span>
                 </button>
@@ -97,9 +92,8 @@
         </div>
     </header>
 
-    <!-- ==================== المحتوى الرئيسي ==================== -->
     <main class="main-content">
-        <!-- شاشة اختيار القسم -->
+        <!-- شاشة الترحيب واختيار القسم -->
         <div class="welcome-screen" id="welcomeScreen">
             <div class="welcome-card">
                 <div class="welcome-icon">
@@ -128,7 +122,6 @@
                         <option value="15">Section 15</option>
                         <option value="16">Section 16</option>
                     </select>
-                    <i class="fas fa-chevron-down select-arrow"></i>
                 </div>
                 
                 <div class="welcome-features">
@@ -148,14 +141,13 @@
             </div>
         </div>
 
-        <!-- عناصر التحكم (تظهر بعد اختيار القسم) -->
+        <!-- عناصر التحكم -->
         <div class="controls-panel hidden" id="controlsPanel">
             <div class="controls-container">
                 <div class="section-selector-wrapper small">
                     <select id="sectionSelectMain" class="section-select" onchange="changeSection(this.value)">
                         <option value="" disabled selected>اختر القسم</option>
                     </select>
-                    <i class="fas fa-chevron-down select-arrow"></i>
                 </div>
                 
                 <div class="controls-buttons">
@@ -179,7 +171,7 @@
             </div>
         </div>
 
-        <!-- عرض الجدول (سكشن) -->
+        <!-- عرض الجدول -->
         <div class="schedule-view hidden" id="scheduleView">
             <div class="schedule-card">
                 <div class="schedule-header">
@@ -211,9 +203,7 @@
                 </div>
                 
                 <div class="group-table-wrapper">
-                    <table class="group-table" id="groupTable">
-                        <!-- يتم التعبئة بالجافاسكربت -->
-                    </table>
+                    <table class="group-table" id="groupTable"></table>
                 </div>
             </div>
         </div>
@@ -221,43 +211,27 @@
         <!-- توقيع المطور -->
         <div class="developer-signature">
             <div class="signature-content">
-                <div class="signature-line"></div>
                 <div class="signature-text">
                     <p class="designed-by">Designed & Developed by</p>
                     <a href="https://wa.me/201025114639" target="_blank" class="developer-name">Mohamed Ali</a>
                     <p class="copyright">Shorouk Academy • Computer Science Department • 2026</p>
                 </div>
-                <div class="signature-line"></div>
             </div>
         </div>
     </main>
 
-    <!-- ==================== JavaScript Files ==================== -->
     <script src="script.js"></script>
     <script>
-        // تسجيل Service Worker للـ PWA
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js')
-                .then(reg => console.log('✅ Service Worker registered'))
-                .catch(err => console.log('❌ Service Worker failed:', err));
+            navigator.serviceWorker.register('sw.js').catch(err => console.log(err));
         }
 
-        // تهيئة الصفحة
         document.addEventListener('DOMContentLoaded', async () => {
-            // إظهار شاشة التحميل
-            showLoader();
-            
-            // تحميل البيانات
             const loaded = await loadData();
-            
             if (loaded) {
-                // تهيئة الخلفية
                 initMatrixBackground();
-                
-                // تحميل السكشن المخصص
                 loadCustomSection();
                 
-                // إضافة خيارات القسم للقائمة الرئيسية
                 const mainSelect = document.getElementById('sectionSelectMain');
                 if (mainSelect) {
                     for (let i = 1; i <= 16; i++) {
@@ -267,40 +241,8 @@
                         mainSelect.appendChild(option);
                     }
                 }
-                
-                // إخفاء شاشة التحميل
-                hideLoader();
-                
-                // التحقق من وجود قسم في الرابط
-                const urlParams = new URLSearchParams(window.location.search);
-                const section = urlParams.get('section');
-                if (section && section >= 1 && section <= 16) {
-                    changeSection(section);
-                }
             }
         });
-
-        // شاشة التحميل
-        function showLoader() {
-            const loader = document.createElement('div');
-            loader.className = 'loader-screen';
-            loader.id = 'loaderScreen';
-            loader.innerHTML = `
-                <div class="loader-content">
-                    <div class="loader-spinner"></div>
-                    <p>جاري تحميل البيانات...</p>
-                </div>
-            `;
-            document.body.appendChild(loader);
-        }
-
-        function hideLoader() {
-            const loader = document.getElementById('loaderScreen');
-            if (loader) {
-                loader.style.opacity = '0';
-                setTimeout(() => loader.remove(), 500);
-            }
-        }
     </script>
 </body>
 </html>
