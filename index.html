@@ -6,8 +6,7 @@
     <title>CS Master Schedule | Mohamed Ali</title>
     <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#0a0f1c" media="(prefers-color-scheme: dark)">
-    <meta name="theme-color" content="#e8f0fe" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0a0f1c">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="CS Schedule">
@@ -46,22 +45,21 @@
         <div class="shortcut-row"><span>Group B</span><span class="shortcut-key">B</span></div>
         <div class="shortcut-row"><span>Designer Mode</span><span class="shortcut-key">D</span></div>
         <div class="shortcut-row"><span>Academic Calendar</span><span class="shortcut-key">C</span></div>
-        <div class="shortcut-row"><span>AI Assistant</span><span class="shortcut-key">Ctrl+M</span></div>
-        <div class="shortcut-row"><span>Toggle Theme</span><span class="shortcut-key">T</span></div>
-        <div class="shortcut-row"><span>Close Modal</span><span class="shortcut-key">Esc</span></div>
+        <div class="shortcut-row"><span>AI Assistant (الفهمان)</span><span class="shortcut-key">Ctrl+M</span></div>
         <div class="shortcut-row"><span>Show/Hide this</span><span class="shortcut-key">?</span></div>
+        <div class="shortcut-row"><span>Close Modal</span><span class="shortcut-key">Esc</span></div>
     </div>
 
-    <!-- AI Assistant Bot - MSRY STATE -->
-    <div id="aiBot" class="ai-bot collapsed">
+    <!-- AI Assistant Bot - الفهمان لمساعدة الإنسان (مخفي افتراضيًا) -->
+    <div id="aiBot" class="ai-bot collapsed hidden">
         <div class="ai-bot-header" onclick="toggleAIBot()">
             <div class="ai-avatar">
-                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%23000'/%3E%3Ctext x='50' y='70' font-size='60' text-anchor='middle' fill='%23ffd700' font-family='Arial'%3E🇪🇬%3C/text%3E%3C/svg%3E" alt="MSRY STATE">
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0'%3E%3C/svg%3E" alt="الفهمان">
                 <span class="ai-status"></span>
             </div>
             <div class="ai-title">
-                <h4>MSRY STATE</h4>
-                <p>Online • مساعدك الذكي</p>
+                <h4>الفهمان</h4>
+                <p>Online • لمساعدة الإنسان</p>
             </div>
             <i class="fas fa-chevron-down ai-toggle"></i>
         </div>
@@ -69,8 +67,8 @@
             <div class="ai-messages" id="aiMessages">
                 <div class="ai-message bot">
                     <div class="message-content">
-                        <p>اهلاً بيك يا باشا! 🇪🇬</p>
-                        <p>أنا MSRY STATE، أسألني أي حاجة عن الجداول أو الدراسة!</p>
+                        <p>أهلاً بيك يا باشا! 🌟</p>
+                        <p>أنا "الفهمان" تحت أمرك، اسألني أي حاجة عن الجدول أو المواد أو الأقسام.</p>
                     </div>
                 </div>
             </div>
@@ -106,7 +104,7 @@
                     <i class="fas fa-university"></i>
                     <span class="hidden sm:inline">Academy</span>
                 </a>
-                <!-- E-Learning (مصحح) -->
+                <!-- E-Learning -->
                 <a href="https://learn.sha.edu.eg/" target="_blank" class="header-link elearning" title="E-Learning">
                     <i class="fas fa-laptop-code"></i>
                     <span class="hidden sm:inline">E-Learning</span>
@@ -119,11 +117,7 @@
                 <!-- AI Bot Toggle -->
                 <button onclick="toggleAIBot()" class="header-link ai-bot-toggle" title="AI Assistant (Ctrl+M)">
                     <i class="fas fa-robot"></i>
-                    <span class="hidden sm:inline">MSRY</span>
-                </button>
-                <!-- Theme Toggle -->
-                <button onclick="toggleTheme()" id="themeToggle" class="header-link theme-toggle" title="Toggle Theme (T)">
-                    <i class="fas fa-moon" id="themeIcon"></i>
+                    <span class="hidden sm:inline">الفهمان</span>
                 </button>
 
                 <!-- Edit Buttons -->
@@ -377,7 +371,6 @@
                 <button onclick="closeModal('designerModal')" class="modal-close"><i class="fas fa-times"></i></button>
             </div>
             <div class="modal-body">
-                <!-- Rules Panel -->
                 <div class="designer-rules">
                     <div class="designer-rules-title"><i class="fas fa-ruler-combined"></i> Schedule Rules</div>
                     <span class="rule-badge lectures"><i class="fas fa-chalkboard-teacher"></i> Exactly 6 Lectures/week</span>
@@ -486,10 +479,10 @@
             if (section && section >= 1 && section <= 16) changeSection(section);
 
             initBinaryBackground();
-
-            const savedTheme = localStorage.getItem('theme') || 'dark';
-            document.documentElement.setAttribute('data-theme', savedTheme);
-            updateThemeIcon(savedTheme);
+            
+            // إخفاء المساعد افتراضيًا
+            const aiBot = document.getElementById('aiBot');
+            aiBot.classList.add('collapsed');
         });
     </script>
 </body>
