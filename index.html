@@ -52,47 +52,7 @@
         <div class="shortcut-row"><span>Show/Hide this</span><span class="shortcut-key">?</span></div>
     </div>
 
-    <!-- المساعد الذكي - الفهمان -->
-<div class="ai-assistant" id="aiAssistant">
-    <div class="ai-header" onclick="toggleAI()">
-        <div class="ai-avatar">
-            <i class="fas fa-robot"></i>
-        </div>
-        <div class="ai-title">
-            <h3>الفهمان</h3>
-            <p>ذكاء اصطناعي • متصل</p>
-        </div>
-        <i class="fas fa-chevron-up toggle-icon"></i>
-    </div>
-    
-    <div class="ai-body">
-        <div class="ai-messages" id="aiMessages">
-            <div class="message bot">
-                <div class="message-content">
-                    <p>أهلاً بيك يا باشا! 🤖</p>
-                    <p>أنا <strong>الفهمان</strong>، ذكاء اصطناعي لمساعدة طلاب كلية الحاسبات والمعلومات - <strong>جامعة الشروق</strong>.</p>
-                    <p>أسألني عن أي حاجة:</p>
-                    <p>• الأقسام والمواد<br>• الدكاترة والمعيدين<br>• مواعيد المحاضرات<br>• التقويم الدراسي<br>• وأي استفسار تاني</p>
-                </div>
-            </div>
-        </div>
-        
-        <div class="ai-input-area">
-            <input type="text" id="aiInput" placeholder="اكتب سؤالك هنا ..." onkeypress="if(event.key==='Enter') askAI()">
-            <button onclick="askAI()" id="aiSendBtn">
-                <i class="fas fa-paper-plane"></i>
-            </button>
-        </div>
-        
-        <div class="ai-status" id="aiStatus">
-            <span class="status-dot"></span>
-            <span>متصل • جاهز للرد</span>
-        </div>
-    </div>
-</div>
-
-    <header class="header-glass sticky top-0 z-40">
-        <div class="max-w-7xl mx-auto px-2 sm:px-6 h-14 sm:h-20 flex justify-between items-center">
+   
             <!-- Logo + Title -->
             <div class="flex items-center gap-1 sm:gap-4">
                 <a href="https://sha.edu.eg/" target="_blank" class="logo-container" title="Shorouk Academy">
@@ -132,12 +92,7 @@
                 <!-- Theme Toggle -->
                 <button onclick="toggleTheme()" id="themeToggle" class="header-link theme-toggle" title="Toggle Theme (T)">
                     <i class="fas fa-moon" id="themeIcon"></i>
-                </button><!-- زر تشغيل المساعد (حطوه في الهيدر) -->
-<button class="ai-toggle-btn" onclick="toggleAI()">
-    <i class="fas fa-robot"></i>
-    <span>الفهمان</span>
-</button>
-                
+                </button>
 
                 <!-- Edit Buttons -->
                 <div class="flex gap-0.5 sm:gap-2" id="editButtons">
@@ -188,7 +143,6 @@
                     <option value="14">Section 14</option>
                     <option value="15">Section 15</option>
                     <option value="16">Section 16</option>
-                    <option value="17">Your Design</option>
                 </select>
             </div>
         </div>
@@ -213,7 +167,6 @@
                 <option value="14">Section 14</option>
                 <option value="15">Section 15</option>
                 <option value="16">Section 16</option>
-                <option value="17">Your Design</option>
             </select>
 
             <div class="flex flex-wrap gap-1 sm:gap-3 justify-center">
