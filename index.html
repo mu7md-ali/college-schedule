@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>CS Master Schedule | Mohamed Ali</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0a0f1c">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="CS Schedule">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Cairo:wght@700;900&display=swap" rel="stylesheet">
+</head>
+<body class="antialiased">
+
+    <!-- Binary Background -->
+    <div id="binary-bg" class="binary-background"></div>
+
+    <!-- Skeleton Loader -->
+    <div id="skeletonLoader" class="skeleton-loader hidden">
+        <div class="skeleton-header"></div>
+        <div class="skeleton-row"></div>
+        <div class="skeleton-row"></div>
+        <div class="skeleton-row"></div>
+        <div class="skeleton-row"></div>
+        <div class="skeleton-row"></div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 flex flex-col gap-2 w-full max-w-sm px-4 pointer-events-none"></div>
+
+    <!-- Header -->
+    <header class="header-glass sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-3 sm:px-6 h-16 sm:h-20 flex justify-between items-center">
+
+            <!-- Logo + Title -->
+            <div class="flex items-center gap-2 sm:gap-4">
+                <a href="https://sha.edu.eg/" target="_blank" class="logo-container" title="Shorouk Academy">
+                    <div class="logo-glow"></div>
+                    <i class="fas fa-graduation-cap text-xl sm:text-3xl" style="color:#00d4ff;"></i>
+                </a>
+                <div>
+                    <h1 class="text-base sm:text-2xl font-black tracking-wider">
+                        CS <span style="color:#00d4ff;">SHOROUK</span>
+                    </h1>
+                    <p class="text-[8px] sm:text-[10px] tracking-widest uppercase hidden sm:block" style="color:rgba(255,255,255,0.4);">Computer Science Department</p>
+                </div>
+            </div>
+
+            <!-- Links + Controls -->
+            <div class="flex items-center gap-1 sm:gap-2">
+                <a href="https://sha.edu.eg/" target="_blank" class="header-link">
+                    <i class="fas fa-university"></i><span>Academy</span>
+                </a>
+                <a href="https://elearning.sha.edu.eg/" target="_blank" class="header-link elearning">
+                    <i class="fas fa-laptop-code"></i><span>E-Learning</span>
+                </a>
+                <a href="https://t.me/CS_SHA_4BOT" target="_blank" class="header-link telegram">
+                    <i class="fab fa-telegram"></i><span>Telegram</span>
+                </a>
+                <button onclick="toggleTheme()" class="header-link theme-toggle" title="Toggle Theme">
+                    <i class="fas fa-moon" id="themeIcon"></i>
+                </button>
+                <!-- Edit buttons (only in edit mode) -->
+                <button id="confirmBtn" onclick="disableEditing(true)" class="hidden action-btn confirm">
+                    <i class="fas fa-check"></i><span class="hidden sm:inline">Save</span>
+                </button>
+                <button id="cancelBtn" onclick="disableEditing(false)" class="hidden action-btn cancel-btn">
+                    <i class="fas fa-times"></i><span class="hidden sm:inline">Cancel</span>
+                </button>
+                <button id="editModeBtn" onclick="enableEditing()" class="action-btn edit">
+                    <i class="fas fa-edit"></i><span class="hidden sm:inline">Edit</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-screen-2xl mx-auto px-2 sm:px-4 py-4 sm:py-8">
+
+        <!-- Controls Bar -->
+        <div id="controlsArea" class="flex flex-wrap gap-2 justify-center mb-6 items-center">
+            <select id="sectionSelectMain" class="main-select" onchange="changeSection(this.value)">
+                <option value="">-- Select Section --</option>
+                <option value="1">Section 1</option>
+                <option value="2">Section 2</option>
+                <option value="3">Section 3</option>
+                <option value="4">Section 4</option>
+                <option value="5">Section 5</option>
+                <option value="6">Section 6</option>
+                <option value="7">Section 7</option>
+                <option value="8">Section 8</option>
+                <option value="9">Section 9</option>
+                <option value="10">Section 10</option>
+                <option value="11">Section 11</option>
+                <option value="12">Section 12</option>
+                <option value="13">Section 13</option>
+                <option value="14">Section 14</option>
+                <option value="15">Section 15</option>
+                <option value="16">Section 16</option>
+                <option value="17">My Section ✏️</option>
+            </select>
+
+            <button onclick="showGroupSchedule('A')" id="groupABtn" class="action-btn group-a">
+                <i class="fas fa-users"></i><span>Group A</span>
+            </button>
+            <button onclick="showGroupSchedule('B')" id="groupBBtn" class="action-btn group-b">
+                <i class="fas fa-users"></i><span>Group B</span>
+            </button>
+            <button onclick="downloadTable()" id="downloadBtn" class="action-btn download">
+                <i class="fas fa-download"></i><span>Download</span>
+            </button>
+            <button onclick="downloadGroupPDF()" id="pdfBtn" class="hidden action-btn pdf">
+                <i class="fas fa-file-pdf"></i><span>PDF</span>
+            </button>
+            <button onclick="backToSection()" id="backBtn" class="hidden action-btn back">
+                <i class="fas fa-arrow-left"></i><span>Back</span>
+            </button>
+            <button onclick="showAcademicCalendar()" class="action-btn calendar">
+                <i class="fas fa-calendar-alt"></i><span class="hidden sm:inline">Calendar</span>
+            </button>
+        </div>
+
+        <!-- Welcome State (shown before any section is selected) -->
+        <div id="welcomeState" class="table-card text-center py-12 sm:py-16">
+            <div class="inline-flex items-center justify-center w-20 h-20 rounded-full mb-6"
+                 style="background:linear-gradient(135deg,rgba(0,212,255,0.15),rgba(184,41,221,0.1));border:2px solid rgba(0,212,255,0.3);">
+                <i class="fas fa-graduation-cap text-4xl" style="color:#00d4ff;"></i>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-black mb-3" style="color:var(--text-primary);">CS Shorouk Schedule</h2>
+            <p class="text-sm sm:text-base mb-8" style="color:var(--text-secondary);">
+                Select your section from the dropdown above to view your weekly schedule.
+            </p>
+            <div class="flex flex-col gap-3 max-w-xs mx-auto text-left">
+                <div class="flex items-center gap-3 text-sm" style="color:var(--text-secondary);">
+                    <i class="fas fa-check-circle" style="color:#10b981;"></i>
+                    All data is unofficial — for reference only
+                </div>
+                <div class="flex items-center gap-3 text-sm" style="color:var(--text-secondary);">
+                    <i class="fas fa-check-circle" style="color:#10b981;"></i>
+                    Please verify with official sources
+                </div>
+                <div class="flex items-center gap-3 text-sm" style="color:var(--text-secondary);">
+                    <i class="fas fa-check-circle" style="color:#10b981;"></i>
+                    Designed &amp; Developed by Mohamed Ali
+                </div>
+            </div>
+        </div>
+
+        <!-- Section View -->
+        <div id="sectionView" class="hidden table-card">
+            <div id="captureArea">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-8 gap-2">
+                    <h2 id="tableTitle" class="section-title text-2xl sm:text-4xl">Section 1</h2>
+                    <div class="time-badge">9:15 – 3:45</div>
+                </div>
+                <div class="overflow-x-auto -mx-1">
+                    <table class="w-full border-separate border-spacing-1 sm:border-spacing-2" style="min-width:420px;">
+                        <thead>
+                            <tr>
+                                <th class="w-8 sm:w-20"></th>
+                                <th class="period-label">
+                                    <div class="period-num">1-2</div>
+                                    <div class="period-time">9:15-10:45</div>
+                                    <div class="period-duration">90 min</div>
+                                </th>
+                                <th class="period-label">
+                                    <div class="period-num">3-4</div>
+                                    <div class="period-time">10:55-12:25</div>
+                                    <div class="period-duration">90 min</div>
+                                </th>
+                                <th class="break-header">
+                                    <div class="break-icon">☕</div>
+                                    <div class="break-text">BREAK</div>
+                                    <div class="break-time">20 min</div>
+                                </th>
+                                <th class="period-label">
+                                    <div class="period-num">5-6</div>
+                                    <div class="period-time">12:45-2:10</div>
+                                    <div class="period-duration">85 min</div>
+                                </th>
+                                <th class="period-label">
+                                    <div class="period-num">7-8</div>
+                                    <div class="period-time">2:20-3:45</div>
+                                    <div class="period-duration">85 min</div>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody"></tbody>
+                    </table>
+                </div>
+                <!-- Signature -->
+                <div class="mt-8 sm:mt-12 pt-6 border-t flex flex-col sm:flex-row justify-between items-center gap-4" style="border-color:var(--border-color);">
+                    <div class="text-center sm:text-left">
+                        <span class="text-[8px] font-black tracking-widest uppercase block mb-1" style="color:#00d4ff;">Designed &amp; Developed By</span>
+                        <h3 class="developer-name">
+                            <a href="https://wa.me/201025114639" target="_blank">Mohamed Ali</a>
+                        </h3>
+                    </div>
+                    <div class="text-center sm:text-right">
+                        <p class="text-[9px] font-bold mb-2 italic" style="color:var(--text-secondary);">Shorouk Academy • CS Dept • 2026</p>
+                        <div class="flex gap-3 justify-center sm:justify-end">
+                            <a href="https://sha.edu.eg/" target="_blank" class="social-link"><i class="fas fa-globe"></i></a>
+                            <a href="https://t.me/CS_SHA_4BOT" target="_blank" class="social-link"><i class="fab fa-telegram"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Group View -->
+        <div id="groupView" class="hidden group-table-container">
+            <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+                <h2 id="groupTitle" class="section-title text-2xl sm:text-4xl">Group A Schedule</h2>
+                <div class="time-badge">All Sections</div>
+            </div>
+            <div class="group-table-wrapper">
+                <table class="group-table" id="groupTable">
+                    <thead>
+                        <tr>
+                            <th class="section-header">SEC</th>
+                            <th class="day-header">SUNDAY</th>
+                            <th class="day-header">MONDAY</th>
+                            <th class="day-header">TUESDAY</th>
+                            <th class="day-header">WEDNESDAY</th>
+                            <th class="day-header">THURSDAY</th>
+                        </tr>
+                    </thead>
+                    <tbody id="groupTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Disclaimer -->
+        <div class="disclaimer-box mt-6">
+            <p><i class="fas fa-info-circle"></i> <strong>Disclaimer:</strong> Unofficial website. Created to help CS students. All data is for reference only — please verify with official sources.</p>
+        </div>
+
+    </main>
+
+    <!-- Academic Calendar Modal -->
+    <div id="calendarModal" class="modal hidden">
+        <div class="modal-content calendar-modal">
+            <div class="modal-header">
+                <h2 class="modal-title"><i class="fas fa-calendar-alt"></i> Academic Calendar 2025–2026</h2>
+                <button onclick="closeModal('calendarModal')" class="modal-close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="calendar-table-wrapper">
+                    <table class="calendar-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Description</th>
+                                <th>Day</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>1</td><td>Start of the First Semester</td><td>Saturday</td><td>20 Sep 2025</td></tr>
+                            <tr><td>2</td><td>Start of Midterm Exams (Semester 1)</td><td>Sunday</td><td>9 Nov 2025</td></tr>
+                            <tr><td>3</td><td>End of Midterm Exams (Semester 1)</td><td>Thursday</td><td>13 Nov 2025</td></tr>
+                            <tr><td>4</td><td>Start of Final Exams (Semester 1)</td><td>Saturday</td><td>3 Jan 2026</td></tr>
+                            <tr><td>5</td><td>End of Final Exams (Semester 1)</td><td>Thursday</td><td>22 Jan 2026</td></tr>
+                            <tr><td>6</td><td>Start of Mid-Year Vacation</td><td>Saturday</td><td>24 Jan 2026</td></tr>
+                            <tr><td>7</td><td>End of Mid-Year Vacation</td><td>Thursday</td><td>5 Feb 2026</td></tr>
+                            <tr><td>8</td><td>Start of the Second Semester</td><td>Saturday</td><td>7 Feb 2026</td></tr>
+                            <tr><td>9</td><td>Start of Midterm Exams (Semester 2)</td><td>Tuesday</td><td>31 Mar 2026</td></tr>
+                            <tr><td>10</td><td>End of Midterm Exams (Semester 2)</td><td>Thursday</td><td>9 Apr 2026</td></tr>
+                            <tr><td>11</td><td>Start of Final Exams (Semester 2)</td><td>Saturday</td><td>16 May 2026</td></tr>
+                            <tr><td>12</td><td>End of Final Exams (Semester 2)</td><td>Thursday</td><td>18 Jun 2026</td></tr>
+                            <tr><td>13</td><td>Start of Graduation Discussions</td><td>Sunday</td><td>21 Jun 2026</td></tr>
+                            <tr><td>14</td><td>End of Graduation Discussions</td><td>Thursday</td><td>9 Jul 2026</td></tr>
+                            <tr><td>15</td><td>Sending Final Results to Ministry</td><td>Wednesday</td><td>11 Jul 2026</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').catch(() => {});
+        }
+        document.addEventListener('DOMContentLoaded', async () => {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateThemeIcon(savedTheme);
+            initBinaryBackground();
+            await loadData();
+            const urlParams = new URLSearchParams(window.location.search);
+            const sec = urlParams.get('section');
+            if (sec && sec >= 1 && sec <= 17) changeSection(sec);
+        });
+    </script>
+</body>
+</html>
