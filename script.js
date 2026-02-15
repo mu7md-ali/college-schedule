@@ -1,282 +1,191 @@
-// ==================== البيانات ====================
+// =============================================
+// DATA — loaded from data.json
+// =============================================
 let periodInfo = {};
 let allSections = {};
-let currentSection = "1";
-let isGroupView = false;
 
-// تحميل البيانات
 async function loadData() {
     try {
         const response = await fetch('data.json');
         const json = await response.json();
         periodInfo = json.periodInfo;
         allSections = json.sections;
-        showToast('تم تحميل البيانات بنجاح ✅');
-        return true;
     } catch (err) {
-        console.error('خطأ في تحميل البيانات:', err);
-        showToast('فشل تحميل البيانات', 'error');
-        return false;
+        console.error('Failed to load data.json:', err);
+        showToast('فشل تحميل البيانات، تأكد من اتصالك بالإنترنت', 'error');
     }
 }
 
-// تهيئة الخلفية
-function initMatrix() {
-    // مش محتاج حاجة
+// =============================================
+// STATE
+// =============================================
+let currentSection = "1";
+let originalContent = '';
+let isEditing = false;
+let isGroupView = false;
+let currentGroup = null;
+let currentNoteSlot = null;
+let hasCustomSection = false;
+
+// =============================================
+// THEME
+// =============================================
+function toggleTheme() {
+    const current = document.documentElement.getAttribute('data-theme');
+    const next = current === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('theme', next);
+    updateThemeIcon(next);
+    
+    // Update theme-color meta tag
+    const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+    if (metaThemeColor) {
+        metaThemeColor.setAttribute('content', next === 'dark' ? '#0a0f1c' : '#e8f0fe');
+    }
+    
+    showToast(`تم التبديل إلى الوضع ${next === 'dark' ? 'الليلي' : 'النهاري'}`, 'info');
 }
 
-// إظهار الإشعارات
-function showToast(message, type = 'success') {
-    const toast = document.getElementById('toast');
-    toast.textContent = message;
-    toast.style.display = 'block';
-    toast.style.background = type === 'success' ? '#10b981' : '#ef4444';
-    
-    setTimeout(() => {
-        toast.style.display = 'none';
-    }, 3000);
+function updateThemeIcon(theme) {
+    const icon = document.getElementById('themeIcon');
+    if (icon) icon.className = theme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
 }
 
-// تبديل المساعد الذكي
-function toggleAI() {
-    const ai = document.getElementById('aiAssistant');
-    ai.classList.toggle('collapsed');
+// =============================================
+// BINARY BACKGROUND
+// =============================================
+function initBinaryBackground() {
+    const container = document.getElementById('binary-bg');
+    if (!container) return;
+    container.innerHTML = '';
+    for (let i = 0; i < 30; i++) {
+        const col = document.createElement('div');
+        col.className = 'binary-column';
+        col.style.left = `${(i / 30) * 100}%`;
+        col.style.animationDuration = `${15 + Math.random() * 10}s`;
+        col.style.animationDelay = `${Math.random() * 5}s`;
+        let txt = '';
+        for (let j = 0; j < 40; j++) { txt += (Math.random() > 0.5 ? '1' : '0') + '<br>'; }
+        col.innerHTML = txt;
+        container.appendChild(col);
+    }
 }
 
-// سؤال المساعد الذكي
-async function askAI() {
-    const input = document.getElementById('aiInput');
-    const question = input.value.trim();
-    if (!question) return;
-    
-    const messages = document.getElementById('aiMessages');
-    
-    // إضافة سؤال المستخدم
-    const userMsg = document.createElement('div');
-    userMsg.className = 'message user';
-    userMsg.innerHTML = `<p>${question}</p>`;
-    messages.appendChild(userMsg);
-    
-    input.value = '';
-    
-    // إضافة مؤشر الكتابة
-    const typing = document.createElement('div');
-    typing.className = 'message bot';
-    typing.id = 'typing';
-    typing.innerHTML = '<p>جاري التفكير...</p>';
-    messages.appendChild(typing);
-    
-    setTimeout(() => {
-        // إزالة مؤشر الكتابة
-        document.getElementById('typing')?.remove();
-        
-        // إضافة الرد
-        const botMsg = document.createElement('div');
-        botMsg.className = 'message bot';
-        botMsg.innerHTML = `<p>${getAIResponse(question)}</p>`;
-        messages.appendChild(botMsg);
-        
-        messages.scrollTop = messages.scrollHeight;
-    }, 1000);
+// =============================================
+// TOAST
+// =============================================
+function showToast(message, type = 'info') {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    const icons = { 
+        success: '<i class="fas fa-check-circle"></i>', 
+        error: '<i class="fas fa-exclamation-circle"></i>', 
+        info: '<i class="fas fa-info-circle"></i>' 
+    };
+    toast.innerHTML = `${icons[type] || ''} ${message}`;
+    container.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
 }
 
-// توليد ردود المساعد
-function getAIResponse(question) {
-    const q = question.toLowerCase();
-    
-    if (q.includes('السلام عليكم') || q.includes('اهلاً')) {
-        return 'وعليكم السلام يا باشا! ازيك عامل ايه؟';
-    }
-    
-    if (q.includes('قسم') && q.match(/\d+/)) {
-        const num = q.match(/\d+/)[0];
-        return `القسم ${num} ${num <= 8 ? 'في المجموعة A' : 'في المجموعة B'}`;
-    }
-    
-    if (q.includes('group a') || q.includes('المجموعة أ')) {
-        return 'المجموعة A: الأقسام 1، 2، 3، 4، 5، 6، 7، 8';
-    }
-    
-    if (q.includes('group b') || q.includes('المجموعة ب')) {
-        return 'المجموعة B: الأقسام 9، 10، 11، 12، 13، 14، 15، 16';
-    }
-    
-    if (q.includes('data') || q.includes('هياكل')) {
-        return 'Data Structure: د. أسامة شفيق';
-    }
-    
-    if (q.includes('web') || q.includes('ويب')) {
-        return 'Web Programming: د. محمد مصطفى';
-    }
-    
-    if (q.includes('network') || q.includes('شبكات')) {
-        return 'Computer Network: د. هشام أبو الفتوح';
-    }
-    
-    if (q.includes('موعد') || q.includes('وقت')) {
-        return 'مواعيد المحاضرات: 1-2 (9:15-10:45)، 3-4 (10:55-12:25)، 5-6 (12:45-2:10)، 7-8 (2:20-3:45)';
-    }
-    
-    if (q.includes('شكر')) {
-        return 'العفو يا باشا، تحت أمرك في أي وقت 🤍';
-    }
-    
-    if (q.includes('مع السلامة') || q.includes('bye')) {
-        return 'مع السلامة ياباشا، ربنا يوفقك 👋';
-    }
-    
-    return 'اسألني عن الأقسام أو المواد أو المواعيد وأنا أرد عليك';
-}
-
-// تغيير القسم
+// =============================================
+// SECTION LOADING
+// =============================================
 function changeSection(sectionNum) {
-    if (!sectionNum || !allSections[sectionNum]) {
-        showToast('القسم مش موجود', 'error');
+    if (!sectionNum) return;
+    
+    // التحقق من وجود القسم
+    if (!allSections[sectionNum]) {
+        showToast('هذا القسم غير متوفر', 'error');
         return;
     }
     
-    currentSection = sectionNum;
-    isGroupView = false;
-    
-    document.getElementById('welcomeScreen').classList.add('hidden');
-    document.getElementById('controls').classList.remove('hidden');
-    document.getElementById('scheduleView').classList.remove('hidden');
-    document.getElementById('groupView').classList.add('hidden');
-    document.getElementById('backBtn').classList.add('hidden');
-    
-    renderSection(allSections[sectionNum].data);
-    document.getElementById('sectionTitle').textContent = `Section ${sectionNum}`;
-    showToast(`تم تحميل القسم ${sectionNum}`);
+    document.getElementById('skeletonLoader').classList.remove('hidden');
+    document.getElementById('noticeBox').classList.add('hidden');
+    document.getElementById('controlsArea').classList.remove('hidden');
+
+    setTimeout(() => {
+        currentSection = sectionNum;
+        isGroupView = false;
+        currentGroup = null;
+
+        document.getElementById('sectionView').classList.remove('hidden');
+        document.getElementById('groupView').classList.add('hidden');
+        document.getElementById('skeletonLoader').classList.add('hidden');
+        document.getElementById('groupABtn').classList.remove('hidden');
+        document.getElementById('groupBBtn').classList.remove('hidden');
+        document.getElementById('downloadBtn').classList.remove('hidden');
+        document.getElementById('pdfBtn').classList.add('hidden');
+        document.getElementById('backBtn').classList.add('hidden');
+
+        const section = allSections[sectionNum];
+        const displayName = sectionNum === 'custom' ? '🎨 My Custom Section' : `Section ${sectionNum}`;
+        renderSectionTable(section.data, displayName);
+
+        // تحديث قيم الـ selects
+        document.getElementById('sectionSelect').value = sectionNum;
+        document.getElementById('sectionSelectMain').value = sectionNum;
+
+        showToast(`${displayName} Loaded`, 'success');
+    }, 400);
 }
 
-// عرض الجدول
-function renderSection(data) {
-    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday'];
-    const periods = ['1-2', '3-4', '5-6', '7-8'];
-    const thead = document.getElementById('tableHeader');
-    const tbody = document.getElementById('tableBody');
-    
-    thead.innerHTML = `
-        <tr>
-            <th>اليوم</th>
-            <th>1-2<br><small>9:15-10:45</small></th>
-            <th>3-4<br><small>10:55-12:25</small></th>
-            <th>استراحة</th>
-            <th>5-6<br><small>12:45-2:10</small></th>
-            <th>7-8<br><small>2:20-3:45</small></th>
-        </tr>
-    `;
-    
-    tbody.innerHTML = '';
-    
-    days.forEach(day => {
+// =============================================
+// RENDER SECTION TABLE
+// =============================================
+function renderSectionTable(data, displayName) {
+    const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday"];
+    const periods = ["1-2", "3-4", "5-6", "7-8"];
+    const body = document.getElementById('tableBody');
+    body.innerHTML = '';
+    document.getElementById('tableTitle').innerText = displayName;
+
+    // Load saved edited HTML if exists
+    const savedHTML = localStorage.getItem(`edit-${currentSection}`);
+    if (savedHTML && !isGroupView) {
+        document.getElementById('captureArea').innerHTML = savedHTML;
+        return;
+    }
+
+    days.forEach((day, index) => {
         const row = document.createElement('tr');
+        row.className = 'day-row';
+        row.style.animationDelay = `${index * 0.05}s`;
         
+        // Day cell
         const dayCell = document.createElement('td');
+        dayCell.className = 'font-black text-white/50 text-[8px] sm:text-[11px] pr-1 sm:pr-4 align-middle uppercase tracking-wider whitespace-nowrap day-label-text';
         dayCell.textContent = day;
         row.appendChild(dayCell);
-        
-        periods.forEach((period, index) => {
-            if (index === 2) {
-                const breakCell = document.createElement('td');
-                breakCell.innerHTML = '☕';
-                row.appendChild(breakCell);
+
+        periods.forEach((p, pIndex) => {
+            if (pIndex === 2) {
+                const breakTd = document.createElement('td');
+                breakTd.innerHTML = `<div class="break-cell"><div class="break-line"></div><span class="break-icon">☕</span><span class="break-text">BREAK</span><div class="break-line"></div></div>`;
+                row.appendChild(breakTd);
             }
             
-            const cell = data[day]?.[period];
+            const cell = data[day] ? data[day][p] : null;
+            const noteKey = `note-${currentSection}-${day}-${p}`;
+            const hasNote = localStorage.getItem(noteKey);
+
             const td = document.createElement('td');
             
             if (cell) {
+                const roomHtml = cell.r.replace(/AI/g, '<span class="ai-highlight">AI</span>');
                 const isLecture = cell.t === 'L';
-                td.innerHTML = `
-                    <div class="${isLecture ? 'lecture-card' : 'lab-card'}" onclick="showDetails('${cell.n}', '${cell.d}', '${cell.r}')">
-                        <div class="card-subject">${cell.n}</div>
-                        <div class="card-doctor">${cell.d}</div>
-                        <div class="room-text">${cell.r}</div>
-                    </div>
-                `;
+                td.innerHTML = `<div class="${isLecture ? 'lecture-card' : 'lab-card'}${hasNote ? ' has-note' : ''}" onclick="showDetails('${day}','${p}','${currentSection}')" oncontextmenu="openNoteModal('${day}','${p}','${currentSection}');return false;"><div class="card-subject">${cell.n}</div><div class="card-doctor">${cell.d}</div><div class="room-text">${roomHtml}</div></div>`;
             } else {
-                td.innerHTML = '<div class="free-card">فاضي</div>';
+                td.innerHTML = `<div class="free-card" onclick="openNoteModal('${day}','${p}','${currentSection}')">FREE</div>`;
             }
-            
-            if (index !== 2) row.appendChild(td);
+            row.appendChild(td);
         });
-        
-        tbody.appendChild(row);
+        body.appendChild(row);
     });
 }
 
-// عرض تفاصيل المادة
-function showDetails(name, doctor, room) {
-    showToast(`${name} | ${doctor} | ${room}`, 'info');
-}
-
-// عرض المجموعات
-function showGroup(group) {
-    isGroupView = true;
-    currentGroup = group;
-    
-    document.getElementById('scheduleView').classList.add('hidden');
-    document.getElementById('groupView').classList.remove('hidden');
-    document.getElementById('backBtn').classList.remove('hidden');
-    
-    const sections = group === 'A' ? ['1','2','3','4','5','6','7','8'] : ['9','10','11','12','13','14','15','16'];
-    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday'];
-    const periods = ['1-2', '3-4', '5-6', '7-8'];
-    
-    let html = '<thead><tr><th>القسم</th><th>الأحد</th><th>الإثنين</th><th>الثلاثاء</th><th>الأربعاء</th><th>الخميس</th></tr></thead><tbody>';
-    
-    sections.forEach(secNum => {
-        const sec = allSections[secNum];
-        html += '<tr>';
-        html += `<th>SEC ${secNum}</th>`;
-        
-        days.forEach(day => {
-            html += '<td>';
-            periods.forEach(period => {
-                const cell = sec.data[day]?.[period];
-                if (cell) {
-                    html += `
-                        <div class="mini-card" onclick="showDetails('${cell.n}', '${cell.d}', '${cell.r}')">
-                            ${cell.n}<br><small>${cell.d}</small>
-                        </div>
-                    `;
-                } else {
-                    html += '<div class="mini-free">فاضي</div>';
-                }
-            });
-            html += '</td>';
-        });
-        html += '</tr>';
-    });
-    
-    html += '</tbody>';
-    document.getElementById('groupTable').innerHTML = html;
-    document.getElementById('groupTitle').textContent = `المجموعة ${group}`;
-}
-
-// رجوع
-function backToSection() {
-    changeSection(currentSection);
-}
-
-// حفظ الصورة
-async function downloadTable() {
-    const area = document.getElementById('tableWrapper');
-    
-    try {
-        const canvas = await html2canvas(area, {
-            scale: 2,
-            backgroundColor: '#0a0f1c'
-        });
-        
-        const link = document.createElement('a');
-        link.download = `section_${currentSection}.png`;
-        link.href = canvas.toDataURL('image/png');
-        link.click();
-        
-        showToast('تم حفظ الصورة ✅');
-    } catch (err) {
-        showToast('فشل حفظ الصورة', 'error');
-    }
-}
+// =============================================
+// GROUP VIEW
+// =============================================
+function showGroupSchedule(group) {
+   
