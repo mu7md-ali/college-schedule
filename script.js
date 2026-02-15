@@ -12,15 +12,24 @@ const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/
 // ==================== تحميل البيانات ====================
 async function loadData() {
     try {
+        console.log('جاري تحميل البيانات...');
         const response = await fetch('data.json');
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
         const json = await response.json();
-        periodInfo = json.periodInfo;
-        allSections = json.sections;
-        console.log('✅ تم تحميل البيانات');
+        periodInfo = json.periodInfo || {};
+        allSections = json.sections || {};
+        
+        console.log('✅ تم تحميل البيانات بنجاح');
+        console.log('الأقسام المتوفرة:', Object.keys(allSections));
+        
         return true;
     } catch (err) {
         console.error('❌ فشل تحميل البيانات:', err);
-        showToast('فشل تحميل البيانات', 'error');
+        showToast('فشل تحميل البيانات. تأكد من وجود ملف data.json', 'error');
         return false;
     }
 }
@@ -30,7 +39,15 @@ function initMatrixBackground() {
     const bg = document.getElementById('matrixBg');
     if (!bg) return;
     
-    // حروف متحركة
+    // تنظيف الخلفية أولاً
+    bg.innerHTML = '';
+    
+    // إضافة الخطوط الثابتة
+    const pattern = document.createElement('div');
+    pattern.className = 'matrix-pattern';
+    bg.appendChild(pattern);
+    
+    // إضافة الحروف المتحركة
     setInterval(() => {
         if (bg.children.length < 30) {
             const span = document.createElement('span');
@@ -42,26 +59,47 @@ function initMatrixBackground() {
             span.style.opacity = 0.1 + Math.random() * 0.2;
             bg.appendChild(span);
             
-            setTimeout(() => span.remove(), 10000);
+            setTimeout(() => {
+                if (span.parentNode === bg) {
+                    span.remove();
+                }
+            }, 10000);
         }
     }, 200);
 }
 
 // ==================== إشعارات ====================
 function showToast(message, type = 'info') {
-    const toast = document.getElementById('toast');
-    toast.textContent = message;
+    const container = document.getElementById('toastContainer');
+    if (!container) return;
+    
+    const toast = document.createElement('div');
     toast.className = `toast ${type}`;
-    toast.classList.remove('hidden');
+    
+    const icons = {
+        success: '<i class="fas fa-check-circle"></i>',
+        error: '<i class="fas fa-exclamation-circle"></i>',
+        info: '<i class="fas fa-info-circle"></i>'
+    };
+    
+    toast.innerHTML = `${icons[type] || ''} ${message}`;
+    container.appendChild(toast);
     
     setTimeout(() => {
-        toast.classList.add('hidden');
+        toast.style.animation = 'fadeOut 0.3s ease forwards';
+        setTimeout(() => {
+            if (toast.parentNode === container) {
+                toast.remove();
+            }
+        }, 300);
     }, 3000);
 }
 
 // ==================== تغيير القسم ====================
 function changeSection(sectionNum) {
-    if (!sectionNum || !allSections[sectionNum]) {
+    if (!sectionNum) return;
+    
+    if (!allSections[sectionNum]) {
         showToast('القسم غير متوفر', 'error');
         return;
     }
@@ -69,14 +107,22 @@ function changeSection(sectionNum) {
     currentSection = sectionNum;
     isGroupView = false;
     
-    document.getElementById('sectionSelector').classList.add('hidden');
-    document.getElementById('controls').classList.remove('hidden');
+    // إخفاء/إظهار العناصر
+    document.getElementById('welcomeScreen').classList.add('hidden');
+    document.getElementById('controlsPanel').classList.remove('hidden');
     document.getElementById('scheduleView').classList.remove('hidden');
     document.getElementById('groupView').classList.add('hidden');
     document.getElementById('backBtn').classList.add('hidden');
     
-    renderSection(allSections[sectionNum].data);
-    showToast(`القسم ${sectionNum}`, 'success');
+    // تحديث الجدول
+    const sectionData = allSections[sectionNum].data;
+    renderSection(sectionData);
+    
+    // تحديث عنوان القسم
+    const displayName = sectionNum === 'custom' ? '⭐ My Custom Section' : `Section ${sectionNum}`;
+    document.getElementById('sectionTitle').textContent = displayName;
+    
+    showToast(`تم تحميل ${displayName}`, 'success');
 }
 
 // ==================== عرض الجدول ====================
@@ -86,15 +132,37 @@ function renderSection(data) {
     const thead = document.getElementById('tableHeader');
     const tbody = document.getElementById('tableBody');
     
+    if (!thead || !tbody) return;
+    
     // رسم رأس الجدول
     thead.innerHTML = `
         <tr>
             <th>Day</th>
-            <th>1-2<br><small>9:15-10:45</small></th>
-            <th>3-4<br><small>10:55-12:25</small></th>
-            <th class="break">☕ BREAK</th>
-            <th>5-6<br><small>12:45-2:10</small></th>
-            <th>7-8<br><small>2:20-3:45</small></th>
+            <th>
+                <div class="period-num">1-2</div>
+                <div class="period-time">9:15-10:45</div>
+                <div class="period-duration">90 min</div>
+            </th>
+            <th>
+                <div class="period-num">3-4</div>
+                <div class="period-time">10:55-12:25</div>
+                <div class="period-duration">90 min</div>
+            </th>
+            <th class="break-col">
+                <div class="break-icon">☕</div>
+                <div class="break-text">BREAK</div>
+                <div class="break-time">20 min</div>
+            </th>
+            <th>
+                <div class="period-num">5-6</div>
+                <div class="period-time">12:45-2:10</div>
+                <div class="period-duration">85 min</div>
+            </th>
+            <th>
+                <div class="period-num">7-8</div>
+                <div class="period-time">2:20-3:45</div>
+                <div class="period-duration">85 min</div>
+            </th>
         </tr>
     `;
     
@@ -103,43 +171,57 @@ function renderSection(data) {
     days.forEach(day => {
         const row = document.createElement('tr');
         
-        // يوم
+        // عمود اليوم
         const dayCell = document.createElement('td');
+        dayCell.className = 'day-cell';
         dayCell.textContent = day;
-        dayCell.style.fontWeight = '600';
         row.appendChild(dayCell);
         
-        // فترات
+        // فترات المحاضرات
         periods.forEach((period, index) => {
             if (index === 2) {
+                // عمود الاستراحة
                 const breakCell = document.createElement('td');
-                breakCell.innerHTML = '<div class="break-cell" style="text-align:center; padding:1rem;"><span style="font-size:1.5rem;">☕</span><br><small>BREAK</small></div>';
+                breakCell.className = 'break-cell';
+                breakCell.innerHTML = `
+                    <div class="break-content">
+                        <span class="break-icon">☕</span>
+                        <span class="break-text">BREAK</span>
+                    </div>
+                `;
                 row.appendChild(breakCell);
             }
             
-            const cell = data[day]?.[period];
+            const cellData = data[day]?.[period];
             const td = document.createElement('td');
             
-            if (cell) {
-                const isLecture = cell.t === 'L';
-                const roomHtml = cell.r.replace(/AI/g, '<span class="ai-highlight">AI</span>');
+            if (cellData) {
+                const isLecture = cellData.t === 'L';
+                const noteKey = `note-${currentSection}-${day}-${period}`;
+                const hasNote = localStorage.getItem(noteKey);
+                
+                td.className = 'schedule-cell';
                 td.innerHTML = `
-                    <div class="${isLecture ? 'lecture-card' : 'lab-card'}" onclick="showDetails('${cell.n.replace(/'/g, "\\'")}', '${cell.d.replace(/'/g, "\\'")}', '${cell.r.replace(/'/g, "\\'")}')">
-                        <div class="card-subject">${cell.n}</div>
-                        <div class="card-doctor">${cell.d}</div>
-                        <div class="room-text">${roomHtml}</div>
+                    <div class="${isLecture ? 'lecture-card' : 'lab-card'}${hasNote ? ' has-note' : ''}" 
+                         onclick="showDetails('${cellData.n.replace(/'/g, "\\'")}', '${cellData.d.replace(/'/g, "\\'")}', '${cellData.r.replace(/'/g, "\\'")}')">
+                        <div class="card-subject">${cellData.n}</div>
+                        <div class="card-doctor">${cellData.d}</div>
+                        <div class="room-text">${cellData.r}</div>
                     </div>
                 `;
             } else {
-                td.innerHTML = '<div class="free-card">FREE</div>';
+                td.innerHTML = `
+                    <div class="free-card">
+                        <span>FREE</span>
+                    </div>
+                `;
             }
-            row.appendChild(td);
+            
+            if (index !== 2) row.appendChild(td);
         });
         
         tbody.appendChild(row);
     });
-    
-    document.getElementById('sectionTitle').textContent = `Section ${currentSection}`;
 }
 
 // ==================== عرض تفاصيل المادة ====================
@@ -155,6 +237,8 @@ function showGroup(group) {
     document.getElementById('scheduleView').classList.add('hidden');
     document.getElementById('groupView').classList.remove('hidden');
     document.getElementById('backBtn').classList.remove('hidden');
+    document.getElementById('groupABtn').classList.add('hidden');
+    document.getElementById('groupBBtn').classList.add('hidden');
     
     renderGroup(group);
     showToast(`Group ${group}`, 'success');
@@ -164,30 +248,38 @@ function renderGroup(group) {
     const sections = group === 'A' ? ['1','2','3','4','5','6','7','8'] : ['9','10','11','12','13','14','15','16'];
     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday'];
     const periods = ['1-2', '3-4', '5-6', '7-8'];
+    const table = document.getElementById('groupTable');
     
-    let html = '<thead><tr><th>SECTION</th><th>SUNDAY</th><th>MONDAY</th><th>TUESDAY</th><th>WEDNESDAY</th><th>THURSDAY</th></tr></thead><tbody>';
+    if (!table) return;
+    
+    let html = '<thead><tr><th>SECTION</th>';
+    days.forEach(day => {
+        html += `<th>${day.substring(0,3)}</th>`;
+    });
+    html += '</tr></thead><tbody>';
     
     sections.forEach(secNum => {
         const sec = allSections[secNum];
+        if (!sec) return;
+        
         html += '<tr>';
-        html += `<th>SEC ${secNum.padStart(2, '0')}</th>`;
+        html += `<th class="section-header ${sec.group === 'B' ? 'group-b' : ''}">SEC ${secNum.padStart(2, '0')}</th>`;
         
         days.forEach(day => {
-            html += '<td>';
+            html += '<td class="group-cell">';
             periods.forEach(period => {
                 const cell = sec.data[day]?.[period];
                 if (cell) {
                     const isLab = cell.t === 'S';
                     html += `
                         <div class="mini-card ${isLab ? 'lab' : ''}" onclick="showDetails('${cell.n.replace(/'/g, "\\'")}', '${cell.d.replace(/'/g, "\\'")}', '${cell.r.replace(/'/g, "\\'")}')">
-                            <div class="mini-time">${period} | ${periodInfo[period]?.time || ''}</div>
+                            <div class="mini-time">${period}</div>
                             <div class="mini-subject">${cell.n}</div>
-                            <div class="mini-doctor">${cell.d}</div>
-                            <div class="mini-room">${cell.r}</div>
+                            <div class="mini-doctor">${cell.d.split(' ').slice(0,2).join(' ')}</div>
                         </div>
                     `;
                 } else {
-                    html += `<div class="mini-free">${period}<br>FREE</div>`;
+                    html += `<div class="mini-free">${period}</div>`;
                 }
             });
             html += '</td>';
@@ -196,44 +288,48 @@ function renderGroup(group) {
     });
     
     html += '</tbody>';
-    document.getElementById('groupTable').innerHTML = html;
-    document.getElementById('groupTitle').textContent = `Group ${group}`;
+    table.innerHTML = html;
+    document.getElementById('groupTitle').textContent = `Group ${group} Schedule`;
 }
 
-// ==================== رجوع ====================
+// ==================== رجوع للسكشن ====================
 function backToSection() {
-    changeSection(currentSection);
+    isGroupView = false;
+    
+    document.getElementById('scheduleView').classList.remove('hidden');
+    document.getElementById('groupView').classList.add('hidden');
+    document.getElementById('backBtn').classList.add('hidden');
+    document.getElementById('groupABtn').classList.remove('hidden');
+    document.getElementById('groupBBtn').classList.remove('hidden');
 }
 
-// ==================== حفظ الصورة - جودة عالية ====================
+// ==================== حفظ الصورة ====================
 async function downloadImage() {
     const area = document.getElementById('captureArea');
+    if (!area) return;
+    
     showToast('جاري تحضير الصورة...', 'info');
     
     try {
-        // التمرير لأعلى
-        window.scrollTo(0, 0);
-        
         // إخفاء المساعد مؤقتاً
-        const aiAssistant = document.querySelector('.ai-assistant');
+        const aiAssistant = document.getElementById('aiAssistant');
         const wasCollapsed = aiAssistant.classList.contains('collapsed');
         aiAssistant.classList.add('hidden');
         
-        // انتظار قليل
+        // التمرير لأعلى
+        window.scrollTo(0, 0);
         await new Promise(r => setTimeout(r, 300));
         
-        // التقاط الصورة بجودة عالية
+        // التقاط الصورة
         const canvas = await html2canvas(area, {
-            scale: 3,
+            scale: 2,
             backgroundColor: '#0a0f1c',
             useCORS: true,
             allowTaint: false,
-            logging: false,
-            windowWidth: area.scrollWidth,
-            windowHeight: area.scrollHeight
+            logging: false
         });
         
-        // إظهار المساعد تاني
+        // إظهار المساعد
         aiAssistant.classList.remove('hidden');
         if (!wasCollapsed) {
             aiAssistant.classList.remove('collapsed');
@@ -249,47 +345,50 @@ async function downloadImage() {
     } catch (err) {
         console.error(err);
         showToast('فشل حفظ الصورة', 'error');
-        document.querySelector('.ai-assistant')?.classList.remove('hidden');
+        document.getElementById('aiAssistant')?.classList.remove('hidden');
     }
 }
 
 // ==================== السكشن المخصص ====================
 function loadCustomSection() {
     const saved = localStorage.getItem('custom-section');
-    if (saved) {
-        try {
-            const customData = JSON.parse(saved);
-            allSections.custom = {
-                group: 'Custom',
-                data: customData
-            };
+    if (!saved) return;
+    
+    try {
+        const customData = JSON.parse(saved);
+        allSections.custom = {
+            group: 'Custom',
+            data: customData
+        };
+        
+        // إضافة خيار للقوائم
+        const selects = ['sectionSelect', 'sectionSelectMain'];
+        selects.forEach(id => {
+            const select = document.getElementById(id);
+            if (!select) return;
             
-            // إضافة خيار للقائمة
-            const selects = document.querySelectorAll('select[id^="sectionSelect"]');
-            selects.forEach(select => {
-                // التأكد من عدم وجود تكرار
-                let exists = false;
-                for (let i = 0; i < select.options.length; i++) {
-                    if (select.options[i].value === 'custom') {
-                        exists = true;
-                        break;
-                    }
+            // التأكد من عدم وجود تكرار
+            let exists = false;
+            for (let i = 0; i < select.options.length; i++) {
+                if (select.options[i].value === 'custom') {
+                    exists = true;
+                    break;
                 }
-                
-                if (!exists) {
-                    const option = document.createElement('option');
-                    option.value = 'custom';
-                    option.textContent = '⭐ My Section';
-                    select.appendChild(option);
-                }
-            });
-        } catch (e) {
-            console.log('خطأ في تحميل القسم المخصص');
-        }
+            }
+            
+            if (!exists) {
+                const option = document.createElement('option');
+                option.value = 'custom';
+                option.textContent = '⭐ My Custom Section';
+                select.appendChild(option);
+            }
+        });
+    } catch (e) {
+        console.log('خطأ في تحميل القسم المخصص');
     }
 }
 
-// ==================== المساعد الذكي - الفهمان (Gemini API) ====================
+// ==================== المساعد الذكي ====================
 let isAIThinking = false;
 
 function toggleAI() {
@@ -305,6 +404,7 @@ function toggleAI() {
 async function askAI() {
     const input = document.getElementById('aiQuestion');
     const question = input.value.trim();
+    
     if (!question || isAIThinking) return;
     
     // عرض سؤال المستخدم
@@ -314,6 +414,7 @@ async function askAI() {
     // بدء التفكير
     isAIThinking = true;
     updateAIStatus('جاري التفكير...');
+    document.getElementById('aiSendBtn').disabled = true;
     
     // عرض مؤشر الكتابة
     showTypingIndicator();
@@ -333,15 +434,20 @@ async function askAI() {
         addMessage('آسف يا باشا، حصل خطأ. جرب تاني بعد شوية.', 'bot');
     } finally {
         isAIThinking = false;
-        updateAIStatus('');
+        updateAIStatus('متصل • جاهز للرد');
+        document.getElementById('aiSendBtn').disabled = false;
     }
 }
 
 async function callGeminiAPI(question) {
-    // بناء السياق للذكاء الاصطناعي
-    const context = buildAIContext();
+    const context = `أنت مساعد اسمك "الفهمان" لطلاب كلية الحاسبات والمعلومات في جامعة الشروق (Shorouk Academy).
     
-    const prompt = `${context}\n\nالسؤال: ${question}\n\nرد كمساعد مصري اسمه "الفهمان" رد باختصار وبالعامية المصرية وبكون لطيف ومتفائل.`;
+معلومات عن الكلية:
+- الأقسام: 1-8 في Group A، 9-16 في Group B
+- المواد: Business Administration 💼 (د. سامح محمد), Data Structure 🌳 (د. أسامة شفيق), System Analysis 📊 (د. مجدي الهنواوي), Web Programming 🌐 (د. محمد مصطفى), Computer Network 🔌 (د. هشام أبو الفتوح), Human Rights ⚖️ (د. أحمد نعمان)
+- مواعيد المحاضرات: 1-2 (9:15-10:45), 3-4 (10:55-12:25), 5-6 (12:45-2:10), 7-8 (2:20-3:45)
+
+رد كمساعد مصري اسمه "الفهمان" رد باختصار وبالعامية المصرية وبكون لطيف ومتفائل.`;
     
     const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
         method: 'POST',
@@ -351,9 +457,13 @@ async function callGeminiAPI(question) {
         body: JSON.stringify({
             contents: [{
                 parts: [{
-                    text: prompt
+                    text: `${context}\n\nالسؤال: ${question}\n\nالإجابة:`
                 }]
-            }]
+            }],
+            generationConfig: {
+                temperature: 0.7,
+                maxOutputTokens: 500
+            }
         })
     });
     
@@ -366,43 +476,14 @@ async function callGeminiAPI(question) {
     }
 }
 
-function buildAIContext() {
-    // بناء معلومات عن الجدول
-    let context = `أنت مساعد اسمك "الفهمان" لطلاب كلية الحاسبات والمعلومات في جامعة الشروق. عندك المعلومات التالية:\n\n`;
-    
-    // معلومات الأقسام والمجموعات
-    context += `الأقسام: 1-8 في Group A، 9-16 في Group B\n\n`;
-    
-    // معلومات المواد
-    const subjects = [
-        'Business Administration 💼 (د. سامح محمد - مدرج 1 إعلام)',
-        'Data Structure 🌳 (د. أسامة شفيق - مدرج 5 إعلام)',
-        'System Analysis 📊 (د. مجدي الهنواوي - مدرج 7 علوم حاسب)',
-        'Web Programming 🌐 (د. محمد مصطفى - مدرج 5 إعلام)',
-        'Computer Network 🔌 (د. هشام أبو الفتوح - مدرج 5 إعلام)',
-        'Human Rights ⚖️ (د. أحمد نعمان - مدرج 5 إعلام)'
-    ];
-    
-    context += `المواد:\n${subjects.map(s => `- ${s}`).join('\n')}\n\n`;
-    
-    // مواعيد
-    context += `مواعيد المحاضرات:\n`;
-    context += `1-2: 9:15-10:45 (90 دقيقة)\n`;
-    context += `3-4: 10:55-12:25 (90 دقيقة)\n`;
-    context += `5-6: 12:45-2:10 (85 دقيقة)\n`;
-    context += `7-8: 2:20-3:45 (85 دقيقة)\n\n`;
-    
-    return context;
-}
-
 function addMessage(text, sender) {
     const messages = document.getElementById('aiMessages');
     const div = document.createElement('div');
     div.className = `message ${sender}`;
     
-    // تنسيق النص (تحويل الأسطر الجديدة)
+    // تنسيق النص
     const formattedText = text.replace(/\n/g, '<br>');
-    div.innerHTML = `<p>${formattedText}</p>`;
+    div.innerHTML = `<div class="message-content">${formattedText}</div>`;
     
     messages.appendChild(div);
     messages.scrollTop = messages.scrollHeight;
@@ -413,7 +494,7 @@ function showTypingIndicator() {
     const div = document.createElement('div');
     div.className = 'message bot typing';
     div.id = 'typingIndicator';
-    div.innerHTML = '<p>الفهمان بيفكر <span class="dots">...</span></p>';
+    div.innerHTML = '<div class="message-content">الفهمان بيفكر<span class="dots">...</span></div>';
     messages.appendChild(div);
     messages.scrollTop = messages.scrollHeight;
 }
@@ -426,26 +507,15 @@ function removeTypingIndicator() {
 function updateAIStatus(text) {
     const status = document.getElementById('aiStatus');
     if (status) {
-        status.textContent = text;
+        status.innerHTML = `<span class="status-dot"></span><span>${text}</span>`;
     }
 }
 
-// ==================== تهيئة الصفحة ====================
-document.addEventListener('DOMContentLoaded', async () => {
-    const loaded = await loadData();
-    if (loaded) {
-        initMatrixBackground();
-        loadCustomSection();
-        
-        // إضافة خيارات القسم للقائمة الرئيسية
-        const mainSelect = document.getElementById('sectionSelectMain');
-        if (mainSelect) {
-            for (let i = 1; i <= 16; i++) {
-                const option = document.createElement('option');
-                option.value = i;
-                option.textContent = `Section ${i}`;
-                mainSelect.appendChild(option);
-            }
-        }
-    }
-});
+// ==================== دوال مساعدة ====================
+window.changeSection = changeSection;
+window.showGroup = showGroup;
+window.backToSection = backToSection;
+window.downloadImage = downloadImage;
+window.toggleAI = toggleAI;
+window.askAI = askAI;
+window.showDetails = showDetails;
