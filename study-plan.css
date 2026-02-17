@@ -1,0 +1,268 @@
+/* ==================== STUDY PLAN MODAL ==================== */
+.study-plan-modal {
+    max-width: 95vw !important;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.level-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.level-tab {
+    flex: 1;
+    min-width: 100px;
+    padding: 12px 20px;
+    background: rgba(255,215,0,0.1);
+    border: 2px solid rgba(255,215,0,0.3);
+    border-radius: 10px;
+    color: var(--txt);
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.level-tab:hover {
+    background: rgba(255,215,0,0.2);
+    border-color: rgba(255,215,0,0.5);
+    transform: translateY(-2px);
+}
+
+.level-tab.active {
+    background: linear-gradient(135deg, rgba(255,215,0,0.3), rgba(255,215,0,0.15));
+    border-color: #ffd700;
+    box-shadow: 0 0 20px rgba(255,215,0,0.3);
+}
+
+.study-plan-content {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    padding: 20px 0;
+}
+
+.semester-column {
+    min-width: 300px;
+    flex: 1;
+}
+
+.semester-title {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--accent);
+    margin-bottom: 15px;
+    text-align: center;
+    padding: 10px;
+    background: rgba(255,215,0,0.1);
+    border-radius: 10px;
+}
+
+.courses-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.course-node {
+    position: relative;
+    padding: 15px;
+    background: linear-gradient(135deg, rgba(255,215,0,0.1), rgba(147,112,219,0.1));
+    backdrop-filter: blur(10px);
+    border: 2px solid;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s;
+    min-height: 80px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.course-node:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(255,215,0,0.3);
+}
+
+.course-node.selected {
+    border-width: 3px;
+    box-shadow: 0 0 30px;
+}
+
+/* Chain Colors */
+.course-node.chain-prog { 
+    border-color: #00d4ff; 
+    background: linear-gradient(135deg, rgba(0,212,255,0.15), rgba(0,212,255,0.05));
+}
+.course-node.chain-prog:hover { 
+    box-shadow: 0 8px 25px rgba(0,212,255,0.4);
+}
+.course-node.chain-prog.selected { 
+    box-shadow: 0 0 30px rgba(0,212,255,0.6);
+}
+
+.course-node.chain-math { 
+    border-color: #9370db; 
+    background: linear-gradient(135deg, rgba(147,112,219,0.15), rgba(147,112,219,0.05));
+}
+.course-node.chain-math:hover { 
+    box-shadow: 0 8px 25px rgba(147,112,219,0.4);
+}
+.course-node.chain-math.selected { 
+    box-shadow: 0 0 30px rgba(147,112,219,0.6);
+}
+
+.course-node.chain-systems { 
+    border-color: #32cd32; 
+    background: linear-gradient(135deg, rgba(50,205,50,0.15), rgba(50,205,50,0.05));
+}
+.course-node.chain-systems:hover { 
+    box-shadow: 0 8px 25px rgba(50,205,50,0.4);
+}
+.course-node.chain-systems.selected { 
+    box-shadow: 0 0 30px rgba(50,205,50,0.6);
+}
+
+.course-node.chain-hardware { 
+    border-color: #ff8c00; 
+    background: linear-gradient(135deg, rgba(255,140,0,0.15), rgba(255,140,0,0.05));
+}
+.course-node.chain-hardware:hover { 
+    box-shadow: 0 8px 25px rgba(255,140,0,0.4);
+}
+.course-node.chain-hardware.selected { 
+    box-shadow: 0 0 30px rgba(255,140,0,0.6);
+}
+
+.course-node.chain-networks { 
+    border-color: #e67e22; 
+    background: linear-gradient(135deg, rgba(230,126,34,0.15), rgba(230,126,34,0.05));
+}
+.course-node.chain-networks:hover { 
+    box-shadow: 0 8px 25px rgba(230,126,34,0.4);
+}
+.course-node.chain-networks.selected { 
+    box-shadow: 0 0 30px rgba(230,126,34,0.6);
+}
+
+.course-node.chain-ai { 
+    border-color: #ffd700; 
+    background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,215,0,0.05));
+}
+.course-node.chain-ai:hover { 
+    box-shadow: 0 8px 25px rgba(255,215,0,0.4);
+}
+.course-node.chain-ai.selected { 
+    box-shadow: 0 0 30px rgba(255,215,0,0.6);
+}
+
+.course-node.chain-graphics { 
+    border-color: #ff69b4; 
+    background: linear-gradient(135deg, rgba(255,105,180,0.15), rgba(255,105,180,0.05));
+}
+.course-node.chain-graphics:hover { 
+    box-shadow: 0 8px 25px rgba(255,105,180,0.4);
+}
+.course-node.chain-graphics.selected { 
+    box-shadow: 0 0 30px rgba(255,105,180,0.6);
+}
+
+.course-node.chain-soft { 
+    border-color: #95a5a6; 
+    background: linear-gradient(135deg, rgba(149,165,166,0.15), rgba(149,165,166,0.05));
+}
+
+.course-node.chain-lang { 
+    border-color: #3498db; 
+    background: linear-gradient(135deg, rgba(52,152,219,0.15), rgba(52,152,219,0.05));
+}
+
+.course-node.chain-science { 
+    border-color: #1abc9c; 
+    background: linear-gradient(135deg, rgba(26,188,156,0.15), rgba(26,188,156,0.05));
+}
+
+.course-name {
+    font-weight: 700;
+    font-size: 0.95rem;
+    margin-bottom: 5px;
+    color: var(--txt);
+}
+
+.course-id {
+    font-size: 0.75rem;
+    color: var(--txt2);
+    opacity: 0.7;
+}
+
+/* SVG Arrows */
+.arrows-svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.arrow-line {
+    stroke-width: 2;
+    fill: none;
+    opacity: 0.6;
+    transition: opacity 0.3s;
+}
+
+.arrow-head {
+    fill: currentColor;
+    opacity: 0.6;
+}
+
+.course-node:hover + svg .arrow-line,
+.course-node.selected + svg .arrow-line {
+    stroke-width: 3;
+    opacity: 1;
+}
+
+/* Course Legend */
+.plan-legend {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+    padding: 15px;
+    background: rgba(255,215,0,0.05);
+    border-radius: 10px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+}
+
+.legend-color {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    border: 2px solid;
+}
+
+/* Button Style */
+.btn-plan {
+    background: linear-gradient(135deg, #9370db, #7e22ce);
+    color: #fff;
+}
+
+@media (max-width: 768px) {
+    .study-plan-content {
+        flex-direction: column;
+    }
+    .semester-column {
+        min-width: 100%;
+    }
+}
