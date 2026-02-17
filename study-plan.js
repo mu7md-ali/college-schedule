@@ -1,15 +1,28 @@
-// Study Plan Data
+// Study Plan System
 let studyPlanData = null;
-let currentLevel = 1;
-let selectedCourse = null;
+let allCourses = [];
+let currentLitCourse = null;
 
 // Load Study Plan
 async function loadStudyPlan() {
     try {
         const res = await fetch('study-plan.json');
         studyPlanData = await res.json();
+        buildCoursesArray();
     } catch (err) {
         console.error('Failed to load study plan:', err);
+    }
+}
+
+// Build flat courses array
+function buildCoursesArray() {
+    allCourses = [];
+    for (const level in studyPlanData) {
+        for (const term in studyPlanData[level]) {
+            studyPlanData[level][term].forEach(course => {
+                allCourses.push(course);
+            });
+        }
     }
 }
 
@@ -19,63 +32,34 @@ function showStudyPlan() {
         showToast('Loading study plan...', 'info');
         loadStudyPlan().then(() => {
             document.getElementById('studyPlanModal').classList.remove('hidden');
-            renderStudyPlan(1);
+            renderFullPlan();
         });
     } else {
         document.getElementById('studyPlanModal').classList.remove('hidden');
-        renderStudyPlan(currentLevel);
+        renderFullPlan();
     }
 }
 
-// Show Level
-function showLevel(level) {
-    currentLevel = level;
-    // Update tabs
-    for (let i = 1; i <= 4; i++) {
-        const btn = document.getElementById(`levelBtn${i}`);
-        if (btn) {
-            if (i === level) {
-                btn.classList.add('active');
-            } else {
-                btn.classList.remove('active');
-            }
-        }
-    }
-    renderStudyPlan(level);
-}
-
-// Render Study Plan
-function renderStudyPlan(level) {
+// Render Full Plan (all levels in one page)
+function renderFullPlan() {
     const content = document.getElementById('studyPlanContent');
     if (!content || !studyPlanData) return;
 
-    const levelKey = `المستوى_${level === 1 ? 'الأول' : level === 2 ? 'الثاني' : level === 3 ? 'الثالث' : 'الرابع'}`;
-    const levelData = studyPlanData[levelKey];
-
-    if (!levelData) return;
-
-    // Build HTML
     let html = '';
+
+    // Level 1
+    html += renderLevel('المستوى_الأول', 'Level 1 - المستوى الأول', 1);
     
-    // Term 1
-    html += '<div class="semester-column">';
-    html += '<div class="semester-title">🌙 الترم الأول</div>';
-    html += '<div class="courses-container">';
-    levelData.الترم_الأول.forEach(course => {
-        html += renderCourseNode(course);
-    });
-    html += '</div></div>';
+    // Level 2
+    html += renderLevel('المستوى_الثاني', 'Level 2 - المستوى الثاني', 2);
+    
+    // Level 3
+    html += renderLevel('المستوى_الثالث', 'Level 3 - المستوى الثالث', 3);
+    
+    // Level 4
+    html += renderLevel('المستوى_الرابع', 'Level 4 - المستوى الرابع', 4);
 
-    // Term 2
-    html += '<div class="semester-column">';
-    html += '<div class="semester-title">☀️ الترم الثاني</div>';
-    html += '<div class="courses-container">';
-    levelData.الترم_الثاني.forEach(course => {
-        html += renderCourseNode(course);
-    });
-    html += '</div></div>';
-
-    // Add legend
+    // Legend
     html += `
     <div class="plan-legend">
         <div class="legend-item">
@@ -113,19 +97,47 @@ function renderStudyPlan(level) {
 
     // Add click handlers
     setTimeout(() => {
-        document.querySelectorAll('.course-node').forEach(node => {
-            node.addEventListener('click', () => selectCourse(parseInt(node.dataset.id)));
+        document.querySelectorAll('.course-card').forEach(card => {
+            card.addEventListener('click', () => {
+                lightUpChain(parseInt(card.dataset.id));
+            });
         });
     }, 100);
 }
 
-// Render Course Node
-function renderCourseNode(course) {
-    const prereq = course.prerequisite_id ? findCourseById(course.prerequisite_id) : null;
+// Render Single Level
+function renderLevel(levelKey, levelTitle, levelNum) {
+    const levelData = studyPlanData[levelKey];
+    if (!levelData) return '';
+
+    let html = `<div class="level-section" id="level-${levelNum}">`;
+    html += `<div class="level-title">${levelTitle}</div>`;
+    html += `<div class="level-grid">`;
+
+    // Combine both terms in one grid
+    const allLevelCourses = [
+        ...levelData.الترم_الأول,
+        ...levelData.الترم_الثاني
+    ];
+
+    allLevelCourses.forEach(course => {
+        html += renderCourseCard(course);
+    });
+
+    html += `</div></div>`;
+    return html;
+}
+
+// Render Course Card
+function renderCourseCard(course) {
+    const prereq = course.prerequisite_id ? findCourse(course.prerequisite_id) : null;
     const prereqText = prereq ? `📌 Requires: ${prereq.name}` : '✅ No prerequisite';
     
     return `
-        <div class="course-node chain-${course.chain}" data-id="${course.id}" title="${prereqText}">
+        <div class="course-card chain-${course.chain}" 
+             data-id="${course.id}" 
+             data-chain="${course.chain}"
+             title="${prereqText}">
             <div class="course-name">${course.name}</div>
             <div class="course-id">ID: ${course.id}</div>
         </div>
@@ -133,64 +145,66 @@ function renderCourseNode(course) {
 }
 
 // Find Course by ID
-function findCourseById(id) {
-    for (const level in studyPlanData) {
-        for (const term in studyPlanData[level]) {
-            const course = studyPlanData[level][term].find(c => c.id === id);
-            if (course) return course;
-        }
-    }
-    return null;
+function findCourse(id) {
+    return allCourses.find(c => c.id === id);
 }
 
-// Select Course
-function selectCourse(id) {
-    // Remove previous selection
-    document.querySelectorAll('.course-node').forEach(n => n.classList.remove('selected'));
-    
-    const course = findCourseById(id);
+// Light Up Chain - Main Feature
+function lightUpChain(courseId) {
+    // Clear previous lighting
+    document.querySelectorAll('.course-card').forEach(card => {
+        card.classList.remove('lit');
+    });
+
+    const course = findCourse(courseId);
     if (!course) return;
 
-    selectedCourse = course;
+    currentLitCourse = course;
 
-    // Highlight selected
-    document.querySelector(`[data-id="${id}"]`)?.classList.add('selected');
-
-    // Show prerequisites chain
-    const prereqs = getPrerequisiteChain(id);
-    const opens = getWhatItOpens(id);
-
-    let msg = `📚 **${course.name}**\n\n`;
+    // Get full chain
+    const chain = getFullChain(courseId);
     
-    if (prereqs.length > 0) {
-        msg += `📌 **Requires:**\n`;
-        prereqs.forEach(p => {
-            msg += `   → ${p.name}\n`;
-        });
-        msg += '\n';
-    } else {
-        msg += `✅ No prerequisites\n\n`;
-    }
+    // Light up all courses in chain
+    chain.forEach(c => {
+        const card = document.querySelector(`[data-id="${c.id}"]`);
+        if (card) {
+            card.classList.add('lit');
+        }
+    });
 
-    if (opens.length > 0) {
-        msg += `🔓 **Opens:**\n`;
-        opens.forEach(o => {
-            msg += `   → ${o.name}\n`;
-        });
-    }
-
-    showToast(msg, 'info');
+    // Show info
+    showChainInfo(course, chain);
 }
 
-// Get Prerequisite Chain
-function getPrerequisiteChain(id) {
+// Get Full Chain (prerequisites + what it opens)
+function getFullChain(courseId) {
     const chain = [];
-    let current = findCourseById(id);
+    const visited = new Set();
+
+    // Get prerequisites (backward)
+    const prereqs = getPrerequisiteChain(courseId);
+    chain.push(...prereqs);
+
+    // Add current course
+    const current = findCourse(courseId);
+    if (current) chain.push(current);
+
+    // Get dependents (forward)
+    const dependents = getDependentChain(courseId);
+    chain.push(...dependents);
+
+    return chain;
+}
+
+// Get Prerequisite Chain (recursive backward)
+function getPrerequisiteChain(courseId) {
+    const chain = [];
+    let current = findCourse(courseId);
     
     while (current && current.prerequisite_id) {
-        const prereq = findCourseById(current.prerequisite_id);
-        if (prereq) {
-            chain.push(prereq);
+        const prereq = findCourse(current.prerequisite_id);
+        if (prereq && !chain.find(c => c.id === prereq.id)) {
+            chain.unshift(prereq); // Add to beginning
             current = prereq;
         } else {
             break;
@@ -200,24 +214,69 @@ function getPrerequisiteChain(id) {
     return chain;
 }
 
-// Get What It Opens
-function getWhatItOpens(id) {
-    const opens = [];
-    
-    for (const level in studyPlanData) {
-        for (const term in studyPlanData[level]) {
-            studyPlanData[level][term].forEach(course => {
-                if (course.prerequisite_id === id) {
-                    opens.push(course);
-                }
-            });
-        }
+// Get Dependent Chain (recursive forward)
+function getDependentChain(courseId) {
+    const chain = [];
+    const toProcess = [courseId];
+    const visited = new Set();
+
+    while (toProcess.length > 0) {
+        const currentId = toProcess.shift();
+        if (visited.has(currentId)) continue;
+        visited.add(currentId);
+
+        // Find all courses that depend on this one
+        allCourses.forEach(course => {
+            if (course.prerequisite_id === currentId && !visited.has(course.id)) {
+                chain.push(course);
+                toProcess.push(course.id);
+            }
+        });
     }
-    
-    return opens;
+
+    return chain;
 }
 
-// Initialize
+// Show Chain Info
+function showChainInfo(course, chain) {
+    const prereqs = chain.filter(c => isPrerequisiteOf(c.id, course.id));
+    const opens = chain.filter(c => isPrerequisiteOf(course.id, c.id));
+
+    let msg = `🎓 **${course.name}** (ID: ${course.id})\n\n`;
+    
+    if (prereqs.length > 0) {
+        msg += `📌 **Prerequisites Chain:**\n`;
+        prereqs.forEach((p, i) => {
+            msg += `   ${i + 1}. ${p.name}\n`;
+        });
+        msg += '\n';
+    } else {
+        msg += `✅ No prerequisites\n\n`;
+    }
+
+    if (opens.length > 0) {
+        msg += `🔓 **Opens These Courses:**\n`;
+        opens.forEach((o, i) => {
+            msg += `   ${i + 1}. ${o.name}\n`;
+        });
+    } else {
+        msg += `🏁 Terminal course (doesn't unlock others)`;
+    }
+
+    showToast(msg, 'info');
+}
+
+// Check if courseA is prerequisite of courseB
+function isPrerequisiteOf(courseAId, courseBId) {
+    let current = findCourse(courseBId);
+    while (current && current.prerequisite_id) {
+        if (current.prerequisite_id === courseAId) return true;
+        current = findCourse(current.prerequisite_id);
+    }
+    return false;
+}
+
+// Initialize on load
 document.addEventListener('DOMContentLoaded', () => {
     loadStudyPlan();
 });
