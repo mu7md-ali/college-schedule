@@ -6,13 +6,18 @@ let allSections = {};
 
 async function loadData() {
     try {
+        console.log('🔄 Loading data.json...');
         const res = await fetch('data.json');
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const json = await res.json();
         periodInfo = json.periodInfo;
         allSections = json.sections;
+        console.log('✅ Data loaded:', Object.keys(allSections).length, 'sections');
     } catch (err) {
-        console.error('Failed to load data.json:', err);
-        showToast('فشل تحميل البيانات', 'error');
+        console.error('❌ Failed to load data.json:', err);
+        showToast('فشل تحميل البيانات - تأكد من وجود data.json', 'error');
+        // Create dummy data so site doesn't crash
+        allSections = {'1': {data: {}}};
     }
 }
 
@@ -41,23 +46,62 @@ function updateThemeIcon(theme) {
 }
 
 // ============================================
-// BINARY BACKGROUND
+// RAMADAN DECORATIONS 🌙✨
 // ============================================
 function initBinaryBackground() {
-    const c = document.getElementById('binary-bg');
-    if (!c) return;
-    c.innerHTML = '';
-    for (let i = 0; i < 28; i++) {
-        const col = document.createElement('div');
-        col.className = 'binary-column';
-        col.style.left = `${(i / 28) * 100}%`;
-        col.style.animationDuration = `${14 + Math.random() * 10}s`;
-        col.style.animationDelay = `-${Math.random() * 14}s`;
-        let txt = '';
-        for (let j = 0; j < 38; j++) txt += (Math.random() > .5 ? '1' : '0') + '<br>';
-        col.innerHTML = txt;
-        c.appendChild(col);
+    const bg = document.getElementById('binary-bg');
+    if (!bg) return;
+    
+    bg.innerHTML = '';
+    bg.className = 'binary-background';
+    
+    // Create stars container
+    const starsDiv = document.createElement('div');
+    starsDiv.className = 'stars';
+    
+    // Generate 50 random stars
+    for (let i = 0; i < 50; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 100 + '%';
+        star.style.animationDelay = Math.random() * 3 + 's';
+        starsDiv.appendChild(star);
     }
+    bg.appendChild(starsDiv);
+    
+    // Create crescent moon
+    const crescent = document.createElement('div');
+    crescent.className = 'crescent';
+    crescent.style.right = '10%';
+    crescent.style.top = '15%';
+    bg.appendChild(crescent);
+    
+    // Create lanterns
+    const lanternPositions = [
+        { left: '15%', top: '20%', delay: '0s' },
+        { right: '20%', top: '35%', delay: '1s' },
+        { left: '25%', top: '60%', delay: '2s' },
+        { right: '15%', top: '70%', delay: '1.5s' }
+    ];
+    
+    lanternPositions.forEach(pos => {
+        const lantern = document.createElement('div');
+        lantern.className = 'lantern';
+        lantern.style.animationDelay = pos.delay;
+        if (pos.left) lantern.style.left = pos.left;
+        if (pos.right) lantern.style.right = pos.right;
+        lantern.style.top = pos.top;
+        
+        lantern.innerHTML = `
+            <div class="lantern-rope"></div>
+            <div class="lantern-body">
+                <div class="lantern-light"></div>
+            </div>
+        `;
+        
+        bg.appendChild(lantern);
+    });
 }
 
 // ============================================
@@ -77,9 +121,15 @@ function showToast(msg, type = 'info') {
 // SECTION LOADING
 // ============================================
 function changeSection(num) {
-    if (!num) return;
-    if (!allSections[num]) { showToast('هذا القسم غير متوفر', 'error'); return; }
+    console.log('📋 changeSection called with:', num);
+    if (!num) { console.warn('⚠️ No section number provided'); return; }
+    if (!allSections[num]) { 
+        console.error('❌ Section not found:', num); 
+        showToast('هذا القسم غير متوفر', 'error'); 
+        return; 
+    }
 
+    console.log('✅ Changing to section:', num);
     currentSection = num;
     isGroupView = false;
     currentGroup = null;
@@ -92,8 +142,12 @@ function changeSection(num) {
 
     document.getElementById('groupABtn').classList.remove('hidden');
     document.getElementById('groupBBtn').classList.remove('hidden');
-    document.getElementById('downloadBtn').classList.remove('hidden');
-    document.getElementById('pdfBtn').classList.add('hidden');
+    // Show print button (it's always visible for sections)
+    const printBtn = document.getElementById('printBtn');
+    if (printBtn) printBtn.classList.remove('hidden');
+    // Hide group print button
+    const printGroupBtn = document.getElementById('printGroupBtn');
+    if (printGroupBtn) printGroupBtn.classList.add('hidden');
     document.getElementById('backBtn').classList.add('hidden');
 
     // Edit button — only for section 17
@@ -201,9 +255,21 @@ function showGroupSchedule(group) {
 
     document.getElementById('groupABtn').classList.add('hidden');
     document.getElementById('groupBBtn').classList.add('hidden');
-    document.getElementById('downloadBtn').classList.add('hidden');
-    document.getElementById('pdfBtn').classList.remove('hidden');
+    const downloadBtn = document.getElementById('downloadBtn');
+    if (downloadBtn) downloadBtn.classList.add('hidden');
+    const printBtn = document.getElementById('printBtn');
+    if (printBtn) printBtn.classList.add('hidden');
+    const printGroupBtn = document.getElementById('printGroupBtn');
+    if (printGroupBtn) printGroupBtn.classList.remove('hidden');
     document.getElementById('backBtn').classList.remove('hidden');
+    
+    // Hide edit buttons (they're only for Section 17)
+    const editBtn = document.getElementById('editBtn');
+    const saveBtn = document.getElementById('saveEditBtn');
+    const cancelBtn = document.getElementById('cancelEditBtn');
+    if (editBtn) editBtn.classList.add('hidden');
+    if (saveBtn) saveBtn.classList.add('hidden');
+    if (cancelBtn) cancelBtn.classList.add('hidden');
 
     ['sectionSelect','sectionSelectMain'].forEach(id => {
         const el = document.getElementById(id);
@@ -312,137 +378,437 @@ function showDetails(day, period, secNum) {
 }
 
 // ============================================
-// DOWNLOAD IMAGE — محسن بالكامل
+// NEW DOWNLOAD METHODS — COMPLETE REWRITE
 // ============================================
-async function downloadTable() {
-    const area = document.getElementById('captureArea');
-    if (!area) return;
 
+// SIMPLE PRINT METHOD (Most Reliable)
+function printTable() {
+    console.log('🖨️ Print triggered');
+    const original = document.getElementById('sectionView');
+    if (!original) {
+        showToast('Table not found', 'error');
+        return;
+    }
+    
+    // Get current theme - default to dark if not set
+    const theme = document.documentElement.getAttribute('data-theme') || 'dark';
+    const bgColor = theme === 'light' ? '#fff8e7' : '#0a051f';
+    
+    console.log('📋 Current theme:', theme);
+    console.log('🎨 Background color:', bgColor);
+    
+    const printContent = original.innerHTML;
+    const printWindow = window.open('', '_blank', 'width=1200,height=800');
+    printWindow.document.write(`
+<!DOCTYPE html>
+<html data-theme="${theme}">
+<head>
+    <meta charset="UTF-8">
+    <title>CS Schedule - Section ${currentSection}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        ${theme === 'dark' ? `
+        :root, [data-theme="dark"] {
+            --bg: #0a051f;
+            --bg2: #1a0a3e;
+            --card: rgba(26,10,62,0.85);
+            --txt: #f5e6d3;
+            --txt2: #d4c5b0;
+            --accent: #ffd700;
+            --purple: #9370db;
+            --green: #32cd32;
+            --orange: #ff8c00;
+            --gold: #ffd700;
+            --border: rgba(255,215,0,0.15);
+        }` : `
+        :root, [data-theme="light"] {
+            --bg: #fff8e7;
+            --bg2: #fff3d9;
+            --card: rgba(255,255,255,0.95);
+            --txt: #4a2c0f;
+            --txt2: #6b4423;
+            --accent: #d4af37;
+            --purple: #9370db;
+            --green: #2d8659;
+            --orange: #e67e22;
+            --gold: #d4af37;
+            --border: rgba(212,175,55,0.25);
+        }`}
+    </style>
+    <link href="style.css" rel="stylesheet">
+    <style>
+        /* Force theme to work properly */
+        html[data-theme="${theme}"] body {
+            background: ${bgColor} !important;
+        }
+        ${theme === 'dark' ? `
+        /* Dark mode overrides */
+        .lec-card {
+            background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,215,0,0.05)) !important;
+            border: 2px solid rgba(255,215,0,0.4) !important;
+        }
+        .lab-card {
+            background: linear-gradient(135deg, rgba(147,112,219,0.15), rgba(147,112,219,0.05)) !important;
+            border: 2px solid rgba(147,112,219,0.4) !important;
+        }
+        .card-subj, .card-doc, .card-room {
+            color: #f5e6d3 !important;
+        }
+        .section-title, .day-lbl {
+            color: #f5e6d3 !important;
+        }
+        ` : `
+        /* Light mode overrides */
+        .lec-card {
+            background: linear-gradient(135deg, rgba(212,175,55,0.2), rgba(212,175,55,0.1)) !important;
+            border: 2px solid rgba(201,160,42,0.5) !important;
+        }
+        .lab-card {
+            background: linear-gradient(135deg, rgba(147,112,219,0.2), rgba(147,112,219,0.1)) !important;
+            border: 2px solid rgba(147,112,219,0.5) !important;
+        }
+        .card-subj, .card-doc, .card-room {
+            color: #4a2c0f !important;
+        }
+        .section-title, .day-lbl {
+            color: #4a2c0f !important;
+        }
+        `}
+        body {
+            background: ${bgColor};
+            padding: 20px;
+            font-family: 'Inter', sans-serif;
+        }
+        .table-card {
+            max-width: none !important;
+            width: 100% !important;
+        }
+        .tbl-scroll {
+            overflow: visible !important;
+        }
+        .sched-table {
+            width: 100% !important;
+            min-width: 0 !important;
+        }
+        @media print {
+            body { background: ${theme === 'light' ? 'white' : '#0a051f'}; }
+            * { overflow: visible !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="table-card">
+        ${printContent}
+    </div>
+    <script>
+        window.onload = function() {
+            setTimeout(function() {
+                window.print();
+            }, 500);
+        };
+    </script>
+</body>
+</html>
+    `);
+    printWindow.document.close();
+}
+
+// Print for Group view
+function printGroupTable() {
+    console.log('🖨️ Print Group triggered');
+    const original = document.getElementById('groupView');
+    if (!original) {
+        showToast('Table not found', 'error');
+        return;
+    }
+    
+    // Get current theme - default to dark if not set
+    const theme = document.documentElement.getAttribute('data-theme') || 'dark';
+    const bgColor = theme === 'light' ? '#fff8e7' : '#0a051f';
+    
+    console.log('📋 Current theme:', theme);
+    console.log('🎨 Background color:', bgColor);
+    
+    const printContent = original.innerHTML;
+    const printWindow = window.open('', '_blank', 'width=1200,height=800');
+    printWindow.document.write(`
+<!DOCTYPE html>
+<html data-theme="${theme}">
+<head>
+    <meta charset="UTF-8">
+    <title>Group ${currentGroup} Schedule</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        ${theme === 'dark' ? `
+        :root, [data-theme="dark"] {
+            --bg: #0a051f;
+            --bg2: #1a0a3e;
+            --card: rgba(26,10,62,0.85);
+            --txt: #f5e6d3;
+            --txt2: #d4c5b0;
+            --accent: #ffd700;
+            --purple: #9370db;
+            --green: #32cd32;
+            --orange: #ff8c00;
+            --gold: #ffd700;
+            --border: rgba(255,215,0,0.15);
+        }` : `
+        :root, [data-theme="light"] {
+            --bg: #fff8e7;
+            --bg2: #fff3d9;
+            --card: rgba(255,255,255,0.95);
+            --txt: #4a2c0f;
+            --txt2: #6b4423;
+            --accent: #d4af37;
+            --purple: #9370db;
+            --green: #2d8659;
+            --orange: #e67e22;
+            --gold: #d4af37;
+            --border: rgba(212,175,55,0.25);
+        }`}
+    </style>
+    <link href="style.css" rel="stylesheet">
+    <style>
+        /* Force theme to work properly */
+        html[data-theme="${theme}"] body {
+            background: ${bgColor} !important;
+        }
+        ${theme === 'dark' ? `
+        /* Dark mode overrides */
+        .mini-card {
+            background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,215,0,0.05)) !important;
+            border: 2px solid rgba(255,215,0,0.4) !important;
+            color: #f5e6d3 !important;
+        }
+        .mini-card.lab {
+            background: linear-gradient(135deg, rgba(147,112,219,0.15), rgba(147,112,219,0.05)) !important;
+            border: 2px solid rgba(147,112,219,0.4) !important;
+        }
+        ` : `
+        /* Light mode overrides */
+        .mini-card {
+            background: linear-gradient(135deg, rgba(212,175,55,0.2), rgba(212,175,55,0.1)) !important;
+            border: 2px solid rgba(201,160,42,0.5) !important;
+            color: #4a2c0f !important;
+        }
+        .mini-card.lab {
+            background: linear-gradient(135deg, rgba(147,112,219,0.2), rgba(147,112,219,0.1)) !important;
+            border: 2px solid rgba(147,112,219,0.5) !important;
+        }
+        `}
+        body {
+            background: ${bgColor};
+            padding: 20px;
+            font-family: 'Inter', sans-serif;
+        }
+        * { overflow: visible !important; }
+        @media print {
+            body { background: ${theme === 'light' ? 'white' : '#0a051f'}; }
+        }
+    </style>
+</head>
+<body>
+    ${printContent}
+    <script>
+        window.onload = function() {
+            setTimeout(function() {
+                window.print();
+            }, 500);
+        };
+    </script>
+</body>
+</html>
+    `);
+    printWindow.document.close();
+}
+
+// MAIN DOWNLOAD FUNCTION — Uses Fixed Width Clone Method
+async function downloadTable() {
     const btn = document.getElementById('downloadBtn');
     if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; }
     showToast('جاري تحضير الصورة...', 'info');
 
     try {
-        // Scroll to top to capture full area
-        window.scrollTo(0, 0);
-        await new Promise(r => setTimeout(r, 300));
-
+        const original = document.getElementById('sectionView');
         const theme = document.documentElement.getAttribute('data-theme');
-        const bgColor = theme === 'light' ? '#dbeafe' : '#080d1a';
-
-        // Get actual rendered dimensions
-        const areaRect = area.getBoundingClientRect();
-        const areaWidth  = area.scrollWidth;
-        const areaHeight = area.scrollHeight;
-        const scale = window.devicePixelRatio >= 2 ? 2 : 2.5;
-
-        const canvas = await html2canvas(area, {
+        const bgColor = theme === 'light' ? '#fff8e7' : '#0a051f';
+        
+        // Create FIXED WIDTH clone (no responsive, no overflow)
+        const clone = original.cloneNode(true);
+        clone.id = 'downloadClone';
+        clone.style.cssText = `
+            position: fixed;
+            left: -99999px;
+            top: 0;
+            width: 1200px !important;
+            max-width: none !important;
+            min-width: 0 !important;
+            background: ${bgColor};
+            padding: 20px;
+            overflow: visible !important;
+            transform: none !important;
+        `;
+        document.body.appendChild(clone);
+        
+        // Force EVERY element to be fully visible
+        clone.querySelectorAll('*').forEach(el => {
+            const computed = window.getComputedStyle(el);
+            el.style.overflow = 'visible';
+            el.style.maxWidth = 'none';
+            el.style.minWidth = '0';
+        });
+        
+        // Fix table scroll wrapper
+        const scrollWrap = clone.querySelector('.tbl-scroll');
+        if (scrollWrap) {
+            scrollWrap.style.overflow = 'visible';
+            scrollWrap.style.width = '100%';
+            scrollWrap.style.maxWidth = 'none';
+            scrollWrap.style.margin = '0';
+            scrollWrap.style.padding = '0';
+        }
+        
+        // Fix the table itself
+        const table = clone.querySelector('.sched-table');
+        if (table) {
+            table.style.width = '100%';
+            table.style.minWidth = '0';
+            table.style.maxWidth = 'none';
+            table.style.tableLayout = 'fixed';
+            table.style.borderCollapse = 'separate';
+        }
+        
+        // Wait for layout to stabilize
+        await new Promise(r => setTimeout(r, 500));
+        
+        const finalWidth = 1200;
+        const finalHeight = clone.scrollHeight + 40;
+        
+        const canvas = await html2canvas(clone, {
             backgroundColor: bgColor,
-            scale: scale,
+            scale: 1,  // No scaling - original size only
             useCORS: true,
             allowTaint: false,
             logging: false,
-            width: areaWidth,
-            height: areaHeight,
+            width: finalWidth,
+            height: finalHeight,
+            windowWidth: finalWidth,
+            windowHeight: finalHeight,
+            x: 0,
+            y: 0,
             scrollX: 0,
             scrollY: 0,
-            windowWidth: areaWidth,
-            windowHeight: areaHeight,
-            onclone: (cloneDoc) => {
-                // make cloned element fully visible
-                const el = cloneDoc.getElementById('captureArea');
-                if (el) {
-                    el.style.width  = areaWidth  + 'px';
-                    el.style.height = 'auto';
-                    el.style.overflow = 'visible';
-                    el.style.transform = 'none';
-                    el.style.position = 'static';
-                }
-            }
         });
-
-        const filename = `CS_Section${currentSection}_${new Date().toISOString().slice(0,10)}.png`;
+        
+        document.body.removeChild(clone);
+        
         const link = document.createElement('a');
-        link.download = filename;
-        link.href = canvas.toDataURL('image/png');
-        document.body.appendChild(link);
+        link.download = `CS_Section${currentSection}_${new Date().toISOString().slice(0,10)}.jpg`;  // Changed to .jpg
+        link.href = canvas.toDataURL('image/jpeg', 0.7);  // JPEG at 70% quality
         link.click();
-        document.body.removeChild(link);
-
-        showToast('تم حفظ الصورة بنجاح! 📸', 'success');
+        
+        showToast('تم حفظ الصورة! ✅', 'success');
+        
     } catch (err) {
         console.error('Download error:', err);
-        showToast('فشل حفظ الصورة، جرب تاني', 'error');
+        showToast(`خطأ: ${err.message}`, 'error');
     } finally {
-        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-download"></i><span>Download</span>'; }
+        if (btn) { 
+            btn.disabled = false; 
+            btn.innerHTML = '<i class="fas fa-download"></i><span>Download</span>'; 
+        }
     }
 }
 
-// ============================================
-// DOWNLOAD GROUP PDF
-// ============================================
+// GROUP PDF — Rewritten
 function downloadGroupPDF() {
     const { jsPDF } = window.jspdf;
     const btn = document.getElementById('pdfBtn');
     if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; }
     showToast('جاري تحضير PDF...', 'info');
 
-    const el = document.getElementById('groupView');
+    const original = document.getElementById('groupView');
     const theme = document.documentElement.getAttribute('data-theme');
-    const bgColor = theme === 'light' ? '#dbeafe' : '#080d1a';
+    const bgColor = theme === 'light' ? '#fff8e7' : '#0a051f';
 
-    // Clone and fix dimensions
-    const clone = el.cloneNode(true);
+    // Create fixed width clone
+    const clone = original.cloneNode(true);
     clone.style.cssText = `
-        position:fixed; top:0; left:0;
-        width:1400px; height:auto;
-        background:${bgColor};
-        z-index:-9999; overflow:visible;
+        position: fixed;
+        left: -99999px;
+        top: 0;
+        width: 1200px !important;
+        background: ${bgColor};
+        padding: 20px;
+        overflow: visible !important;
     `;
     document.body.appendChild(clone);
-
-    html2canvas(clone, {
-        backgroundColor: bgColor,
-        scale: 2,
-        useCORS: true,
-        allowTaint: false,
-        logging: false,
-        width: 1400,
-        height: clone.scrollHeight,
-        windowWidth: 1400,
-        windowHeight: clone.scrollHeight,
-    }).then(canvas => {
-        document.body.removeChild(clone);
-        const imgData = canvas.toDataURL('image/png');
-        const pdf = new jsPDF('l', 'mm', 'a4');
-        const pgW = 297;
-        const pgH = (canvas.height * pgW) / canvas.width;
-
-        if (pgH <= 210) {
-            pdf.addImage(imgData, 'PNG', 0, 0, pgW, pgH);
-        } else {
-            // Multi-page if too tall
-            let yPos = 0;
-            let remaining = pgH;
-            let page = 0;
-            while (remaining > 0) {
-                if (page > 0) pdf.addPage();
-                pdf.addImage(imgData, 'PNG', 0, -page * 210, pgW, pgH);
-                remaining -= 210;
-                page++;
-            }
-        }
-
-        pdf.save(`CS_Group${currentGroup}_Schedule.pdf`);
-        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-file-pdf"></i><span>Save PDF</span>'; }
-        showToast('تم حفظ PDF! 📄', 'success');
-    }).catch(err => {
-        if (document.body.contains(clone)) document.body.removeChild(clone);
-        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-file-pdf"></i><span>Save PDF</span>'; }
-        showToast('فشل حفظ PDF', 'error');
-        console.error(err);
+    
+    // Force visibility
+    clone.querySelectorAll('*').forEach(el => {
+        el.style.overflow = 'visible';
+        el.style.maxWidth = 'none';
     });
+    
+    const scrollWrap = clone.querySelector('.tbl-scroll');
+    if (scrollWrap) {
+        scrollWrap.style.overflow = 'visible';
+        scrollWrap.style.width = '100%';
+    }
+    
+    const table = clone.querySelector('.sched-table');
+    if (table) {
+        table.style.width = '100%';
+        table.style.tableLayout = 'fixed';
+    }
+
+    setTimeout(() => {
+        html2canvas(clone, {
+            backgroundColor: bgColor,
+            scale: 1,  // No scaling
+            useCORS: true,
+            allowTaint: false,
+            logging: false,
+            width: 1200,
+            height: clone.scrollHeight + 40,
+        }).then(canvas => {
+            document.body.removeChild(clone);
+            // Use JPEG with lower quality for much smaller size
+            const imgData = canvas.toDataURL('image/jpeg', 0.7);
+            const pdf = new jsPDF('l', 'mm', 'a4');
+            const pgW = 297;
+            const pgH = (canvas.height * pgW) / canvas.width;
+
+            if (pgH <= 210) {
+                pdf.addImage(imgData, 'JPEG', 0, 0, pgW, pgH);
+            } else {
+                let yPos = 0;
+                let remaining = pgH;
+                let page = 0;
+                while (remaining > 0) {
+                    if (page > 0) pdf.addPage();
+                    pdf.addImage(imgData, 'JPEG', 0, -page * 210, pgW, pgH);
+                    remaining -= 210;
+                    page++;
+                }
+            }
+
+            pdf.save(`Group_${currentGroup}_${new Date().toISOString().slice(0,10)}.pdf`);
+            showToast('تم حفظ PDF! 📄', 'success');
+        }).catch(err => {
+            console.error(err);
+            showToast('فشل الحفظ', 'error');
+        }).finally(() => {
+            if (btn) { 
+                btn.disabled = false; 
+                btn.innerHTML = '<i class="fas fa-file-pdf"></i><span>Save PDF</span>'; 
+            }
+        });
+    }, 800);
 }
+
 
 // ============================================
 // MODALS
