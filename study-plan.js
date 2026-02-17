@@ -32,32 +32,37 @@ function showStudyPlan() {
         showToast('Loading study plan...', 'info');
         loadStudyPlan().then(() => {
             document.getElementById('studyPlanModal').classList.remove('hidden');
-            renderFullPlan();
+            renderFlowchartPlan();
         });
     } else {
         document.getElementById('studyPlanModal').classList.remove('hidden');
-        renderFullPlan();
+        renderFlowchartPlan();
     }
 }
 
-// Render Full Plan (all levels in one page)
-function renderFullPlan() {
+// Render Flowchart Plan (like the image)
+function renderFlowchartPlan() {
     const content = document.getElementById('studyPlanContent');
     if (!content || !studyPlanData) return;
 
-    let html = '';
-
+    // Create SVG container for arrows
+    let html = '<svg class="arrows-svg" id="arrowsSvg"></svg>';
+    
+    html += '<div class="flowchart-container">';
+    
     // Level 1
-    html += renderLevel('المستوى_الأول', 'Level 1 - المستوى الأول', 1);
+    html += renderFlowchartLevel('المستوى_الأول', 'Level 1', 1);
     
     // Level 2
-    html += renderLevel('المستوى_الثاني', 'Level 2 - المستوى الثاني', 2);
+    html += renderFlowchartLevel('المستوى_الثاني', 'Level 2', 2);
     
     // Level 3
-    html += renderLevel('المستوى_الثالث', 'Level 3 - المستوى الثالث', 3);
+    html += renderFlowchartLevel('المستوى_الثالث', 'Level 3', 3);
     
     // Level 4
-    html += renderLevel('المستوى_الرابع', 'Level 4 - المستوى الرابع', 4);
+    html += renderFlowchartLevel('المستوى_الرابع', 'Level 4', 4);
+    
+    html += '</div>';
 
     // Legend
     html += `
@@ -95,51 +100,50 @@ function renderFullPlan() {
 
     content.innerHTML = html;
 
-    // Add click handlers
+    // Draw arrows after DOM is ready
     setTimeout(() => {
-        document.querySelectorAll('.course-card').forEach(card => {
-            card.addEventListener('click', () => {
-                lightUpChain(parseInt(card.dataset.id));
-            });
-        });
+        drawArrows();
+        setupCourseInteractions();
     }, 100);
 }
 
-// Render Single Level
-function renderLevel(levelKey, levelTitle, levelNum) {
+// Render Single Level as Flowchart Row
+function renderFlowchartLevel(levelKey, levelTitle, levelNum) {
     const levelData = studyPlanData[levelKey];
     if (!levelData) return '';
 
-    let html = `<div class="level-section" id="level-${levelNum}">`;
-    html += `<div class="level-title">${levelTitle}</div>`;
-    html += `<div class="level-grid">`;
+    let html = `<div class="flowchart-level" id="level-${levelNum}" data-level="${levelNum}">`;
+    html += `<div class="level-label">${levelTitle}</div>`;
+    html += `<div class="level-courses">`;
 
-    // Combine both terms in one grid
+    // Combine both terms
     const allLevelCourses = [
         ...levelData.الترم_الأول,
         ...levelData.الترم_الثاني
     ];
 
     allLevelCourses.forEach(course => {
-        html += renderCourseCard(course);
+        html += renderFlowchartCourse(course);
     });
 
     html += `</div></div>`;
     return html;
 }
 
-// Render Course Card
-function renderCourseCard(course) {
+// Render Course Node
+function renderFlowchartCourse(course) {
     const prereq = course.prerequisite_id ? findCourse(course.prerequisite_id) : null;
     const prereqText = prereq ? `📌 Requires: ${prereq.name}` : '✅ No prerequisite';
     
     return `
-        <div class="course-card chain-${course.chain}" 
+        <div class="course-node chain-${course.chain}" 
              data-id="${course.id}" 
              data-chain="${course.chain}"
+             data-prereq="${course.prerequisite_id || ''}"
              title="${prereqText}">
             <div class="course-name">${course.name}</div>
             <div class="course-id">ID: ${course.id}</div>
+            <div class="course-glow"></div>
         </div>
     `;
 }
@@ -149,54 +153,128 @@ function findCourse(id) {
     return allCourses.find(c => c.id === id);
 }
 
-// Light Up Chain - Main Feature
+// Draw SVG Arrows between courses
+function drawArrows() {
+    const svg = document.getElementById('arrowsSvg');
+    if (!svg) return;
+    
+    const container = document.querySelector('.flowchart-container');
+    if (!container) return;
+    
+    const containerRect = container.getBoundingClientRect();
+    
+    let svgContent = '';
+    
+    allCourses.forEach(course => {
+        if (course.prerequisite_id) {
+            const fromNode = document.querySelector(`[data-id="${course.prerequisite_id}"]`);
+            const toNode = document.querySelector(`[data-id="${course.id}"]`);
+            
+            if (fromNode && toNode) {
+                const fromRect = fromNode.getBoundingClientRect();
+                const toRect = toNode.getBoundingClientRect();
+                
+                // Calculate positions relative to container
+                const x1 = fromRect.left + fromRect.width / 2 - containerRect.left;
+                const y1 = fromRect.bottom - containerRect.top;
+                const x2 = toRect.left + toRect.width / 2 - containerRect.left;
+                const y2 = toRect.top - containerRect.top;
+                
+                // Create curved path
+                const midY = (y1 + y2) / 2;
+                const pathId = `arrow-${course.prerequisite_id}-${course.id}`;
+                
+                svgContent += `
+                    <path id="${pathId}" 
+                          class="arrow-path" 
+                          d="M ${x1} ${y1} C ${x1} ${midY}, ${x2} ${midY}, ${x2} ${y2}"
+                          data-from="${course.prerequisite_id}"
+                          data-to="${course.id}" />
+                    <circle class="arrow-head" cx="${x2}" cy="${y2}" r="3" 
+                            data-from="${course.prerequisite_id}" data-to="${course.id}" />
+                `;
+            }
+        }
+    });
+    
+    svg.innerHTML = svgContent;
+    svg.setAttribute('viewBox', `0 0 ${containerRect.width} ${containerRect.height}`);
+}
+
+// Setup click interactions
+function setupCourseInteractions() {
+    document.querySelectorAll('.course-node').forEach(node => {
+        node.addEventListener('click', () => {
+            const courseId = parseInt(node.dataset.id);
+            lightUpChain(courseId);
+        });
+    });
+}
+
+// Light Up Chain - Main Feature with flowing animation
 function lightUpChain(courseId) {
     // Clear previous lighting
-    document.querySelectorAll('.course-card').forEach(card => {
-        card.classList.remove('lit');
+    document.querySelectorAll('.course-node').forEach(node => {
+        node.classList.remove('lit', 'lit-prereq', 'lit-current', 'lit-next');
+    });
+    document.querySelectorAll('.arrow-path').forEach(path => {
+        path.classList.remove('lit', 'lit-flow');
+    });
+    document.querySelectorAll('.arrow-head').forEach(head => {
+        head.classList.remove('lit');
     });
 
     const course = findCourse(courseId);
     if (!course) return;
-
     currentLitCourse = course;
 
-    // Get full chain
-    const chain = getFullChain(courseId);
-    
-    // Light up all courses in chain
-    chain.forEach(c => {
-        const card = document.querySelector(`[data-id="${c.id}"]`);
-        if (card) {
-            card.classList.add('lit');
+    // Get chains
+    const prereqs = getPrerequisiteChain(courseId);
+    const dependents = getDependentChain(courseId);
+
+    // Light up prerequisites (dimmer)
+    prereqs.forEach((c, i) => {
+        const node = document.querySelector(`[data-id="${c.id}"]`);
+        if (node) {
+            node.classList.add('lit', 'lit-prereq');
+            node.style.animationDelay = `${i * 0.1}s`;
+        }
+    });
+
+    // Light up current course (brightest)
+    const currentNode = document.querySelector(`[data-id="${courseId}"]`);
+    if (currentNode) {
+        currentNode.classList.add('lit', 'lit-current');
+    }
+
+    // Light up dependents (bright, different color)
+    dependents.forEach((c, i) => {
+        const node = document.querySelector(`[data-id="${c.id}"]`);
+        if (node) {
+            node.classList.add('lit', 'lit-next');
+            node.style.animationDelay = `${i * 0.15}s`;
+        }
+    });
+
+    // Light up arrows
+    document.querySelectorAll('.arrow-path').forEach(path => {
+        const from = parseInt(path.dataset.from);
+        const to = parseInt(path.dataset.to);
+        
+        // Arrow is in chain if it connects lit nodes
+        const fromNode = document.querySelector(`[data-id="${from}"]`);
+        const toNode = document.querySelector(`[data-id="${to}"]`);
+        
+        if (fromNode?.classList.contains('lit') && toNode?.classList.contains('lit')) {
+            path.classList.add('lit', 'lit-flow');
         }
     });
 
     // Show info
-    showChainInfo(course, chain);
+    showChainInfo(course, prereqs, dependents);
 }
 
-// Get Full Chain (prerequisites + what it opens)
-function getFullChain(courseId) {
-    const chain = [];
-    const visited = new Set();
-
-    // Get prerequisites (backward)
-    const prereqs = getPrerequisiteChain(courseId);
-    chain.push(...prereqs);
-
-    // Add current course
-    const current = findCourse(courseId);
-    if (current) chain.push(current);
-
-    // Get dependents (forward)
-    const dependents = getDependentChain(courseId);
-    chain.push(...dependents);
-
-    return chain;
-}
-
-// Get Prerequisite Chain (recursive backward)
+// Get Prerequisite Chain (backward)
 function getPrerequisiteChain(courseId) {
     const chain = [];
     let current = findCourse(courseId);
@@ -204,7 +282,7 @@ function getPrerequisiteChain(courseId) {
     while (current && current.prerequisite_id) {
         const prereq = findCourse(current.prerequisite_id);
         if (prereq && !chain.find(c => c.id === prereq.id)) {
-            chain.unshift(prereq); // Add to beginning
+            chain.unshift(prereq);
             current = prereq;
         } else {
             break;
@@ -214,7 +292,7 @@ function getPrerequisiteChain(courseId) {
     return chain;
 }
 
-// Get Dependent Chain (recursive forward)
+// Get Dependent Chain (forward)
 function getDependentChain(courseId) {
     const chain = [];
     const toProcess = [courseId];
@@ -225,7 +303,6 @@ function getDependentChain(courseId) {
         if (visited.has(currentId)) continue;
         visited.add(currentId);
 
-        // Find all courses that depend on this one
         allCourses.forEach(course => {
             if (course.prerequisite_id === currentId && !visited.has(course.id)) {
                 chain.push(course);
@@ -238,14 +315,11 @@ function getDependentChain(courseId) {
 }
 
 // Show Chain Info
-function showChainInfo(course, chain) {
-    const prereqs = chain.filter(c => isPrerequisiteOf(c.id, course.id));
-    const opens = chain.filter(c => isPrerequisiteOf(course.id, c.id));
-
-    let msg = `🎓 **${course.name}** (ID: ${course.id})\n\n`;
+function showChainInfo(course, prereqs, dependents) {
+    let msg = `🎓 **${course.name}**\n\n`;
     
     if (prereqs.length > 0) {
-        msg += `📌 **Prerequisites Chain:**\n`;
+        msg += `📚 **Prerequisites:**\n`;
         prereqs.forEach((p, i) => {
             msg += `   ${i + 1}. ${p.name}\n`;
         });
@@ -254,26 +328,16 @@ function showChainInfo(course, chain) {
         msg += `✅ No prerequisites\n\n`;
     }
 
-    if (opens.length > 0) {
-        msg += `🔓 **Opens These Courses:**\n`;
-        opens.forEach((o, i) => {
-            msg += `   ${i + 1}. ${o.name}\n`;
+    if (dependents.length > 0) {
+        msg += `🚀 **Unlocks:**\n`;
+        dependents.forEach((d, i) => {
+            msg += `   ${i + 1}. ${d.name}\n`;
         });
     } else {
-        msg += `🏁 Terminal course (doesn't unlock others)`;
+        msg += `🏁 Terminal course`;
     }
 
     showToast(msg, 'info');
-}
-
-// Check if courseA is prerequisite of courseB
-function isPrerequisiteOf(courseAId, courseBId) {
-    let current = findCourse(courseBId);
-    while (current && current.prerequisite_id) {
-        if (current.prerequisite_id === courseAId) return true;
-        current = findCourse(current.prerequisite_id);
-    }
-    return false;
 }
 
 // Initialize on load
