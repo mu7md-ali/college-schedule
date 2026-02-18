@@ -32,130 +32,103 @@ function showStudyPlan() {
         showToast('Loading study plan...', 'info');
         loadStudyPlan().then(() => {
             document.getElementById('studyPlanModal').classList.remove('hidden');
-            renderFlowchartPlan();
+            renderCompactFlowchart();
         });
     } else {
         document.getElementById('studyPlanModal').classList.remove('hidden');
-        renderFlowchartPlan();
+        renderCompactFlowchart();
     }
 }
 
-// Render Flowchart Plan
-function renderFlowchartPlan() {
+// Render Compact Flowchart - All in one screen
+function renderCompactFlowchart() {
     const content = document.getElementById('studyPlanContent');
     if (!content || !studyPlanData) return;
 
-    let html = '<div class="flowchart-wrapper">';
+    let html = '<div class="compact-flowchart">';
     
-    // SVG layer for arrows (on top)
-    html += '<svg class="arrows-svg" id="arrowsSvg"></svg>';
+    // SVG for arrows
+    html += '<svg class="compact-arrows" id="arrowsSvg"></svg>';
     
-    html += '<div class="flowchart-container" id="flowchartContainer">';
-
+    // All levels in one row
+    html += '<div class="levels-row" id="levelsRow">';
+    
     // Level 1
-    html += renderFlowchartLevel('المستوى_الأول', 'Level 1', 1);
+    html += renderCompactLevel('المستوى_الأول', 'L1', 1);
     
     // Level 2
-    html += renderFlowchartLevel('المستوى_الثاني', 'Level 2', 2);
+    html += renderCompactLevel('المستوى_الثاني', 'L2', 2);
     
     // Level 3
-    html += renderFlowchartLevel('المستوى_الثالث', 'Level 3', 3);
+    html += renderCompactLevel('المستوى_الثالث', 'L3', 3);
     
     // Level 4
-    html += renderFlowchartLevel('المستوى_الرابع', 'Level 4', 4);
+    html += renderCompactLevel('المستوى_الرابع', 'L4', 4);
     
     html += '</div></div>';
 
-    // Legend
+    // Bottom legend
     html += `
-    <div class="plan-legend">
-        <div class="legend-item">
-            <div class="legend-color" style="border-color: #00d4ff; background: rgba(0,212,255,0.1);"></div>
-            <span>Programming</span>
-        </div>
-        <div class="legend-item">
-            <div class="legend-color" style="border-color: #9370db; background: rgba(147,112,219,0.1);"></div>
-            <span>Math</span>
-        </div>
-        <div class="legend-item">
-            <div class="legend-color" style="border-color: #32cd32; background: rgba(50,205,50,0.1);"></div>
-            <span>Systems</span>
-        </div>
-        <div class="legend-item">
-            <div class="legend-color" style="border-color: #ff8c00; background: rgba(255,140,0,0.1);"></div>
-            <span>Hardware</span>
-        </div>
-        <div class="legend-item">
-            <div class="legend-color" style="border-color: #e67e22; background: rgba(230,126,34,0.1);"></div>
-            <span>Networks</span>
-        </div>
-        <div class="legend-item">
-            <div class="legend-color" style="border-color: #ffd700; background: rgba(255,215,0,0.1);"></div>
-            <span>AI</span>
-        </div>
-        <div class="legend-item">
-            <div class="legend-color" style="border-color: #ff69b4; background: rgba(255,105,180,0.1);"></div>
-            <span>Graphics</span>
-        </div>
+    <div class="compact-legend">
+        <div class="legend-dot" style="background:#00d4ff;box-shadow:0 0 10px #00d4ff"></div><span>Prog</span>
+        <div class="legend-dot" style="background:#9370db;box-shadow:0 0 10px #9370db"></div><span>Math</span>
+        <div class="legend-dot" style="background:#32cd32;box-shadow:0 0 10px #32cd32"></div><span>Sys</span>
+        <div class="legend-dot" style="background:#ff8c00;box-shadow:0 0 10px #ff8c00"></div><span>HW</span>
+        <div class="legend-dot" style="background:#e67e22;box-shadow:0 0 10px #e67e22"></div><span>Net</span>
+        <div class="legend-dot" style="background:#ffd700;box-shadow:0 0 10px #ffd700"></div><span>AI</span>
+        <div class="legend-dot" style="background:#ff69b4;box-shadow:0 0 10px #ff69b4"></div><span>Gfx</span>
     </div>
     `;
 
     content.innerHTML = html;
 
-    // Draw arrows after DOM is ready
     setTimeout(() => {
-        drawRealArrows();
-        setupCourseInteractions();
-    }, 200);
+        drawCompactArrows();
+        setupCompactInteractions();
+    }, 100);
 }
 
-// Render Single Level with Term Separation
-function renderFlowchartLevel(levelKey, levelTitle, levelNum) {
+// Render Compact Level - Horizontal layout
+function renderCompactLevel(levelKey, shortTitle, levelNum) {
     const levelData = studyPlanData[levelKey];
     if (!levelData) return '';
 
-    let html = `<div class="flowchart-level" id="level-${levelNum}" data-level="${levelNum}">`;
-    html += `<div class="level-title">${levelTitle}</div>`;
+    let html = `<div class="compact-level" id="level-${levelNum}" data-level="${levelNum}">`;
+    
+    // Level header
+    html += `<div class="compact-level-title">${shortTitle}</div>`;
     
     // Term 1
-    html += `<div class="term-section">`;
-    html += `<div class="term-label">Term 1</div>`;
-    html += `<div class="term-courses">`;
+    html += `<div class="compact-term">`;
     levelData.الترم_الأول.forEach(course => {
-        html += renderFlowchartCourse(course);
+        html += renderCompactCourse(course);
     });
-    html += `</div></div>`;
+    html += `</div>`;
     
-    // Separator
-    html += `<div class="term-separator"></div>`;
+    // Term separator
+    html += `<div class="compact-separator">•</div>`;
     
     // Term 2
-    html += `<div class="term-section">`;
-    html += `<div class="term-label">Term 2</div>`;
-    html += `<div class="term-courses">`;
+    html += `<div class="compact-term">`;
     levelData.الترم_الثاني.forEach(course => {
-        html += renderFlowchartCourse(course);
+        html += renderCompactCourse(course);
     });
-    html += `</div></div>`;
+    html += `</div>`;
     
     html += `</div>`;
     return html;
 }
 
-// Render Course Node (without ID)
-function renderFlowchartCourse(course) {
-    const prereq = course.prerequisite_id ? findCourse(course.prerequisite_id) : null;
-    const prereqText = prereq ? `📌 Requires: ${prereq.name}` : '✅ No prerequisite';
-    
+// Render Compact Course
+function renderCompactCourse(course) {
     return `
-        <div class="course-node chain-${course.chain}" 
+        <div class="compact-course chain-${course.chain}" 
              id="course-${course.id}"
              data-id="${course.id}" 
              data-chain="${course.chain}"
              data-prereq="${course.prerequisite_id || ''}"
-             title="${prereqText}">
-            <div class="course-name">${course.name}</div>
-            <div class="course-glow"></div>
+             title="${course.name}">
+            ${course.name}
         </div>
     `;
 }
@@ -165,22 +138,17 @@ function findCourse(id) {
     return allCourses.find(c => c.id === id);
 }
 
-// Draw REAL Arrows connecting courses
-function drawRealArrows() {
+// Draw Arrows for compact layout
+function drawCompactArrows() {
     const svg = document.getElementById('arrowsSvg');
-    const container = document.getElementById('flowchartContainer');
+    const container = document.getElementById('levelsRow');
     if (!svg || !container) return;
     
-    // Clear existing
-    svg.innerHTML = '';
-    
-    // Set SVG size to match container
     const containerRect = container.getBoundingClientRect();
     svg.style.width = containerRect.width + 'px';
     svg.style.height = containerRect.height + 'px';
     
     let svgContent = '';
-    const arrows = [];
     
     allCourses.forEach(course => {
         if (course.prerequisite_id) {
@@ -191,184 +159,105 @@ function drawRealArrows() {
                 const fromRect = fromNode.getBoundingClientRect();
                 const toRect = toNode.getBoundingClientRect();
                 
-                // Calculate positions relative to container
-                const x1 = fromRect.left + fromRect.width / 2 - containerRect.left;
-                const y1 = fromRect.bottom - containerRect.top;
-                const x2 = toRect.left + toRect.width / 2 - containerRect.left;
-                const y2 = toRect.top - containerRect.top;
+                const x1 = fromRect.right - containerRect.left;
+                const y1 = fromRect.top + fromRect.height / 2 - containerRect.top;
+                const x2 = toRect.left - containerRect.left;
+                const y2 = toRect.top + toRect.height / 2 - containerRect.top;
                 
-                arrows.push({
-                    from: course.prerequisite_id,
-                    to: course.id,
-                    x1, y1, x2, y2,
-                    pathId: `arrow-${course.prerequisite_id}-${course.id}`
-                });
+                // Horizontal curve
+                const midX = (x1 + x2) / 2;
+                
+                svgContent += `
+                    <path id="arrow-${course.prerequisite_id}-${course.id}" 
+                          class="arrow-line" 
+                          d="M ${x1} ${y1} C ${midX} ${y1}, ${midX} ${y2}, ${x2} ${y2}"
+                          data-from="${course.prerequisite_id}"
+                          data-to="${course.id}" />
+                `;
             }
         }
-    });
-    
-    // Draw arrows
-    arrows.forEach(arrow => {
-        const { x1, y1, x2, y2, pathId } = arrow;
-        
-        // Control points for smooth curve
-        const c1x = x1;
-        const c1y = y1 + (y2 - y1) * 0.5;
-        const c2x = x2;
-        const c2y = y2 - (y2 - y1) * 0.5;
-        
-        svgContent += `
-            <path id="${pathId}" 
-                  class="arrow-path" 
-                  d="M ${x1} ${y1} C ${c1x} ${c1y}, ${c2x} ${c2y}, ${x2} ${y2}"
-                  data-from="${arrow.from}"
-                  data-to="${arrow.to}" />
-            <polygon class="arrow-head" 
-                     points="${x2-4},${y2-8} ${x2+4},${y2-8} ${x2},${y2}"
-                     data-from="${arrow.from}"
-                     data-to="${arrow.to}" />
-        `;
     });
     
     svg.innerHTML = svgContent;
 }
 
-// Setup click interactions
-function setupCourseInteractions() {
-    document.querySelectorAll('.course-node').forEach(node => {
+// Setup interactions
+function setupCompactInteractions() {
+    document.querySelectorAll('.compact-course').forEach(node => {
         node.addEventListener('click', () => {
             const courseId = parseInt(node.dataset.id);
-            lightUpChain(courseId);
+            lightUpCompactChain(courseId);
         });
     });
 }
 
-// Light Up Chain with flowing effect
-function lightUpChain(courseId) {
-    // Clear previous
-    document.querySelectorAll('.course-node').forEach(node => {
+// Light up chain
+function lightUpCompactChain(courseId) {
+    document.querySelectorAll('.compact-course').forEach(node => {
         node.classList.remove('lit', 'lit-prereq', 'lit-current', 'lit-next');
     });
-    document.querySelectorAll('.arrow-path').forEach(path => {
-        path.classList.remove('lit', 'lit-flow');
-    });
-    document.querySelectorAll('.arrow-head').forEach(head => {
-        head.classList.remove('lit');
+    document.querySelectorAll('.arrow-line').forEach(path => {
+        path.classList.remove('lit', 'flow');
     });
 
     const course = findCourse(courseId);
     if (!course) return;
-    currentLitCourse = course;
 
-    // Get chains
     const prereqs = getPrerequisiteChain(courseId);
     const dependents = getDependentChain(courseId);
 
-    // Light up prerequisites (ancestors)
+    // Prerequisites
     prereqs.forEach((c, i) => {
         const node = document.getElementById(`course-${c.id}`);
-        if (node) {
-            node.classList.add('lit', 'lit-prereq');
-            node.style.animationDelay = `${(prereqs.length - i) * 0.1}s`;
-        }
-        // Light arrow from prereq to next
-        const arrow = document.getElementById(`arrow-${c.id}-${course.prerequisite_id === c.id ? courseId : findNextInChain(c.id, courseId)}`);
-        if (arrow) arrow.classList.add('lit', 'lit-flow');
+        if (node) node.classList.add('lit', 'lit-prereq');
     });
 
-    // Light up current course
+    // Current
     const currentNode = document.getElementById(`course-${courseId}`);
-    if (currentNode) {
-        currentNode.classList.add('lit', 'lit-current');
-    }
+    if (currentNode) currentNode.classList.add('lit', 'lit-current');
 
-    // Light up dependents (descendants)
+    // Dependents
     dependents.forEach((c, i) => {
         const node = document.getElementById(`course-${c.id}`);
-        if (node) {
-            node.classList.add('lit', 'lit-next');
-            node.style.animationDelay = `${i * 0.15}s`;
-        }
-        // Light arrows
-        const arrow = document.getElementById(`arrow-${courseId}-${c.id}`) || 
-                      document.getElementById(`arrow-${findPrereqFor(c.id)}-${c.id}`);
-        if (arrow) arrow.classList.add('lit', 'lit-flow');
+        if (node) node.classList.add('lit', 'lit-next');
     });
 
-    // Light all arrows in the chain
-    lightChainArrows(prereqs, courseId, dependents);
-
-    showChainInfo(course, prereqs, dependents);
-}
-
-function findNextInChain(fromId, toId) {
-    // Find which course has fromId as prereq and is in path to toId
-    const course = allCourses.find(c => c.prerequisite_id === fromId && isInPath(c.id, toId));
-    return course ? course.id : toId;
-}
-
-function isInPath(fromId, toId) {
-    // Check if fromId leads to toId
-    let current = findCourse(fromId);
-    const visited = new Set();
-    while (current && !visited.has(current.id)) {
-        visited.add(current.id);
-        if (current.id === toId) return true;
-        // Find next
-        const next = allCourses.find(c => c.prerequisite_id === current.id);
-        if (!next) break;
-        current = next;
-    }
-    return false;
-}
-
-function findPrereqFor(courseId) {
-    const course = findCourse(courseId);
-    return course ? course.prerequisite_id : null;
-}
-
-function lightChainArrows(prereqs, currentId, dependents) {
-    // Light arrows connecting the chain
-    [...prereqs, {id: currentId}, ...dependents].forEach((course, i, arr) => {
-        if (i < arr.length - 1) {
-            const next = arr[i + 1];
-            const arrow = document.getElementById(`arrow-${course.id}-${next.id}`);
-            if (arrow) {
-                arrow.classList.add('lit', 'lit-flow');
-            }
+    // Arrows
+    document.querySelectorAll('.arrow-line').forEach(arrow => {
+        const from = parseInt(arrow.dataset.from);
+        const to = parseInt(arrow.dataset.to);
+        const fromNode = document.getElementById(`course-${from}`);
+        const toNode = document.getElementById(`course-${to}`);
+        
+        if (fromNode?.classList.contains('lit') && toNode?.classList.contains('lit')) {
+            arrow.classList.add('lit', 'flow');
         }
     });
+
+    showCompactInfo(course, prereqs, dependents);
 }
 
-// Get Prerequisite Chain (backward)
 function getPrerequisiteChain(courseId) {
     const chain = [];
     let current = findCourse(courseId);
-    
     while (current && current.prerequisite_id) {
         const prereq = findCourse(current.prerequisite_id);
         if (prereq && !chain.find(c => c.id === prereq.id)) {
             chain.unshift(prereq);
             current = prereq;
-        } else {
-            break;
-        }
+        } else break;
     }
-    
     return chain;
 }
 
-// Get Dependent Chain (forward)
 function getDependentChain(courseId) {
     const chain = [];
     const toProcess = [courseId];
     const visited = new Set();
-
     while (toProcess.length > 0) {
         const currentId = toProcess.shift();
         if (visited.has(currentId)) continue;
         visited.add(currentId);
-
         allCourses.forEach(course => {
             if (course.prerequisite_id === currentId && !visited.has(course.id)) {
                 chain.push(course);
@@ -376,37 +265,17 @@ function getDependentChain(courseId) {
             }
         });
     }
-
     return chain;
 }
 
-// Show Chain Info
-function showChainInfo(course, prereqs, dependents) {
-    let msg = `🎓 **${course.name}**\n\n`;
-    
-    if (prereqs.length > 0) {
-        msg += `📚 **Prerequisites:**\n`;
-        prereqs.forEach((p, i) => {
-            msg += `   ${i + 1}. ${p.name}\n`;
-        });
-        msg += '\n';
-    } else {
-        msg += `✅ No prerequisites\n\n`;
-    }
-
-    if (dependents.length > 0) {
-        msg += `🚀 **Unlocks:**\n`;
-        dependents.forEach((d, i) => {
-            msg += `   ${i + 1}. ${d.name}\n`;
-        });
-    } else {
-        msg += `🏁 Terminal course`;
-    }
-
+function showCompactInfo(course, prereqs, dependents) {
+    let msg = `🎓 ${course.name}\n`;
+    if (prereqs.length > 0) msg += `📚 Needs: ${prereqs.map(p => p.name).join(' → ')}\n`;
+    if (dependents.length > 0) msg += `🚀 Unlocks: ${dependents.map(d => d.name).join(', ')}`;
     showToast(msg, 'info');
 }
 
-// Initialize on load
+// Initialize
 document.addEventListener('DOMContentLoaded', () => {
     loadStudyPlan();
 });
