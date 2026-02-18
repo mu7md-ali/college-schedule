@@ -40,16 +40,18 @@ function showStudyPlan() {
     }
 }
 
-// Render Flowchart Plan (like the image)
+// Render Flowchart Plan
 function renderFlowchartPlan() {
     const content = document.getElementById('studyPlanContent');
     if (!content || !studyPlanData) return;
 
-    // Create SVG container for arrows
-    let html = '<svg class="arrows-svg" id="arrowsSvg"></svg>';
+    let html = '<div class="flowchart-wrapper">';
     
-    html += '<div class="flowchart-container">';
+    // SVG layer for arrows (on top)
+    html += '<svg class="arrows-svg" id="arrowsSvg"></svg>';
     
+    html += '<div class="flowchart-container" id="flowchartContainer">';
+
     // Level 1
     html += renderFlowchartLevel('المستوى_الأول', 'Level 1', 1);
     
@@ -62,7 +64,7 @@ function renderFlowchartPlan() {
     // Level 4
     html += renderFlowchartLevel('المستوى_الرابع', 'Level 4', 4);
     
-    html += '</div>';
+    html += '</div></div>';
 
     // Legend
     html += `
@@ -102,47 +104,57 @@ function renderFlowchartPlan() {
 
     // Draw arrows after DOM is ready
     setTimeout(() => {
-        drawArrows();
+        drawRealArrows();
         setupCourseInteractions();
-    }, 100);
+    }, 200);
 }
 
-// Render Single Level as Flowchart Row
+// Render Single Level with Term Separation
 function renderFlowchartLevel(levelKey, levelTitle, levelNum) {
     const levelData = studyPlanData[levelKey];
     if (!levelData) return '';
 
     let html = `<div class="flowchart-level" id="level-${levelNum}" data-level="${levelNum}">`;
-    html += `<div class="level-label">${levelTitle}</div>`;
-    html += `<div class="level-courses">`;
-
-    // Combine both terms
-    const allLevelCourses = [
-        ...levelData.الترم_الأول,
-        ...levelData.الترم_الثاني
-    ];
-
-    allLevelCourses.forEach(course => {
+    html += `<div class="level-title">${levelTitle}</div>`;
+    
+    // Term 1
+    html += `<div class="term-section">`;
+    html += `<div class="term-label">Term 1</div>`;
+    html += `<div class="term-courses">`;
+    levelData.الترم_الأول.forEach(course => {
         html += renderFlowchartCourse(course);
     });
-
     html += `</div></div>`;
+    
+    // Separator
+    html += `<div class="term-separator"></div>`;
+    
+    // Term 2
+    html += `<div class="term-section">`;
+    html += `<div class="term-label">Term 2</div>`;
+    html += `<div class="term-courses">`;
+    levelData.الترم_الثاني.forEach(course => {
+        html += renderFlowchartCourse(course);
+    });
+    html += `</div></div>`;
+    
+    html += `</div>`;
     return html;
 }
 
-// Render Course Node
+// Render Course Node (without ID)
 function renderFlowchartCourse(course) {
     const prereq = course.prerequisite_id ? findCourse(course.prerequisite_id) : null;
     const prereqText = prereq ? `📌 Requires: ${prereq.name}` : '✅ No prerequisite';
     
     return `
         <div class="course-node chain-${course.chain}" 
+             id="course-${course.id}"
              data-id="${course.id}" 
              data-chain="${course.chain}"
              data-prereq="${course.prerequisite_id || ''}"
              title="${prereqText}">
             <div class="course-name">${course.name}</div>
-            <div class="course-id">ID: ${course.id}</div>
             <div class="course-glow"></div>
         </div>
     `;
@@ -153,22 +165,27 @@ function findCourse(id) {
     return allCourses.find(c => c.id === id);
 }
 
-// Draw SVG Arrows between courses
-function drawArrows() {
+// Draw REAL Arrows connecting courses
+function drawRealArrows() {
     const svg = document.getElementById('arrowsSvg');
-    if (!svg) return;
+    const container = document.getElementById('flowchartContainer');
+    if (!svg || !container) return;
     
-    const container = document.querySelector('.flowchart-container');
-    if (!container) return;
+    // Clear existing
+    svg.innerHTML = '';
     
+    // Set SVG size to match container
     const containerRect = container.getBoundingClientRect();
+    svg.style.width = containerRect.width + 'px';
+    svg.style.height = containerRect.height + 'px';
     
     let svgContent = '';
+    const arrows = [];
     
     allCourses.forEach(course => {
         if (course.prerequisite_id) {
-            const fromNode = document.querySelector(`[data-id="${course.prerequisite_id}"]`);
-            const toNode = document.querySelector(`[data-id="${course.id}"]`);
+            const fromNode = document.getElementById(`course-${course.prerequisite_id}`);
+            const toNode = document.getElementById(`course-${course.id}`);
             
             if (fromNode && toNode) {
                 const fromRect = fromNode.getBoundingClientRect();
@@ -180,25 +197,40 @@ function drawArrows() {
                 const x2 = toRect.left + toRect.width / 2 - containerRect.left;
                 const y2 = toRect.top - containerRect.top;
                 
-                // Create curved path
-                const midY = (y1 + y2) / 2;
-                const pathId = `arrow-${course.prerequisite_id}-${course.id}`;
-                
-                svgContent += `
-                    <path id="${pathId}" 
-                          class="arrow-path" 
-                          d="M ${x1} ${y1} C ${x1} ${midY}, ${x2} ${midY}, ${x2} ${y2}"
-                          data-from="${course.prerequisite_id}"
-                          data-to="${course.id}" />
-                    <circle class="arrow-head" cx="${x2}" cy="${y2}" r="3" 
-                            data-from="${course.prerequisite_id}" data-to="${course.id}" />
-                `;
+                arrows.push({
+                    from: course.prerequisite_id,
+                    to: course.id,
+                    x1, y1, x2, y2,
+                    pathId: `arrow-${course.prerequisite_id}-${course.id}`
+                });
             }
         }
     });
     
+    // Draw arrows
+    arrows.forEach(arrow => {
+        const { x1, y1, x2, y2, pathId } = arrow;
+        
+        // Control points for smooth curve
+        const c1x = x1;
+        const c1y = y1 + (y2 - y1) * 0.5;
+        const c2x = x2;
+        const c2y = y2 - (y2 - y1) * 0.5;
+        
+        svgContent += `
+            <path id="${pathId}" 
+                  class="arrow-path" 
+                  d="M ${x1} ${y1} C ${c1x} ${c1y}, ${c2x} ${c2y}, ${x2} ${y2}"
+                  data-from="${arrow.from}"
+                  data-to="${arrow.to}" />
+            <polygon class="arrow-head" 
+                     points="${x2-4},${y2-8} ${x2+4},${y2-8} ${x2},${y2}"
+                     data-from="${arrow.from}"
+                     data-to="${arrow.to}" />
+        `;
+    });
+    
     svg.innerHTML = svgContent;
-    svg.setAttribute('viewBox', `0 0 ${containerRect.width} ${containerRect.height}`);
 }
 
 // Setup click interactions
@@ -211,9 +243,9 @@ function setupCourseInteractions() {
     });
 }
 
-// Light Up Chain - Main Feature with flowing animation
+// Light Up Chain with flowing effect
 function lightUpChain(courseId) {
-    // Clear previous lighting
+    // Clear previous
     document.querySelectorAll('.course-node').forEach(node => {
         node.classList.remove('lit', 'lit-prereq', 'lit-current', 'lit-next');
     });
@@ -232,46 +264,80 @@ function lightUpChain(courseId) {
     const prereqs = getPrerequisiteChain(courseId);
     const dependents = getDependentChain(courseId);
 
-    // Light up prerequisites (dimmer)
+    // Light up prerequisites (ancestors)
     prereqs.forEach((c, i) => {
-        const node = document.querySelector(`[data-id="${c.id}"]`);
+        const node = document.getElementById(`course-${c.id}`);
         if (node) {
             node.classList.add('lit', 'lit-prereq');
-            node.style.animationDelay = `${i * 0.1}s`;
+            node.style.animationDelay = `${(prereqs.length - i) * 0.1}s`;
         }
+        // Light arrow from prereq to next
+        const arrow = document.getElementById(`arrow-${c.id}-${course.prerequisite_id === c.id ? courseId : findNextInChain(c.id, courseId)}`);
+        if (arrow) arrow.classList.add('lit', 'lit-flow');
     });
 
-    // Light up current course (brightest)
-    const currentNode = document.querySelector(`[data-id="${courseId}"]`);
+    // Light up current course
+    const currentNode = document.getElementById(`course-${courseId}`);
     if (currentNode) {
         currentNode.classList.add('lit', 'lit-current');
     }
 
-    // Light up dependents (bright, different color)
+    // Light up dependents (descendants)
     dependents.forEach((c, i) => {
-        const node = document.querySelector(`[data-id="${c.id}"]`);
+        const node = document.getElementById(`course-${c.id}`);
         if (node) {
             node.classList.add('lit', 'lit-next');
             node.style.animationDelay = `${i * 0.15}s`;
         }
+        // Light arrows
+        const arrow = document.getElementById(`arrow-${courseId}-${c.id}`) || 
+                      document.getElementById(`arrow-${findPrereqFor(c.id)}-${c.id}`);
+        if (arrow) arrow.classList.add('lit', 'lit-flow');
     });
 
-    // Light up arrows
-    document.querySelectorAll('.arrow-path').forEach(path => {
-        const from = parseInt(path.dataset.from);
-        const to = parseInt(path.dataset.to);
-        
-        // Arrow is in chain if it connects lit nodes
-        const fromNode = document.querySelector(`[data-id="${from}"]`);
-        const toNode = document.querySelector(`[data-id="${to}"]`);
-        
-        if (fromNode?.classList.contains('lit') && toNode?.classList.contains('lit')) {
-            path.classList.add('lit', 'lit-flow');
+    // Light all arrows in the chain
+    lightChainArrows(prereqs, courseId, dependents);
+
+    showChainInfo(course, prereqs, dependents);
+}
+
+function findNextInChain(fromId, toId) {
+    // Find which course has fromId as prereq and is in path to toId
+    const course = allCourses.find(c => c.prerequisite_id === fromId && isInPath(c.id, toId));
+    return course ? course.id : toId;
+}
+
+function isInPath(fromId, toId) {
+    // Check if fromId leads to toId
+    let current = findCourse(fromId);
+    const visited = new Set();
+    while (current && !visited.has(current.id)) {
+        visited.add(current.id);
+        if (current.id === toId) return true;
+        // Find next
+        const next = allCourses.find(c => c.prerequisite_id === current.id);
+        if (!next) break;
+        current = next;
+    }
+    return false;
+}
+
+function findPrereqFor(courseId) {
+    const course = findCourse(courseId);
+    return course ? course.prerequisite_id : null;
+}
+
+function lightChainArrows(prereqs, currentId, dependents) {
+    // Light arrows connecting the chain
+    [...prereqs, {id: currentId}, ...dependents].forEach((course, i, arr) => {
+        if (i < arr.length - 1) {
+            const next = arr[i + 1];
+            const arrow = document.getElementById(`arrow-${course.id}-${next.id}`);
+            if (arrow) {
+                arrow.classList.add('lit', 'lit-flow');
+            }
         }
     });
-
-    // Show info
-    showChainInfo(course, prereqs, dependents);
 }
 
 // Get Prerequisite Chain (backward)
