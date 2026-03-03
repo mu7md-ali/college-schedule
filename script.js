@@ -46,7 +46,7 @@ function updateThemeIcon(theme) {
 }
 
 // ============================================
-// RAMADAN DECORATIONS
+// RAMADAN DECORATIONS 🌙✨
 // ============================================
 function initBinaryBackground() {
     const bg = document.getElementById('binary-bg');
@@ -937,7 +937,7 @@ function closeStudentsNames() {
 
 
 // =====================================================
-// STUDY PLAN — MOBILE FRIENDLY REDESIGN
+// STUDY PLAN — CLEAN REBUILD — NO SVG, NO IDs
 // =====================================================
 
 const SP_COLORS = {
@@ -1016,223 +1016,171 @@ function showStudyPlan() {
     const modal = document.getElementById('studyPlanModal');
     if (!modal) return;
     modal.classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
     if (!modal.dataset.built) {
-        buildStudyPlanMobile();
+        buildSP();
         modal.dataset.built = '1';
     }
 }
-
 function closeStudyPlan() {
-    const modal = document.getElementById('studyPlanModal');
-    if (modal) {
-        modal.classList.add('hidden');
-        document.body.style.overflow = '';
-    }
+    document.getElementById('studyPlanModal')?.classList.add('hidden');
     sp_active = null;
 }
 
-// ── Build Mobile-Friendly Study Plan ─────────────────
-function buildStudyPlanMobile() {
+// ── Build UI ─────────────────────────────────────────
+function buildSP() {
     const modal = document.getElementById('studyPlanModal');
-    
-    // Group courses by level and term
-    const levels = {};
-    for (let lv = 1; lv <= 4; lv++) {
-        levels[lv] = {
-            term1: SP_DATA.filter(c => c.lv === lv && c.tm === 1),
-            term2: SP_DATA.filter(c => c.lv === lv && c.tm === 2)
-        };
-    }
-    
-    // Build legend
+
+    // max rows per column pair (each level×term)
+    const cols = {};
+    for (let lv = 1; lv <= 4; lv++)
+        for (let tm = 1; tm <= 2; tm++) {
+            const key = `${lv}-${tm}`;
+            cols[key] = SP_DATA.filter(c => c.lv === lv && c.tm === tm);
+        }
+    const maxRows = Math.max(...Object.values(cols).map(a => a.length));
+
+    // legend
     const chains = [...new Set(SP_DATA.map(c => c.chain))];
     const legendHtml = chains.map(ch => `
-        <div class="sp-legend-item" data-chain="${ch}">
-            <span class="sp-legend-dot" style="background:${SP_COLORS[ch]}"></span>
-            <span class="sp-legend-text">${SP_LABELS[ch]||ch}</span>
-        </div>
-    `).join('');
-    
-    // Build levels accordion
-    let levelsHtml = '';
+        <div class="sp-pill" style="border-color:${SP_COLORS[ch]}55;color:${SP_COLORS[ch]};">
+            <div class="sp-pill-dot" style="background:${SP_COLORS[ch]};"></div>
+            ${SP_LABELS[ch]||ch}
+        </div>`).join('');
+
+    // build grid rows
+    // Row 0: level headers (span 2 cols each)
+    // Row 1: term headers
+    // Row 2+: cards
+
+    let gridHtml = '';
+
+    // Level headers row
     for (let lv = 1; lv <= 4; lv++) {
-        const t1 = levels[lv].term1;
-        const t2 = levels[lv].term2;
-        
-        levelsHtml += `
-            <div class="sp-level-section" data-level="${lv}">
-                <div class="sp-level-header" onclick="toggleLevel(${lv})">
-                    <span class="sp-level-title">⬡ Level ${lv}</span>
-                    <i class="fas fa-chevron-down sp-level-icon" id="level-icon-${lv}"></i>
-                </div>
-                <div class="sp-level-content" id="level-content-${lv}">
-                    <div class="sp-terms-row">
-                        <div class="sp-term-column">
-                            <div class="sp-term-header">Term 1</div>
-                            <div class="sp-courses-list">
-                                ${t1.map(c => createCourseCard(c)).join('')}
-                            </div>
-                        </div>
-                        <div class="sp-term-column">
-                            <div class="sp-term-header term2">Term 2</div>
-                            <div class="sp-courses-list">
-                                ${t2.map(c => createCourseCard(c)).join('')}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
+        const border = lv > 1 ? 'lvl-border' : '';
+        gridHtml += `<div class="sp-level-head ${border}" style="grid-column:${(lv-1)*2+1} / span 2; grid-row:1;">⬡ Level ${lv}</div>`;
     }
-    
+
+    // Term headers row
+    for (let lv = 1; lv <= 4; lv++) {
+        const col1 = (lv-1)*2+1;
+        const col2 = (lv-1)*2+2;
+        gridHtml += `<div class="sp-col-head term1" style="grid-column:${col1};grid-row:2;">T1</div>`;
+        gridHtml += `<div class="sp-col-head term2" style="grid-column:${col2};grid-row:2;">T2</div>`;
+    }
+
+    // Card rows
+    for (let row = 0; row < maxRows; row++) {
+        for (let lv = 1; lv <= 4; lv++) {
+            for (let tm = 1; tm <= 2; tm++) {
+                const gridCol = (lv-1)*2 + tm;
+                const gridRow = row + 3;
+                const course = cols[`${lv}-${tm}`][row];
+                const borderLeft = (lv > 1 && tm === 1) ? 'border-left:3px solid rgba(255,215,0,0.15);' : tm === 2 ? 'border-left:1px solid rgba(255,255,255,0.05);' : '';
+                if (course) {
+                    gridHtml += `
+                    <div style="grid-column:${gridCol};grid-row:${gridRow};padding:4px 3px;${borderLeft}">
+                        <div class="sp-card"
+                             data-id="${course.id}"
+                             data-chain="${course.chain}"
+                             data-pre="${course.pre ?? ''}"
+                             onclick="spTap(${course.id})">
+                            <div class="sp-card-name">${course.name}</div>
+                        </div>
+                    </div>`;
+                } else {
+                    gridHtml += `<div style="grid-column:${gridCol};grid-row:${gridRow};${borderLeft}"></div>`;
+                }
+            }
+        }
+    }
+
     modal.innerHTML = `
-        <div class="sp-modal-container">
-            <div class="sp-modal-header">
-                <div class="sp-modal-title">
-                    <i class="fas fa-graduation-cap"></i>
-                    <span>CS Study Plan</span>
-                </div>
-                <button class="sp-close-btn" onclick="closeStudyPlan()">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            
-            <div class="sp-legend-bar">
-                ${legendHtml}
-            </div>
-            
-            <div class="sp-info-panel" id="spInfoPanel">
-                <span class="sp-info-text">Tap a course to see prerequisites</span>
-            </div>
-            
-            <div class="sp-levels-container">
-                ${levelsHtml}
-            </div>
+    <div style="display:flex;flex-direction:column;height:100%;overflow:hidden;">
+        <div class="sp-header">
+            <div class="sp-title"><i class="fas fa-graduation-cap"></i> CS Study Plan — خطة الدراسة</div>
+            <button class="sp-close" onclick="closeStudyPlan()"><i class="fas fa-times"></i></button>
         </div>
-    `;
-    
-    // Expand first level by default
-    setTimeout(() => toggleLevel(1), 100);
-}
-
-function createCourseCard(course) {
-    const color = SP_COLORS[course.chain];
-    const hasPre = course.pre !== null;
-    const preCourse = hasPre ? SP_DATA.find(c => c.id === course.pre) : null;
-    
-    return `
-        <div class="sp-course-card" 
-             data-id="${course.id}"
-             data-chain="${course.chain}"
-             data-pre="${course.pre || ''}"
-             style="border-color:${color}40; background:${color}10"
-             onclick="selectCourse(${course.id})">
-            <div class="sp-course-name" style="color:${color}">${course.name}</div>
-            ${hasPre ? `<div class="sp-course-pre">📌 ${preCourse?.name || ''}</div>` : ''}
+        <div class="sp-legend">${legendHtml}</div>
+        <div class="sp-info" id="spInfo">
+            <span class="sp-info-name" id="spInfoName"></span>
+            <span id="spInfoTags"></span>
         </div>
-    `;
+        <div class="sp-body">
+            <div class="sp-grid" id="spGrid">${gridHtml}</div>
+        </div>
+    </div>`;
 }
 
-function toggleLevel(lv) {
-    const content = document.getElementById(`level-content-${lv}`);
-    const icon = document.getElementById(`level-icon-${lv}`);
-    
-    if (content.classList.contains('expanded')) {
-        content.classList.remove('expanded');
-        icon.style.transform = 'rotate(0deg)';
-    } else {
-        // Close all other levels
-        document.querySelectorAll('.sp-level-content').forEach(el => {
-            el.classList.remove('expanded');
-        });
-        document.querySelectorAll('.sp-level-icon').forEach(el => {
-            el.style.transform = 'rotate(0deg)';
-        });
-        
-        // Open this level
-        content.classList.add('expanded');
-        icon.style.transform = 'rotate(180deg)';
-    }
-}
-
-function selectCourse(id) {
-    const course = SP_DATA.find(c => c.id === id);
-    if (!course) return;
-    
-    // Toggle off if already selected
+// ── Tap handler ──────────────────────────────────────
+function spTap(id) {
+    // Toggle off
     if (sp_active === id) {
         sp_active = null;
-        clearCourseHighlights();
-        updateInfoPanel('Tap a course to see prerequisites');
+        spClearStates();
+        document.getElementById('spInfo')?.classList.remove('show');
         return;
     }
-    
     sp_active = id;
-    
-    const prereqs = getPrereqs(id);
-    const unlocks = getUnlocks(id);
-    
-    // Clear previous highlights
-    clearCourseHighlights();
-    
-    // Highlight selected
-    const selectedCard = document.querySelector(`[data-id="${id}"]`);
-    if (selectedCard) selectedCard.classList.add('selected');
-    
-    // Highlight prerequisites
-    prereqs.forEach(p => {
-        const card = document.querySelector(`[data-id="${p.id}"]`);
-        if (card) card.classList.add('prereq');
+
+    const course = SP_DATA.find(c => c.id === id);
+    if (!course) return;
+
+    const prereqs  = spGetPrereqs(id);
+    const unlocks  = spGetUnlocks(id);
+    const related  = new Set([...prereqs.map(c=>c.id), id, ...unlocks.map(c=>c.id)]);
+
+    // Apply classes
+    document.querySelectorAll('.sp-card').forEach(card => {
+        const cid = parseInt(card.dataset.id);
+        card.classList.remove('is-selected','is-prereq','is-unlocks','is-dim');
+        if (cid === id)                          card.classList.add('is-selected');
+        else if (prereqs.find(c=>c.id===cid))   card.classList.add('is-prereq');
+        else if (unlocks.find(c=>c.id===cid))   card.classList.add('is-unlocks');
+        else                                      card.classList.add('is-dim');
     });
-    
-    // Highlights unlocks
-    unlocks.forEach(u => {
-        const card = document.querySelector(`[data-id="${u.id}"]`);
-        if (card) card.classList.add('unlocks');
-    });
-    
-    // Update info panel
-    const color = SP_COLORS[course.chain];
-    let infoHtml = `<span style="color:${color}; font-weight:700">${course.name}</span>`;
-    
-    if (prereqs.length > 0) {
-        infoHtml += ` <span class="sp-tag prereq-tag">📌 Requires: ${prereqs.map(p => p.name).join(' → ')}</span>`;
-    }
-    if (unlocks.length > 0) {
-        infoHtml += ` <span class="sp-tag unlocks-tag">🔓 Unlocks: ${unlocks.map(u => u.name).join(', ')}</span>`;
-    }
-    
-    updateInfoPanel(infoHtml);
+
+    // Info panel
+    const infoEl   = document.getElementById('spInfo');
+    const nameEl   = document.getElementById('spInfoName');
+    const tagsEl   = document.getElementById('spInfoTags');
+    const col      = SP_COLORS[course.chain] || '#ffd700';
+    nameEl.textContent  = course.name;
+    nameEl.style.color  = col;
+    nameEl.style.textShadow = `0 0 10px ${col}`;
+
+    let tags = `<span class="sp-info-tag">${SP_LABELS[course.chain]||course.chain}</span>`;
+    if (prereqs.length) tags += `<span class="sp-info-tag pre">📌 ${prereqs.map(p=>p.name).join(' → ')}</span>`;
+    else                tags += `<span class="sp-info-tag">✅ No prerequisites</span>`;
+    if (unlocks.length) tags += `<span class="sp-info-tag open">🔓 ${unlocks.map(u=>u.name).join(', ')}</span>`;
+    tagsEl.innerHTML = tags;
+    infoEl?.classList.add('show');
+
+    // Scroll selected into view
+    const el = [...document.querySelectorAll('.sp-card')].find(c=>parseInt(c.dataset.id)===id);
+    el?.scrollIntoView({ behavior:'smooth', block:'nearest', inline:'center' });
 }
 
-function clearCourseHighlights() {
-    document.querySelectorAll('.sp-course-card').forEach(card => {
-        card.classList.remove('selected', 'prereq', 'unlocks');
-    });
+function spClearStates() {
+    document.querySelectorAll('.sp-card').forEach(c =>
+        c.classList.remove('is-selected','is-prereq','is-unlocks','is-dim'));
 }
 
-function updateInfoPanel(html) {
-    const panel = document.getElementById('spInfoPanel');
-    if (panel) panel.innerHTML = html;
-}
-
-function getPrereqs(id) {
+function spGetPrereqs(id) {
     const chain = [];
-    let cur = SP_DATA.find(c => c.id === id);
+    let cur = SP_DATA.find(c=>c.id===id);
     while (cur && cur.pre) {
-        const p = SP_DATA.find(c => c.id === cur.pre);
-        if (!p || chain.find(c => c.id === p.id)) break;
+        const p = SP_DATA.find(c=>c.id===cur.pre);
+        if (!p || chain.find(c=>c.id===p.id)) break;
         chain.unshift(p);
         cur = p;
     }
     return chain;
 }
 
-function getUnlocks(id) {
+function spGetUnlocks(id) {
     const result = [];
-    const queue = [id];
-    const seen = new Set();
+    const queue  = [id];
+    const seen   = new Set();
     while (queue.length) {
         const cid = queue.shift();
         if (seen.has(cid)) continue;
@@ -1249,9 +1197,11 @@ function getUnlocks(id) {
 
 
 // ============================================
-// SUBJECT FILES - DOUBLE CLICK / DOUBLE TAP
+// SUBJECT FILES - LONG PRESS & GOOGLE DRIVE LINKS
 // ============================================
 
+// Subject Google Drive links
+// Format: subject name (lowercase, no emojis) -> drive folder link
 const subjectDriveLinks = {
     "business administration": "https://drive.google.com/drive/folders/1_GE-P572jVZLhJZqnU7t7ahl5GxVTU8I",
     "data structure": "https://drive.google.com/drive/folders/1RIdM672Mfhcr8KhVpzXgJr-DsWC0zL7A",
@@ -1261,9 +1211,15 @@ const subjectDriveLinks = {
     "human rights": "https://drive.google.com/drive/folders/1XlfEGfvmQigDkWkEgxO9ewxxBN9n3ElF"
 };
 
+// ============================================
+// DOUBLE CLICK / DOUBLE TAP DETECTION
+// ============================================
+
 function initDoubleTapDetection() {
+    // Double click for desktop - on document to catch dynamically added cards
     document.addEventListener('dblclick', handleDoubleClick);
 
+    // Double tap for mobile
     let lastTap = 0;
     document.addEventListener('touchend', (e) => {
         const now = Date.now();
@@ -1296,12 +1252,21 @@ function handleDoubleClick(e) {
     openSubjectFiles(subjectName);
 }
 
+// ============================================
+// SUBJECT FILES MODAL - GOOGLE DRIVE LINKS
+// ============================================
+
+let currentSubjectName = null;
+
 function openSubjectFiles(subjectName) {
+    // Clean subject name (remove emojis, lowercase)
     const cleanName = cleanSubjectName(subjectName);
+    currentSubjectName = subjectName;
     
     const driveLink = subjectDriveLinks[cleanName];
     
     if (driveLink) {
+        // Open Google Drive link directly in new tab
         window.open(driveLink, '_blank');
         showToast(`Opening ${subjectName} Drive folder 🚀`, 'success');
     } else {
@@ -1310,6 +1275,7 @@ function openSubjectFiles(subjectName) {
 }
 
 function cleanSubjectName(name) {
+    // Remove emojis, variation selectors, and extra spaces, convert to lowercase
     return name
         .replace(/\p{Emoji}/gu, '')
         .replace(/[\u{FE00}-\u{FE0F}]/gu, '')
@@ -1318,18 +1284,24 @@ function cleanSubjectName(name) {
         .toLowerCase();
 }
 
+function openFolder(folderName) {
+    currentFolderPath.push(folderName);
+    renderFiles();
+}
+
 // ============================================
 // INITIALIZATION
 // ============================================
+
+// Initialize long press detection when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     initDoubleTapDetection();
-    loadEnglishScheduleData();
-    loadStudentsData();
 });
 
-
 // ============================================
-// TASKS FROM GOOGLE SHEETS - FIXED
+// ============================================
+// ============================================
+// TASKS FROM GOOGLE SHEETS - ORIGINAL
 // ============================================
 
 const SHEET_ID = '12W7uul0LS0dZmMf7E3DU2TJRrf2BN06o';
@@ -1340,32 +1312,17 @@ let currentFilter = 'all';
 
 async function loadTasksFromSheet() {
     try {
-        // Add cache-busting parameter
         const res = await fetch(SHEET_URL + '&t=' + Date.now());
         const text = await res.text();
-        
-        console.log('📊 Raw CSV:', text.substring(0, 500));
-        
-        allTasks = parseCSVTasksFixed(text);
-        console.log('✅ Parsed tasks:', allTasks);
-        
+        allTasks = parseCSVTasks(text);
         renderTasks();
     } catch (err) {
-        console.error('❌ Error loading tasks:', err);
         const container = document.getElementById('tasksContainer');
-        if (container) {
-            container.innerHTML = `
-                <div class="tasks-empty">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <p>Could not load tasks. Please check your connection.</p>
-                    <button onclick="refreshTasks()" class="btn-retry">Retry</button>
-                </div>
-            `;
-        }
+        if (container) container.innerHTML = '<div class="tasks-empty"><i class="fas fa-wifi"></i><p>Could not load tasks.</p></div>';
     }
 }
 
-function parseCSVTasksFixed(csv) {
+function parseCSVTasks(csv) {
     const lines = csv.trim().split('\n');
     const tasks = [];
     
@@ -1445,10 +1402,12 @@ function renderTasks() {
     container.innerHTML = filtered.map(task => {
         const taskType = task.type || 'default';
         
+        // تصليح مهم: متغيرات منفصلة لكل كارد
         let dueBadge = '';
         let urgentClass = '';
-        let neonClass = '';
+        let neonClass = ''; // للألوان النيونية حسب الحالة
         
+        // معالجة التاريخ بأمان
         if (task.due_date && task.due_date.trim() !== '') {
             const due = parseDateSafe(task.due_date);
             
@@ -1464,7 +1423,7 @@ function renderTasks() {
                     urgentClass = 'task-urgent-today';
                     neonClass = 'neon-orange';
                 } else if (diff <= 3) {
-                    dueBadge = `<span class="task-badge task-soon">In ${diff}d</span>`;
+                    dueBadge = '<span class="task-badge task-soon">In ' + diff + 'd</span>';
                     neonClass = 'neon-blue';
                 }
             }
@@ -1483,30 +1442,29 @@ function renderTasks() {
     }).join('');
 }
 
+// دالة آمنة لقراءة التاريخ
 function parseDateSafe(dateString) {
     if (!dateString || typeof dateString !== 'string') return null;
     
     const str = dateString.trim();
     if (!str) return null;
     
-    // Try direct parsing first
+    // جرب قراءة مباشرة أولاً
     let date = new Date(str);
     if (!isNaN(date.getTime())) return date;
     
-    // Try DD/MM/YYYY format
+    // لو فيه / بدل - حاول تبديلهم
     if (str.includes('/')) {
+        date = new Date(str.replace(/\//g, '-'));
+        if (!isNaN(date.getTime())) return date;
+        
+        // جرب DD/MM/YYYY
         const parts = str.split('/');
         if (parts.length === 3) {
             // DD/MM/YYYY
             date = new Date(parts[2], parts[1] - 1, parts[0]);
             if (!isNaN(date.getTime())) return date;
         }
-    }
-    
-    // Try YYYY-MM-DD format
-    if (str.includes('-')) {
-        date = new Date(str);
-        if (!isNaN(date.getTime())) return date;
     }
     
     return null;
@@ -1523,4 +1481,12 @@ function refreshTasks() {
     const c = document.getElementById('tasksContainer');
     if (c) c.innerHTML = '<div class="tasks-loading"><i class="fas fa-spinner fa-spin"></i> Refreshing...</div>';
     loadTasksFromSheet();
+}
+
+function toggleTasksSection() {
+    const s = document.getElementById('tasksSection');
+    if (!s) return;
+    const wasHidden = s.classList.contains('hidden');
+    s.classList.toggle('hidden');
+    if (wasHidden) { s.scrollIntoView({ behavior:'smooth', block:'start' }); loadTasksFromSheet(); }
 }
