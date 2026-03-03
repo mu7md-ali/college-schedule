@@ -1301,6 +1301,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ============================================
 // ============================================
+// ============================================
 // TASKS FROM GOOGLE SHEETS
 // ============================================
 
@@ -1367,35 +1368,34 @@ function renderTasks() {
     container.innerHTML = filtered.map(task => {
         const taskType = task.type || 'default';
         
-        let dueBadge = '', urgentClass = '';
+        // ✅ تصليح مهم: متغيرات منفصلة لكل كارد
+        let dueBadge = '';
+        let urgentClass = '';
+        let neonClass = ''; // للألوان النيونية حسب الحالة
         
-        // ✅ فك التاريخ بأمان
-        try {
-            if (task.due_date && task.due_date.trim() !== '') {
-                // استبدل / بـ - عشان تتوحد الصيغة
-                const dateStr = task.due_date.replace(/\//g, '-');
-                const due = new Date(dateStr);
+        // معالجة التاريخ بأمان
+        if (task.due_date && task.due_date.trim() !== '') {
+            const due = parseDateSafe(task.due_date);
+            
+            if (due && !isNaN(due.getTime())) {
+                const diff = Math.ceil((due - today) / 86400000);
                 
-                if (!isNaN(due.getTime())) {
-                    const diff = Math.ceil((due - today) / 86400000);
-                    
-                    if (diff < 0) {
-                        dueBadge = '<span class="task-overdue">Overdue</span>'; 
-                        urgentClass = 'task-card-overdue';
-                    } else if (diff === 0) {
-                        dueBadge = '<span class="task-today">Today!</span>';    
-                        urgentClass = 'task-card-today';
-                    } else if (diff <= 3) {
-                        dueBadge = '<span class="task-soon">In ' + diff + 'd</span>';
-                    }
+                if (diff < 0) {
+                    dueBadge = '<span class="task-badge task-overdue">Overdue</span>';
+                    urgentClass = 'task-urgent-overdue';
+                    neonClass = 'neon-red';
+                } else if (diff === 0) {
+                    dueBadge = '<span class="task-badge task-today">Today!</span>';
+                    urgentClass = 'task-urgent-today';
+                    neonClass = 'neon-orange';
+                } else if (diff <= 3) {
+                    dueBadge = '<span class="task-badge task-soon">In ' + diff + 'd</span>';
+                    neonClass = 'neon-blue';
                 }
             }
-        } catch (e) {
-            // لو فيه خطأ في التاريخ، سيبه فاضي
-            console.log('Invalid date:', task.due_date);
         }
         
-        return `<div class="task-card ${urgentClass}" data-type="${taskType}">
+        return `<div class="task-card ${urgentClass} ${neonClass}" data-type="${taskType}">
             <div class="task-card-header">
                 <div class="task-type-badge">${task.type || 'Task'}</div>
                 ${dueBadge}
@@ -1406,6 +1406,34 @@ function renderTasks() {
             ${task.notes ? `<div class="task-notes"><i class="fas fa-sticky-note"></i> ${task.notes}</div>` : ''}
         </div>`;
     }).join('');
+}
+
+// ✅ دالة آمنة لقراءة التاريخ
+function parseDateSafe(dateString) {
+    if (!dateString || typeof dateString !== 'string') return null;
+    
+    const str = dateString.trim();
+    if (!str) return null;
+    
+    // جرب قراءة مباشرة أولاً
+    let date = new Date(str);
+    if (!isNaN(date.getTime())) return date;
+    
+    // لو فيه / بدل - حاول تبديلهم
+    if (str.includes('/')) {
+        date = new Date(str.replace(/\//g, '-'));
+        if (!isNaN(date.getTime())) return date;
+        
+        // جرب DD/MM/YYYY
+        const parts = str.split('/');
+        if (parts.length === 3) {
+            // DD/MM/YYYY
+            date = new Date(parts[2], parts[1] - 1, parts[0]);
+            if (!isNaN(date.getTime())) return date;
+        }
+    }
+    
+    return null;
 }
 
 function filterTasks(type) {
