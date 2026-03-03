@@ -1326,17 +1326,27 @@ async function loadTasksFromSheet() {
 function parseCSVTasks(csv) {
     const lines = csv.trim().split('\n');
     const tasks = [];
+    
     for (let i = 2; i < lines.length; i++) {
-        const cols = parseCSVLine(lines[i]);
-        if (!cols[0] || cols[0].replace(/"/g,'').trim() === '') continue;
+        const line = lines[i].trim();
+        if (!line) continue;
+        
+        // ✅ استخدم طريقة تانية: split بالـ comma مع مراعاة الـ quotes
+        const cols = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || [];
+        
+        const name = cols[0]?.replace(/^"|"$/g,'').trim() || '';
+        if (!name) continue;
+        
         tasks.push({
-            name:     cols[0]?.replace(/^"|"$/g,'').trim() || '',
+            name:     name,
             subject:  cols[1]?.replace(/^"|"$/g,'').trim() || '',
             type:     cols[2]?.replace(/^"|"$/g,'').trim() || '',
             due_date: cols[3]?.replace(/^"|"$/g,'').trim() || '',
             notes:    cols[4]?.replace(/^"|"$/g,'').trim() || ''
         });
     }
+    
+    console.log('✅ Parsed', tasks.length, 'tasks:', tasks);
     return tasks;
 }
 
