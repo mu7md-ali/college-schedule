@@ -1365,19 +1365,36 @@ function renderTasks() {
     today.setHours(0,0,0,0);
     
     container.innerHTML = filtered.map(task => {
-        // ✅ الحتة المهمة: data-type attribute
         const taskType = task.type || 'default';
         
         let dueBadge = '', urgentClass = '';
-        if (task.due_date) {
-            const due = new Date(task.due_date);
-            const diff = Math.ceil((due - today) / 86400000);
-            if (diff < 0)       { dueBadge = '<span class="task-overdue">Overdue</span>'; urgentClass = 'task-card-overdue'; }
-            else if (diff === 0){ dueBadge = '<span class="task-today">Today!</span>';    urgentClass = 'task-card-today'; }
-            else if (diff <= 3) { dueBadge = '<span class="task-soon">In '+diff+'d</span>'; }
+        
+        // ✅ فك التاريخ بأمان
+        try {
+            if (task.due_date && task.due_date.trim() !== '') {
+                // استبدل / بـ - عشان تتوحد الصيغة
+                const dateStr = task.due_date.replace(/\//g, '-');
+                const due = new Date(dateStr);
+                
+                if (!isNaN(due.getTime())) {
+                    const diff = Math.ceil((due - today) / 86400000);
+                    
+                    if (diff < 0) {
+                        dueBadge = '<span class="task-overdue">Overdue</span>'; 
+                        urgentClass = 'task-card-overdue';
+                    } else if (diff === 0) {
+                        dueBadge = '<span class="task-today">Today!</span>';    
+                        urgentClass = 'task-card-today';
+                    } else if (diff <= 3) {
+                        dueBadge = '<span class="task-soon">In ' + diff + 'd</span>';
+                    }
+                }
+            }
+        } catch (e) {
+            // لو فيه خطأ في التاريخ، سيبه فاضي
+            console.log('Invalid date:', task.due_date);
         }
         
-        // ✅ data-type attribute هنا
         return `<div class="task-card ${urgentClass}" data-type="${taskType}">
             <div class="task-card-header">
                 <div class="task-type-badge">${task.type || 'Task'}</div>
