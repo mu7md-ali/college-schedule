@@ -2651,7 +2651,7 @@ body {
 }
 
 /* ============================================
-   TASK CARDS - COLORED BY TYPE
+   TASK CARDS - ALL TYPES (English & Arabic)
    ============================================ */
 .task-card {
     border-radius: 12px;
@@ -2667,7 +2667,9 @@ body {
 /* 🟦 QUIZ - أزرق سماوي */
 .task-card[data-type="quiz"],
 .task-card[data-type="Quiz"],
-.task-card[data-type="كويز"] {
+.task-card[data-type="QUIZ"],
+.task-card[data-type="كويز"],
+.task-card[data-type="كويزات"] {
     background: linear-gradient(135deg, rgba(0, 212, 255, 0.15), rgba(0, 212, 255, 0.05));
     border: 1px solid rgba(0, 212, 255, 0.3);
     border-left-color: #00d4ff;
@@ -2676,7 +2678,9 @@ body {
 
 .task-card[data-type="quiz"]:hover,
 .task-card[data-type="Quiz"]:hover,
-.task-card[data-type="كويز"]:hover {
+.task-card[data-type="QUIZ"]:hover,
+.task-card[data-type="كويز"]:hover,
+.task-card[data-type="كويزات"]:hover {
     transform: translateY(-3px) scale(1.01);
     border-color: rgba(0, 212, 255, 0.6);
     box-shadow: 0 8px 25px rgba(0, 212, 255, 0.3);
@@ -2685,7 +2689,11 @@ body {
 /* 🟩 ASSIGNMENT - أخضر زمردي */
 .task-card[data-type="assignment"],
 .task-card[data-type="Assignment"],
-.task-card[data-type="اسايمنت"] {
+.task-card[data-type="ASSIGNMENT"],
+.task-card[data-type="اسايمنت"],
+.task-card[data-type="اسايمنتات"],
+.task-card[data-type="واجب"],
+.task-card[data-type="واجبات"] {
     background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.05));
     border: 1px solid rgba(16, 185, 129, 0.3);
     border-left-color: #10b981;
@@ -2694,7 +2702,11 @@ body {
 
 .task-card[data-type="assignment"]:hover,
 .task-card[data-type="Assignment"]:hover,
-.task-card[data-type="اسايمنت"]:hover {
+.task-card[data-type="ASSIGNMENT"]:hover,
+.task-card[data-type="اسايمنت"]:hover,
+.task-card[data-type="اسايمنتات"]:hover,
+.task-card[data-type="واجب"]:hover,
+.task-card[data-type="واجبات"]:hover {
     transform: translateY(-3px) scale(1.01);
     border-color: rgba(16, 185, 129, 0.6);
     box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
@@ -2703,7 +2715,9 @@ body {
 /* 🟨 PROJECT - أصفر ذهبي */
 .task-card[data-type="project"],
 .task-card[data-type="Project"],
-.task-card[data-type="مشروع"] {
+.task-card[data-type="PROJECT"],
+.task-card[data-type="مشروع"],
+.task-card[data-type="مشاريع"] {
     background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.05));
     border: 1px solid rgba(245, 158, 11, 0.3);
     border-left-color: #f59e0b;
@@ -2712,16 +2726,25 @@ body {
 
 .task-card[data-type="project"]:hover,
 .task-card[data-type="Project"]:hover,
-.task-card[data-type="مشروع"]:hover {
+.task-card[data-type="PROJECT"]:hover,
+.task-card[data-type="مشروع"]:hover,
+.task-card[data-type="مشاريع"]:hover {
     transform: translateY(-3px) scale(1.01);
     border-color: rgba(245, 158, 11, 0.6);
     box-shadow: 0 8px 25px rgba(245, 158, 11, 0.3);
 }
 
-/* 🟥 EXAM - أحمر مرجاني */
+/* 🟥 EXAM / SUBMISSION - أحمر مرجاني */
 .task-card[data-type="exam"],
 .task-card[data-type="Exam"],
-.task-card[data-type="امتحان"] {
+.task-card[data-type="EXAM"],
+.task-card[data-type="امتحان"],
+.task-card[data-type="امتحانات"],
+.task-card[data-type="submission"],
+.task-card[data-type="Submission"],
+.task-card[data-type="SUBMISSION"],
+.task-card[data-type="تسليم"],
+.task-card[data-type="تسليمات"] {
     background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(239, 68, 68, 0.05));
     border: 1px solid rgba(239, 68, 68, 0.3);
     border-left-color: #ef4444;
@@ -2730,21 +2753,42 @@ body {
 
 .task-card[data-type="exam"]:hover,
 .task-card[data-type="Exam"]:hover,
-.task-card[data-type="امتحان"]:hover {
+.task-card[data-type="EXAM"]:hover,
+.task-card[data-type="امتحان"]:hover,
+.task-card[data-type="امتحانات"]:hover,
+.task-card[data-type="submission"]:hover,
+.task-card[data-type="Submission"]:hover,
+.task-card[data-type="SUBMISSION"]:hover,
+.task-card[data-type="تسليم"]:hover,
+.task-card[data-type="تسليمات"]:hover {
     transform: translateY(-3px) scale(1.01);
     border-color: rgba(239, 68, 68, 0.6);
     box-shadow: 0 8px 25px rgba(239, 68, 68, 0.3);
 }
 
-/* 🟪 DEFAULT - بنفسجي (لو مفيش نوع محدد) */
-.task-card:not([data-type]) {
+/* 🟪 DEFAULT - بنفسجي */
+.task-card:not([data-type]),
+.task-card[data-type=""],
+.task-card[data-type="default"],
+.task-card[data-type="task"],
+.task-card[data-type="Task"],
+.task-card[data-type="TASK"],
+.task-card[data-type="مهمة"],
+.task-card[data-type="مهام"] {
     background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(139, 92, 246, 0.05));
     border: 1px solid rgba(139, 92, 246, 0.3);
     border-left-color: #8b5cf6;
     box-shadow: 0 4px 15px rgba(139, 92, 246, 0.15), inset 0 1px 0 rgba(139, 92, 246, 0.1);
 }
 
-.task-card:not([data-type]):hover {
+.task-card:not([data-type]):hover,
+.task-card[data-type=""]:hover,
+.task-card[data-type="default"]:hover,
+.task-card[data-type="task"]:hover,
+.task-card[data-type="Task"]:hover,
+.task-card[data-type="TASK"]:hover,
+.task-card[data-type="مهمة"]:hover,
+.task-card[data-type="مهام"]:hover {
     transform: translateY(-3px) scale(1.01);
     border-color: rgba(139, 92, 246, 0.6);
     box-shadow: 0 8px 25px rgba(139, 92, 246, 0.3);
@@ -2768,7 +2812,6 @@ body {
     backdrop-filter: blur(4px);
 }
 
-/* 🚨 متأخر - أحمر */
 .task-overdue { 
     background: rgba(239, 68, 68, 0.25); 
     color: #ef4444; 
@@ -2780,7 +2823,6 @@ body {
     backdrop-filter: blur(4px);
 }
 
-/* ⚠️ اليوم - برتقالي */
 .task-today { 
     background: rgba(245, 158, 11, 0.25); 
     color: #f59e0b; 
@@ -2792,7 +2834,6 @@ body {
     backdrop-filter: blur(4px);
 }
 
-/* 🔜 قريباً - أزرق */
 .task-soon { 
     background: rgba(59, 130, 246, 0.25); 
     color: #3b82f6; 
@@ -2850,7 +2891,7 @@ body {
 }
 
 /* ============================================
-   LIGHT MODE - ألوان واضحة
+   LIGHT MODE
    ============================================ */
 [data-theme="light"] .tasks-section {
     background: rgba(255, 255, 255, 0.7);
@@ -2860,62 +2901,84 @@ body {
         inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
-/* Quiz في Light Mode */
+/* Quiz Light */
 [data-theme="light"] .task-card[data-type="quiz"],
 [data-theme="light"] .task-card[data-type="Quiz"],
-[data-theme="light"] .task-card[data-type="كويز"] {
+[data-theme="light"] .task-card[data-type="QUIZ"],
+[data-theme="light"] .task-card[data-type="كويز"],
+[data-theme="light"] .task-card[data-type="كويزات"] {
     background: linear-gradient(135deg, rgba(0, 212, 255, 0.2), rgba(0, 212, 255, 0.08));
     border: 1px solid rgba(0, 212, 255, 0.5);
     box-shadow: 0 4px 15px rgba(0, 212, 255, 0.2);
 }
 
-/* Assignment في Light Mode */
+/* Assignment Light */
 [data-theme="light"] .task-card[data-type="assignment"],
 [data-theme="light"] .task-card[data-type="Assignment"],
-[data-theme="light"] .task-card[data-type="اسايمنت"] {
+[data-theme="light"] .task-card[data-type="ASSIGNMENT"],
+[data-theme="light"] .task-card[data-type="اسايمنت"],
+[data-theme="light"] .task-card[data-type="اسايمنتات"],
+[data-theme="light"] .task-card[data-type="واجب"],
+[data-theme="light"] .task-card[data-type="واجبات"] {
     background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.08));
     border: 1px solid rgba(16, 185, 129, 0.5);
     box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);
 }
 
-/* Project في Light Mode */
+/* Project Light */
 [data-theme="light"] .task-card[data-type="project"],
 [data-theme="light"] .task-card[data-type="Project"],
-[data-theme="light"] .task-card[data-type="مشروع"] {
+[data-theme="light"] .task-card[data-type="PROJECT"],
+[data-theme="light"] .task-card[data-type="مشروع"],
+[data-theme="light"] .task-card[data-type="مشاريع"] {
     background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(245, 158, 11, 0.08));
     border: 1px solid rgba(245, 158, 11, 0.5);
     box-shadow: 0 4px 15px rgba(245, 158, 11, 0.2);
 }
 
-/* Exam في Light Mode */
+/* Exam/Submission Light */
 [data-theme="light"] .task-card[data-type="exam"],
 [data-theme="light"] .task-card[data-type="Exam"],
-[data-theme="light"] .task-card[data-type="امتحان"] {
+[data-theme="light"] .task-card[data-type="EXAM"],
+[data-theme="light"] .task-card[data-type="امتحان"],
+[data-theme="light"] .task-card[data-type="امتحانات"],
+[data-theme="light"] .task-card[data-type="submission"],
+[data-theme="light"] .task-card[data-type="Submission"],
+[data-theme="light"] .task-card[data-type="SUBMISSION"],
+[data-theme="light"] .task-card[data-type="تسليم"],
+[data-theme="light"] .task-card[data-type="تسليمات"] {
     background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(239, 68, 68, 0.08));
     border: 1px solid rgba(239, 68, 68, 0.5);
     box-shadow: 0 4px 15px rgba(239, 68, 68, 0.2);
 }
 
-/* Default في Light Mode */
-[data-theme="light"] .task-card:not([data-type]) {
+/* Default Light */
+[data-theme="light"] .task-card:not([data-type]),
+[data-theme="light"] .task-card[data-type=""],
+[data-theme="light"] .task-card[data-type="default"],
+[data-theme="light"] .task-card[data-type="task"],
+[data-theme="light"] .task-card[data-type="Task"],
+[data-theme="light"] .task-card[data-type="TASK"],
+[data-theme="light"] .task-card[data-type="مهمة"],
+[data-theme="light"] .task-card[data-type="مهام"] {
     background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(139, 92, 246, 0.08));
     border: 1px solid rgba(139, 92, 246, 0.5);
     box-shadow: 0 4px 15px rgba(139, 92, 246, 0.2);
 }
 
-/* النصوص في Light Mode */
+/* Text Colors Light Mode */
 [data-theme="light"] .task-name {
-    color: #1f2937; /* رمادي غامق */
+    color: #1f2937;
 }
 
 [data-theme="light"] .task-subject,
 [data-theme="light"] .task-due,
 [data-theme="light"] .task-notes {
-    color: #6b7280; /* رمادي متوسط */
+    color: #6b7280;
 }
 
 [data-theme="light"] .tasks-title {
-    color: #7c3aed; /* بنفسجي أغمق */
+    color: #7c3aed;
 }
 
 [data-theme="light"] .btn-refresh-tasks {
