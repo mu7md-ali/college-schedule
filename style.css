@@ -2569,19 +2569,20 @@ body {
 }
 
 /* ============================================
-   TASKS SECTION - GLASSMORPHISM EDITION
+/* ============================================
+   TASKS SECTION - NEON EDITION
    ============================================ */
 .tasks-section {
-    background: rgba(139, 92, 246, 0.08);
-    border: 1px solid rgba(139, 92, 246, 0.25);
+    background: rgba(10, 10, 20, 0.6);
+    border: 1px solid rgba(139, 92, 246, 0.3);
     border-radius: 16px;
     padding: 1.4rem;
     margin: 1rem 0;
     box-shadow: 
-        0 4px 24px rgba(139, 92, 246, 0.15),
+        0 0 20px rgba(139, 92, 246, 0.2),
         inset 0 1px 0 rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
 }
 
 .tasks-head { 
@@ -2597,24 +2598,27 @@ body {
     color: #a78bfa; 
     display: flex; 
     align-items: center; 
-    gap: .5rem; 
+    gap: .5rem;
+    text-shadow: 0 0 10px rgba(167, 139, 250, 0.5);
 }
 
 .btn-refresh-tasks { 
-    background: rgba(167, 139, 250, 0.15); 
+    background: rgba(167, 139, 250, 0.1); 
     border: 1px solid rgba(167, 139, 250, 0.4); 
     color: #a78bfa; 
     border-radius: 8px; 
     padding: .4rem .8rem; 
     cursor: pointer; 
-    transition: all .2s; 
+    transition: all .3s; 
     backdrop-filter: blur(4px);
+    box-shadow: 0 0 10px rgba(167, 139, 250, 0.1);
 }
 
 .btn-refresh-tasks:hover { 
-    background: rgba(167, 139, 250, 0.25); 
+    background: rgba(167, 139, 250, 0.2); 
     border-color: #a78bfa;
-    transform: translateY(-1px);
+    box-shadow: 0 0 20px rgba(167, 139, 250, 0.4);
+    transform: translateY(-2px);
 }
 
 .tasks-filter { 
@@ -2625,55 +2629,74 @@ body {
 }
 
 .task-filter-btn { 
-    background: rgba(255, 255, 255, 0.08); 
-    border: 1px solid rgba(255, 255, 255, 0.15); 
+    background: rgba(255, 255, 255, 0.05); 
+    border: 1px solid rgba(255, 255, 255, 0.1); 
     color: #9ca3af; 
     border-radius: 20px; 
     padding: .3rem .8rem; 
     font-size: .82rem; 
     cursor: pointer; 
-    transition: all .2s; 
+    transition: all .3s; 
     backdrop-filter: blur(4px);
 }
 
 .task-filter-btn.active,
 .task-filter-btn:hover { 
-    background: rgba(167, 139, 250, 0.2); 
+    background: rgba(167, 139, 250, 0.15); 
     border-color: #a78bfa; 
     color: #a78bfa; 
-    box-shadow: 0 2px 8px rgba(167, 139, 250, 0.2);
+    box-shadow: 0 0 15px rgba(167, 139, 250, 0.3);
 }
 
 .tasks-container { 
     display: grid; 
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); 
-    gap: .8rem; 
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+    gap: 1rem; 
 }
 
 /* ============================================
-   TASK CARDS - ALL TYPES (English & Arabic)
+   TASK CARDS - NEON GLOW
    ============================================ */
 .task-card {
     border-radius: 12px;
     padding: 1rem;
-    transition: all .25s;
+    transition: all .3s;
     position: relative;
     overflow: hidden;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    border-left: 4px solid;
+    border: 1px solid;
+    border-left-width: 4px;
 }
 
-/* 🟦 QUIZ - أزرق سماوي */
+/* تأثير النيون الأساسي */
+.task-card::before {
+    content: '';
+    position: absolute;
+    top: -2px; left: -2px; right: -2px; bottom: -2px;
+    background: linear-gradient(45deg, transparent, transparent, transparent);
+    z-index: -1;
+    border-radius: 14px;
+    opacity: 0;
+    transition: opacity .3s;
+}
+
+.task-card:hover::before {
+    opacity: 1;
+}
+
+/* 🟦 QUIZ - نيون أزرق سماوي */
 .task-card[data-type="quiz"],
 .task-card[data-type="Quiz"],
 .task-card[data-type="QUIZ"],
 .task-card[data-type="كويز"],
 .task-card[data-type="كويزات"] {
-    background: linear-gradient(135deg, rgba(0, 212, 255, 0.15), rgba(0, 212, 255, 0.05));
-    border: 1px solid rgba(0, 212, 255, 0.3);
+    background: rgba(0, 212, 255, 0.08);
+    border-color: rgba(0, 212, 255, 0.4);
     border-left-color: #00d4ff;
-    box-shadow: 0 4px 15px rgba(0, 212, 255, 0.15), inset 0 1px 0 rgba(0, 212, 255, 0.1);
+    box-shadow: 
+        0 0 20px rgba(0, 212, 255, 0.15),
+        inset 0 1px 0 rgba(0, 212, 255, 0.1);
 }
 
 .task-card[data-type="quiz"]:hover,
@@ -2681,12 +2704,15 @@ body {
 .task-card[data-type="QUIZ"]:hover,
 .task-card[data-type="كويز"]:hover,
 .task-card[data-type="كويزات"]:hover {
-    transform: translateY(-3px) scale(1.01);
-    border-color: rgba(0, 212, 255, 0.6);
-    box-shadow: 0 8px 25px rgba(0, 212, 255, 0.3);
+    transform: translateY(-5px) scale(1.02);
+    border-color: #00d4ff;
+    box-shadow: 
+        0 0 30px rgba(0, 212, 255, 0.4),
+        0 0 60px rgba(0, 212, 255, 0.2),
+        inset 0 1px 0 rgba(0, 212, 255, 0.2);
 }
 
-/* 🟩 ASSIGNMENT - أخضر زمردي */
+/* 🟩 ASSIGNMENT - نيون أخضر */
 .task-card[data-type="assignment"],
 .task-card[data-type="Assignment"],
 .task-card[data-type="ASSIGNMENT"],
@@ -2694,10 +2720,12 @@ body {
 .task-card[data-type="اسايمنتات"],
 .task-card[data-type="واجب"],
 .task-card[data-type="واجبات"] {
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.05));
-    border: 1px solid rgba(16, 185, 129, 0.3);
-    border-left-color: #10b981;
-    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.15), inset 0 1px 0 rgba(16, 185, 129, 0.1);
+    background: rgba(0, 255, 136, 0.08);
+    border-color: rgba(0, 255, 136, 0.4);
+    border-left-color: #00ff88;
+    box-shadow: 
+        0 0 20px rgba(0, 255, 136, 0.15),
+        inset 0 1px 0 rgba(0, 255, 136, 0.1);
 }
 
 .task-card[data-type="assignment"]:hover,
@@ -2707,21 +2735,26 @@ body {
 .task-card[data-type="اسايمنتات"]:hover,
 .task-card[data-type="واجب"]:hover,
 .task-card[data-type="واجبات"]:hover {
-    transform: translateY(-3px) scale(1.01);
-    border-color: rgba(16, 185, 129, 0.6);
-    box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+    transform: translateY(-5px) scale(1.02);
+    border-color: #00ff88;
+    box-shadow: 
+        0 0 30px rgba(0, 255, 136, 0.4),
+        0 0 60px rgba(0, 255, 136, 0.2),
+        inset 0 1px 0 rgba(0, 255, 136, 0.2);
 }
 
-/* 🟨 PROJECT - أصفر ذهبي */
+/* 🟨 PROJECT - نيون أصفر/ذهبي */
 .task-card[data-type="project"],
 .task-card[data-type="Project"],
 .task-card[data-type="PROJECT"],
 .task-card[data-type="مشروع"],
 .task-card[data-type="مشاريع"] {
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.05));
-    border: 1px solid rgba(245, 158, 11, 0.3);
-    border-left-color: #f59e0b;
-    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.15), inset 0 1px 0 rgba(245, 158, 11, 0.1);
+    background: rgba(255, 215, 0, 0.08);
+    border-color: rgba(255, 215, 0, 0.4);
+    border-left-color: #ffd700;
+    box-shadow: 
+        0 0 20px rgba(255, 215, 0, 0.15),
+        inset 0 1px 0 rgba(255, 215, 0, 0.1);
 }
 
 .task-card[data-type="project"]:hover,
@@ -2729,12 +2762,15 @@ body {
 .task-card[data-type="PROJECT"]:hover,
 .task-card[data-type="مشروع"]:hover,
 .task-card[data-type="مشاريع"]:hover {
-    transform: translateY(-3px) scale(1.01);
-    border-color: rgba(245, 158, 11, 0.6);
-    box-shadow: 0 8px 25px rgba(245, 158, 11, 0.3);
+    transform: translateY(-5px) scale(1.02);
+    border-color: #ffd700;
+    box-shadow: 
+        0 0 30px rgba(255, 215, 0, 0.4),
+        0 0 60px rgba(255, 215, 0, 0.2),
+        inset 0 1px 0 rgba(255, 215, 0, 0.2);
 }
 
-/* 🟥 EXAM / SUBMISSION - أحمر مرجاني */
+/* 🟥 EXAM / SUBMISSION - نيون أحمر/وردي */
 .task-card[data-type="exam"],
 .task-card[data-type="Exam"],
 .task-card[data-type="EXAM"],
@@ -2745,10 +2781,12 @@ body {
 .task-card[data-type="SUBMISSION"],
 .task-card[data-type="تسليم"],
 .task-card[data-type="تسليمات"] {
-    background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(239, 68, 68, 0.05));
-    border: 1px solid rgba(239, 68, 68, 0.3);
-    border-left-color: #ef4444;
-    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.15), inset 0 1px 0 rgba(239, 68, 68, 0.1);
+    background: rgba(255, 0, 128, 0.08);
+    border-color: rgba(255, 0, 128, 0.4);
+    border-left-color: #ff0080;
+    box-shadow: 
+        0 0 20px rgba(255, 0, 128, 0.15),
+        inset 0 1px 0 rgba(255, 0, 128, 0.1);
 }
 
 .task-card[data-type="exam"]:hover,
@@ -2761,12 +2799,15 @@ body {
 .task-card[data-type="SUBMISSION"]:hover,
 .task-card[data-type="تسليم"]:hover,
 .task-card[data-type="تسليمات"]:hover {
-    transform: translateY(-3px) scale(1.01);
-    border-color: rgba(239, 68, 68, 0.6);
-    box-shadow: 0 8px 25px rgba(239, 68, 68, 0.3);
+    transform: translateY(-5px) scale(1.02);
+    border-color: #ff0080;
+    box-shadow: 
+        0 0 30px rgba(255, 0, 128, 0.4),
+        0 0 60px rgba(255, 0, 128, 0.2),
+        inset 0 1px 0 rgba(255, 0, 128, 0.2);
 }
 
-/* 🟪 DEFAULT - بنفسجي */
+/* 🟪 DEFAULT - نيون بنفسجي */
 .task-card:not([data-type]),
 .task-card[data-type=""],
 .task-card[data-type="default"],
@@ -2775,10 +2816,12 @@ body {
 .task-card[data-type="TASK"],
 .task-card[data-type="مهمة"],
 .task-card[data-type="مهام"] {
-    background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(139, 92, 246, 0.05));
-    border: 1px solid rgba(139, 92, 246, 0.3);
-    border-left-color: #8b5cf6;
-    box-shadow: 0 4px 15px rgba(139, 92, 246, 0.15), inset 0 1px 0 rgba(139, 92, 246, 0.1);
+    background: rgba(189, 0, 255, 0.08);
+    border-color: rgba(189, 0, 255, 0.4);
+    border-left-color: #bd00ff;
+    box-shadow: 
+        0 0 20px rgba(189, 0, 255, 0.15),
+        inset 0 1px 0 rgba(189, 0, 255, 0.1);
 }
 
 .task-card:not([data-type]):hover,
@@ -2789,13 +2832,49 @@ body {
 .task-card[data-type="TASK"]:hover,
 .task-card[data-type="مهمة"]:hover,
 .task-card[data-type="مهام"]:hover {
-    transform: translateY(-3px) scale(1.01);
-    border-color: rgba(139, 92, 246, 0.6);
-    box-shadow: 0 8px 25px rgba(139, 92, 246, 0.3);
+    transform: translateY(-5px) scale(1.02);
+    border-color: #bd00ff;
+    box-shadow: 
+        0 0 30px rgba(189, 0, 255, 0.4),
+        0 0 60px rgba(189, 0, 255, 0.2),
+        inset 0 1px 0 rgba(189, 0, 255, 0.2);
 }
 
 /* ============================================
-   STATUS BADGES (Overdue, Today, Soon)
+   NEON CLASSES FOR URGENT STATUS
+   ============================================ */
+/* نيون أحمر للمتأخر */
+.neon-red {
+    animation: pulse-red 2s infinite;
+}
+
+@keyframes pulse-red {
+    0%, 100% { box-shadow: 0 0 20px rgba(255, 0, 0, 0.4), 0 0 40px rgba(255, 0, 0, 0.2); }
+    50% { box-shadow: 0 0 30px rgba(255, 0, 0, 0.6), 0 0 60px rgba(255, 0, 0, 0.3); }
+}
+
+/* نيون برتقالي لليوم */
+.neon-orange {
+    animation: pulse-orange 2s infinite;
+}
+
+@keyframes pulse-orange {
+    0%, 100% { box-shadow: 0 0 20px rgba(255, 165, 0, 0.4), 0 0 40px rgba(255, 165, 0, 0.2); }
+    50% { box-shadow: 0 0 30px rgba(255, 165, 0, 0.6), 0 0 60px rgba(255, 165, 0, 0.3); }
+}
+
+/* نيون أزرق للقريب */
+.neon-blue {
+    animation: pulse-blue 2s infinite;
+}
+
+@keyframes pulse-blue {
+    0%, 100% { box-shadow: 0 0 20px rgba(0, 150, 255, 0.4), 0 0 40px rgba(0, 150, 255, 0.2); }
+    50% { box-shadow: 0 0 30px rgba(0, 150, 255, 0.6), 0 0 60px rgba(0, 150, 255, 0.3); }
+}
+
+/* ============================================
+   BADGES & CONTENT
    ============================================ */
 .task-card-header { 
     display: flex; 
@@ -2806,61 +2885,72 @@ body {
 
 .task-type-badge { 
     font-size: .75rem; 
-    font-weight: 600; 
+    font-weight: 700; 
     padding: .2rem .6rem; 
     border-radius: 20px; 
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+}
+
+.task-badge {
+    font-size: .7rem; 
+    font-weight: 700; 
+    padding: .2rem .5rem; 
+    border-radius: 6px; 
+    border: 1px solid;
     backdrop-filter: blur(4px);
 }
 
 .task-overdue { 
-    background: rgba(239, 68, 68, 0.25); 
-    color: #ef4444; 
-    font-size: .75rem; 
-    font-weight: 700; 
-    padding: .2rem .5rem; 
-    border-radius: 6px; 
-    border: 1px solid rgba(239, 68, 68, 0.3);
-    backdrop-filter: blur(4px);
+    background: rgba(255, 0, 0, 0.2); 
+    color: #ff4444;
+    border-color: #ff4444;
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.3);
+    text-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
 }
 
 .task-today { 
-    background: rgba(245, 158, 11, 0.25); 
-    color: #f59e0b; 
-    font-size: .75rem; 
-    font-weight: 700; 
-    padding: .2rem .5rem; 
-    border-radius: 6px; 
-    border: 1px solid rgba(245, 158, 11, 0.3);
-    backdrop-filter: blur(4px);
+    background: rgba(255, 165, 0, 0.2); 
+    color: #ffa500;
+    border-color: #ffa500;
+    box-shadow: 0 0 10px rgba(255, 165, 0, 0.3);
+    text-shadow: 0 0 5px rgba(255, 165, 0, 0.5);
 }
 
 .task-soon { 
-    background: rgba(59, 130, 246, 0.25); 
-    color: #3b82f6; 
-    font-size: .75rem; 
-    font-weight: 600; 
-    padding: .2rem .5rem; 
-    border-radius: 6px; 
-    border: 1px solid rgba(59, 130, 246, 0.3);
-    backdrop-filter: blur(4px);
+    background: rgba(0, 150, 255, 0.2); 
+    color: #0096ff;
+    border-color: #0096ff;
+    box-shadow: 0 0 10px rgba(0, 150, 255, 0.3);
+    text-shadow: 0 0 5px rgba(0, 150, 255, 0.5);
 }
 
 .task-name { 
     font-size: .95rem; 
     font-weight: 700; 
-    color: #f1f5f9; 
-    margin-bottom: .4rem; 
+    color: #fff; 
+    margin-bottom: .4rem;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
 }
 
 .task-subject,
 .task-due,
 .task-notes { 
     font-size: .8rem; 
-    color: #9ca3af; 
+    color: #b0b0b0; 
     margin-bottom: .25rem; 
     display: flex; 
     align-items: center; 
     gap: .4rem; 
+}
+
+.task-subject i,
+.task-due i,
+.task-notes i {
+    color: #a78bfa;
+    text-shadow: 0 0 5px rgba(167, 139, 250, 0.5);
 }
 
 .tasks-empty,
@@ -2876,29 +2966,49 @@ body {
     font-size: 2rem; 
     margin-bottom: .5rem; 
     display: block; 
+    color: #a78bfa;
+    text-shadow: 0 0 20px rgba(167, 139, 250, 0.5);
 }
 
 .btn-tasks { 
-    background: rgba(167, 139, 250, 0.15); 
+    background: rgba(167, 139, 250, 0.1); 
     border: 1px solid rgba(167, 139, 250, 0.4); 
     color: #a78bfa; 
     backdrop-filter: blur(4px);
+    box-shadow: 0 0 10px rgba(167, 139, 250, 0.1);
 }
 
 .btn-tasks:hover { 
-    background: rgba(167, 139, 250, 0.25); 
+    background: rgba(167, 139, 250, 0.2); 
     border-color: #a78bfa; 
+    box-shadow: 0 0 20px rgba(167, 139, 250, 0.3);
 }
 
 /* ============================================
-   LIGHT MODE
+   LIGHT MODE - NEON ADAPTED
    ============================================ */
 [data-theme="light"] .tasks-section {
-    background: rgba(255, 255, 255, 0.7);
+    background: rgba(255, 255, 255, 0.8);
     border: 1px solid rgba(139, 92, 246, 0.3);
     box-shadow: 
-        0 4px 24px rgba(139, 92, 246, 0.1),
+        0 0 20px rgba(139, 92, 246, 0.1),
         inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+[data-theme="light"] .task-name {
+    color: #1a1a2e;
+    text-shadow: none;
+}
+
+[data-theme="light"] .task-subject,
+[data-theme="light"] .task-due,
+[data-theme="light"] .task-notes {
+    color: #4a4a6a;
+}
+
+[data-theme="light"] .tasks-title {
+    color: #7c3aed;
+    text-shadow: 0 0 10px rgba(124, 58, 237, 0.3);
 }
 
 /* Quiz Light */
@@ -2907,9 +3017,9 @@ body {
 [data-theme="light"] .task-card[data-type="QUIZ"],
 [data-theme="light"] .task-card[data-type="كويز"],
 [data-theme="light"] .task-card[data-type="كويزات"] {
-    background: linear-gradient(135deg, rgba(0, 212, 255, 0.2), rgba(0, 212, 255, 0.08));
-    border: 1px solid rgba(0, 212, 255, 0.5);
-    box-shadow: 0 4px 15px rgba(0, 212, 255, 0.2);
+    background: rgba(0, 212, 255, 0.1);
+    border-color: rgba(0, 212, 255, 0.6);
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.2);
 }
 
 /* Assignment Light */
@@ -2920,9 +3030,9 @@ body {
 [data-theme="light"] .task-card[data-type="اسايمنتات"],
 [data-theme="light"] .task-card[data-type="واجب"],
 [data-theme="light"] .task-card[data-type="واجبات"] {
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.08));
-    border: 1px solid rgba(16, 185, 129, 0.5);
-    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);
+    background: rgba(0, 200, 100, 0.1);
+    border-color: rgba(0, 200, 100, 0.6);
+    box-shadow: 0 0 20px rgba(0, 200, 100, 0.2);
 }
 
 /* Project Light */
@@ -2931,12 +3041,12 @@ body {
 [data-theme="light"] .task-card[data-type="PROJECT"],
 [data-theme="light"] .task-card[data-type="مشروع"],
 [data-theme="light"] .task-card[data-type="مشاريع"] {
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(245, 158, 11, 0.08));
-    border: 1px solid rgba(245, 158, 11, 0.5);
-    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.2);
+    background: rgba(255, 180, 0, 0.1);
+    border-color: rgba(255, 180, 0, 0.6);
+    box-shadow: 0 0 20px rgba(255, 180, 0, 0.2);
 }
 
-/* Exam/Submission Light */
+/* Exam Light */
 [data-theme="light"] .task-card[data-type="exam"],
 [data-theme="light"] .task-card[data-type="Exam"],
 [data-theme="light"] .task-card[data-type="EXAM"],
@@ -2947,9 +3057,9 @@ body {
 [data-theme="light"] .task-card[data-type="SUBMISSION"],
 [data-theme="light"] .task-card[data-type="تسليم"],
 [data-theme="light"] .task-card[data-type="تسليمات"] {
-    background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(239, 68, 68, 0.08));
-    border: 1px solid rgba(239, 68, 68, 0.5);
-    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.2);
+    background: rgba(255, 0, 100, 0.1);
+    border-color: rgba(255, 0, 100, 0.6);
+    box-shadow: 0 0 20px rgba(255, 0, 100, 0.2);
 }
 
 /* Default Light */
@@ -2961,47 +3071,9 @@ body {
 [data-theme="light"] .task-card[data-type="TASK"],
 [data-theme="light"] .task-card[data-type="مهمة"],
 [data-theme="light"] .task-card[data-type="مهام"] {
-    background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(139, 92, 246, 0.08));
-    border: 1px solid rgba(139, 92, 246, 0.5);
-    box-shadow: 0 4px 15px rgba(139, 92, 246, 0.2);
+    background: rgba(150, 0, 255, 0.1);
+    border-color: rgba(150, 0, 255, 0.6);
+    box-shadow: 0 0 20px rgba(150, 0, 255, 0.2);
 }
-
-/* Text Colors Light Mode */
-[data-theme="light"] .task-name {
-    color: #1f2937;
-}
-
-[data-theme="light"] .task-subject,
-[data-theme="light"] .task-due,
-[data-theme="light"] .task-notes {
-    color: #6b7280;
-}
-
-[data-theme="light"] .tasks-title {
-    color: #7c3aed;
-}
-
-[data-theme="light"] .btn-refresh-tasks {
-    background: rgba(139, 92, 246, 0.15);
-    border-color: rgba(139, 92, 246, 0.4);
-    color: #7c3aed;
-}
-
-[data-theme="light"] .task-filter-btn {
-    background: rgba(255, 255, 255, 0.8);
-    border-color: rgba(139, 92, 246, 0.2);
-    color: #6b7280;
-}
-
-[data-theme="light"] .task-filter-btn.active,
-[data-theme="light"] .task-filter-btn:hover {
-    background: rgba(139, 92, 246, 0.15);
-    border-color: #7c3aed;
-    color: #7c3aed;
-}
-
-[data-theme="light"] .btn-tasks {
-    background: rgba(139, 92, 246, 0.15);
-    border-color: rgba(139, 92, 246, 0.4);
     color: #7c3aed;
 }
