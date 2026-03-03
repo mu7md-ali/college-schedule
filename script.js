@@ -1300,6 +1300,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ============================================
+// ============================================
 // TASKS FROM GOOGLE SHEETS
 // ============================================
 
@@ -1352,34 +1353,40 @@ function parseCSVLine(line) {
 function renderTasks() {
     const container = document.getElementById('tasksContainer');
     if (!container) return;
+    
     const filtered = currentFilter === 'all' ? allTasks : allTasks.filter(t => t.type === currentFilter);
+    
     if (filtered.length === 0) {
         container.innerHTML = '<div class="tasks-empty"><i class="fas fa-check-circle"></i><p>No tasks yet!</p></div>';
         return;
     }
-    const typeColors = { 'Quiz':'#f59e0b', 'Assignment':'#3b82f6', 'Project':'#8b5cf6', 'Submission':'#ef4444' };
-    const typeIcons  = { 'Quiz':'fa-brain', 'Assignment':'fa-file-alt', 'Project':'fa-project-diagram', 'Submission':'fa-upload' };
-    const today = new Date(); today.setHours(0,0,0,0);
+    
+    const today = new Date(); 
+    today.setHours(0,0,0,0);
+    
     container.innerHTML = filtered.map(task => {
-        const color = typeColors[task.type] || '#6b7280';
-        const icon  = typeIcons[task.type]  || 'fa-tasks';
+        // ✅ الحتة المهمة: data-type attribute
+        const taskType = task.type || 'default';
+        
         let dueBadge = '', urgentClass = '';
         if (task.due_date) {
             const due = new Date(task.due_date);
             const diff = Math.ceil((due - today) / 86400000);
             if (diff < 0)       { dueBadge = '<span class="task-overdue">Overdue</span>'; urgentClass = 'task-card-overdue'; }
             else if (diff === 0){ dueBadge = '<span class="task-today">Today!</span>';    urgentClass = 'task-card-today'; }
-            else if (diff <= 3) { dueBadge = '<span class="task-soon">In '+diff+'d</span>'; urgentClass = 'task-card-soon'; }
+            else if (diff <= 3) { dueBadge = '<span class="task-soon">In '+diff+'d</span>'; }
         }
-        return `<div class="task-card ${urgentClass}" style="border-left-color:${color}">
+        
+        // ✅ data-type attribute هنا
+        return `<div class="task-card ${urgentClass}" data-type="${taskType}">
             <div class="task-card-header">
-                <div class="task-type-badge" style="background:${color}20;color:${color}"><i class="fas ${icon}"></i> ${task.type}</div>
+                <div class="task-type-badge">${task.type || 'Task'}</div>
                 ${dueBadge}
             </div>
             <div class="task-name">${task.name}</div>
             <div class="task-subject"><i class="fas fa-book"></i> ${task.subject}</div>
             ${task.due_date ? `<div class="task-due"><i class="fas fa-calendar"></i> ${task.due_date}</div>` : ''}
-            ${task.notes    ? `<div class="task-notes"><i class="fas fa-sticky-note"></i> ${task.notes}</div>` : ''}
+            ${task.notes ? `<div class="task-notes"><i class="fas fa-sticky-note"></i> ${task.notes}</div>` : ''}
         </div>`;
     }).join('');
 }
