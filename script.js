@@ -797,152 +797,205 @@ function cleanSubjectName(name) {
 document.addEventListener('DOMContentLoaded', () => { initDoubleTapDetection(); });
 
 // ============================================
-// TASKS FROM GOOGLE SHEETS
 // ============================================
-const SHEET_ID = '12W7uul0LS0dZmMf7E3DU2TJRrf2BN06o';
-const SHEET_URL = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/gviz/tq?tqx=out:csv&sheet=tasks';
+// TASKS FROM GOOGLE SHEETS — CLEAN REBUILD
+// ============================================
 
-let allTasks = [];
+const TASKS_SHEET_ID  = '12W7uul0LS0dZmMf7E3DU2TJRrf2BN06o';
+const TASKS_SHEET_URL = `https://docs.google.com/spreadsheets/d/${TASKS_SHEET_ID}/gviz/tq?tqx=out:csv&sheet=tasks`;
+
+let allTasks      = [];
 let currentFilter = 'all';
 
+// ── Fetch & parse ────────────────────────────────────
 async function loadTasksFromSheet() {
+    const container = document.getElementById('tasksContainer');
+    if (!container) return;
+
+    container.innerHTML = `
+        <div class="tasks-loading">
+            <i class="fas fa-spinner fa-spin"></i>
+            <span>Loading tasks...</span>
+        </div>`;
+
     try {
-        const res = await fetch(SHEET_URL + '&t=' + Date.now());
+        const res  = await fetch(TASKS_SHEET_URL + '&t=' + Date.now());
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const text = await res.text();
-        allTasks = parseCSVTasks(text);
+        allTasks   = parseTasksCSV(text);
         renderTasks();
     } catch (err) {
-        const container = document.getElementById('tasksContainer');
-        if (container) container.innerHTML = '<div class="tasks-empty"><i class="fas fa-wifi"></i><p>Could not load tasks.</p></div>';
+        console.error('Tasks fetch error:', err);
+        container.innerHTML = `
+            <div class="tasks-empty">
+                <i class="fas fa-wifi"></i>
+                <p>Could not load tasks</p>
+                <button onclick="refreshTasks()" class="btn-retry-tasks">
+                    <i class="fas fa-redo"></i> Retry
+                </button>
+            </div>`;
     }
 }
 
-function parseCSVTasks(csv) {
-    const lines = csv.trim().split('\n');
-    const tasks = [];
+// ── CSV Parser ───────────────────────────────────────
+function parseTasksCSV(csv) {
+    const lines  = csv.trim().split('\n');
+    const tasks  = [];
+
+    // Skip first 2 rows (English header + Arabic header)
     for (let i = 2; i < lines.length; i++) {
-        const line = lines[i].trim();
-        if (!line) continue;
-        const cols = parseCSVLine(line);
-        const name = cleanCSVField(cols[0]);
+        const cols = splitCSVLine(lines[i].trim());
+        if (!cols.length) continue;
+
+        const name = stripQuotes(cols[0]);
         if (!name) continue;
+
         tasks.push({
-            name: name,
-            subject: cleanCSVField(cols[1]) || '',
-            type: cleanCSVField(cols[2]) || '',
-            due_date: cleanCSVField(cols[3]) || '',
-            notes: cleanCSVField(cols[4]) || ''
+            name    : name,
+            subject : stripQuotes(cols[1] || ''),
+            type    : stripQuotes(cols[2] || ''),
+            due     : stripQuotes(cols[3] || ''),   // YYYY-MM-DD
+            notes   : stripQuotes(cols[4] || ''),
         });
     }
+
     return tasks;
 }
 
-function parseCSVLine(line) {
-    const result = [];
-    let current = '';
-    let inQuotes = false;
+function splitCSVLine(line) {
+    const cols     = [];
+    let   current  = '';
+    let   inQuotes = false;
+
     for (let i = 0; i < line.length; i++) {
-        const char = line[i];
-        const nextChar = line[i + 1];
-        if (char === '"') {
-            if (inQuotes && nextChar === '"') { current += '"'; i++; }
+        const ch   = line[i];
+        const next = line[i + 1];
+
+        if (ch === '"') {
+            if (inQuotes && next === '"') { current += '"'; i++; }
             else inQuotes = !inQuotes;
-        } else if (char === ',' && !inQuotes) { result.push(current); current = ''; }
-        else current += char;
+        } else if (ch === ',' && !inQuotes) {
+            cols.push(current);
+            current = '';
+        } else {
+            current += ch;
+        }
     }
-    result.push(current);
-    return result;
+    cols.push(current);
+    return cols;
 }
 
-function cleanCSVField(field) {
-    if (!field) return '';
-    return field.replace(/^"|"$/g, '').trim();
+function stripQuotes(str) {
+    return str.replace(/^"|"$/g, '').trim();
 }
 
+// ── Date helpers (YYYY-MM-DD only) ───────────────────
+function parseDate(str) {
+    if (!str || typeof str !== 'string') return null;
+    const s = str.trim();
+    // Strict YYYY-MM-DD
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return null;
+    const [y, m, d] = s.split('-').map(Number);
+    const date = new Date(y, m - 1, d);   // local date, no timezone issues
+    return isNaN(date.getTime()) ? null : date;
+}
+
+function daysFromToday(date) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    date.setHours(0, 0, 0, 0);
+    return Math.round((date - today) / 86400000);
+}
+
+function formatDate(str) {
+    const d = parseDate(str);
+    if (!d) return str;
+    return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+// ── Render ───────────────────────────────────────────
 function renderTasks() {
     const container = document.getElementById('tasksContainer');
     if (!container) return;
-    const filtered = currentFilter === 'all' ? allTasks : allTasks.filter(t => t.type === currentFilter);
-    if (filtered.length === 0) {
-        container.innerHTML = '<div class="tasks-empty"><i class="fas fa-check-circle"></i><p>No tasks yet!</p></div>';
+
+    const list = currentFilter === 'all'
+        ? allTasks
+        : allTasks.filter(t => t.type.toLowerCase() === currentFilter.toLowerCase());
+
+    if (!list.length) {
+        container.innerHTML = `
+            <div class="tasks-empty">
+                <i class="fas fa-check-circle"></i>
+                <p>No tasks found!</p>
+            </div>`;
         return;
     }
-    const today = new Date();
-    today.setHours(0,0,0,0);
-    container.innerHTML = filtered.map(task => {
-        const taskType = task.type || 'default';
-        let dueBadge = '';
-        let urgentClass = '';
-        let neonClass = '';
-        let daysLeft = null;
-        if (task.due_date && task.due_date.trim() !== '') {
-            const due = parseDateSafe(task.due_date);
-            if (due && !isNaN(due.getTime())) {
-                const diff = Math.ceil((due - today) / 86400000);
-                daysLeft = diff;
-                if (diff < 0) { dueBadge = '<span class="task-badge task-overdue">Overdue</span>'; urgentClass = 'task-urgent-overdue'; neonClass = 'neon-red'; }
-                else if (diff === 0) { dueBadge = '<span class="task-badge task-today">Today!</span>'; urgentClass = 'task-urgent-today'; neonClass = 'neon-orange'; }
-                else if (diff <= 3) { dueBadge = `<span class="task-badge task-soon">In ${diff}d</span>`; neonClass = 'neon-blue'; }
-            }
-        }
-        let countdownHtml = '';
-        if (daysLeft !== null) {
-            if (daysLeft < 0) countdownHtml = `<div class="task-countdown overdue"><i class="fas fa-exclamation-circle"></i> ${Math.abs(daysLeft)} days ago</div>`;
-            else if (daysLeft === 0) countdownHtml = `<div class="task-countdown today"><i class="fas fa-clock"></i> Due Today!</div>`;
-            else if (daysLeft === 1) countdownHtml = `<div class="task-countdown tomorrow"><i class="fas fa-hourglass-half"></i> 1 day left</div>`;
-            else countdownHtml = `<div class="task-countdown"><i class="fas fa-hourglass-start"></i> ${daysLeft} days left</div>`;
-        }
-        return `<div class="task-card ${urgentClass} ${neonClass}" data-type="${taskType}">
-            <div class="task-card-header">
-                <div class="task-type-badge">${task.type || 'Task'}</div>
-                ${dueBadge}
-            </div>
-            <div class="task-name">${task.name}</div>
-            <div class="task-subject"><i class="fas fa-book"></i> ${task.subject}</div>
-            ${task.due_date ? `<div class="task-due"><i class="fas fa-calendar"></i> ${task.due_date}</div>` : ''}
-            ${countdownHtml}
-            ${task.notes ? `<div class="task-notes"><i class="fas fa-sticky-note"></i> ${task.notes}</div>` : ''}
-        </div>`;
-    }).join('');
+
+    container.innerHTML = list.map(task => buildTaskCard(task)).join('');
 }
 
-function parseDateSafe(dateString) {
-    if (!dateString || typeof dateString !== 'string') return null;
-    const str = dateString.trim();
-    if (!str) return null;
-    let date = new Date(str);
-    if (!isNaN(date.getTime())) return date;
-    if (str.includes('/')) {
-        const parts = str.split('/');
-        if (parts.length === 3) {
-            date = new Date(parts[2], parts[1] - 1, parts[0]);
-            if (!isNaN(date.getTime())) return date;
-        }
+function buildTaskCard(task) {
+    const date     = parseDate(task.due);
+    const diff     = date ? daysFromToday(date) : null;
+    const typeKey  = (task.type || '').toLowerCase();
+
+    // Status badge
+    let badge = '';
+    let urgency = '';
+    if (diff !== null) {
+        if      (diff < 0)  { badge = `<span class="t-badge overdue">Overdue</span>`;      urgency = 'is-overdue'; }
+        else if (diff === 0) { badge = `<span class="t-badge today">Today!</span>`;         urgency = 'is-today'; }
+        else if (diff <= 3)  { badge = `<span class="t-badge soon">In ${diff}d</span>`;     urgency = 'is-soon'; }
     }
-    return null;
+
+    // Countdown line
+    let countdown = '';
+    if (diff !== null) {
+        if      (diff < 0)   countdown = `<div class="t-countdown overdue"><i class="fas fa-exclamation-circle"></i> ${Math.abs(diff)} day${Math.abs(diff)!==1?'s':''} ago</div>`;
+        else if (diff === 0) countdown = `<div class="t-countdown today"><i class="fas fa-clock"></i> Due Today!</div>`;
+        else if (diff === 1) countdown = `<div class="t-countdown soon"><i class="fas fa-hourglass-half"></i> 1 day left</div>`;
+        else                 countdown = `<div class="t-countdown normal"><i class="fas fa-hourglass-start"></i> ${diff} days left</div>`;
+    }
+
+    return `
+    <div class="t-card ${urgency}" data-type="${typeKey}">
+        <div class="t-card-top">
+            <span class="t-type">${task.type || 'Task'}</span>
+            ${badge}
+        </div>
+        <div class="t-name">${task.name}</div>
+        ${task.subject ? `<div class="t-meta"><i class="fas fa-book"></i> ${task.subject}</div>` : ''}
+        ${task.due     ? `<div class="t-meta"><i class="fas fa-calendar"></i> ${formatDate(task.due)}</div>` : ''}
+        ${countdown}
+        ${task.notes   ? `<div class="t-notes"><i class="fas fa-sticky-note"></i> ${task.notes}</div>` : ''}
+    </div>`;
 }
 
-function filterTasks(type) {
+// ── Filter ───────────────────────────────────────────
+function filterTasks(type, el) {
     currentFilter = type;
     document.querySelectorAll('.task-filter-btn').forEach(b => b.classList.remove('active'));
-    event.target.classList.add('active');
+    if (el) el.classList.add('active');
     renderTasks();
 }
 
+// ── Refresh ──────────────────────────────────────────
 function refreshTasks() {
-    const c = document.getElementById('tasksContainer');
-    if (c) c.innerHTML = '<div class="tasks-loading"><i class="fas fa-spinner fa-spin"></i> Refreshing...</div>';
+    allTasks = [];
     loadTasksFromSheet();
 }
 
+// ── Toggle visibility ─────────────────────────────────
 function toggleTasksSection() {
     const s = document.getElementById('tasksSection');
     if (!s) return;
     const wasHidden = s.classList.contains('hidden');
     s.classList.toggle('hidden');
-    if (wasHidden) { s.scrollIntoView({ behavior:'smooth', block:'start' }); loadTasksFromSheet(); }
+    if (wasHidden) {
+        s.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        loadTasksFromSheet();
+    }
 }
-
 // ============================================
 // STUDY PLAN — CORRECTED PREREQUISITES
 // ============================================
@@ -1007,7 +1060,7 @@ const SP_DATA = [
     // Level 4 Term 1
     { id:36,  name:'Parallel Processing',     pre:[20],     chain:'networks', lv:4, tm:1 },
     { id:37,  name:'Cloud Computing',         pre:[20],     chain:'networks', lv:4, tm:1 },
-    { id:38,  name:'Senior Project 1',        pre:[29],     chain:'systems',  lv:4, tm:1 },
+    { id:38,  name:'Senior Project 1',        pre:[],     chain:'systems',  lv:4, tm:1 },
     { id:39,  name:'Data Warehouse',          pre:[28],     chain:'systems',  lv:4, tm:1 },
     { id:40,  name:'Embedded Systems',        pre:[17],     chain:'hardware', lv:4, tm:1 },
     { id:41,  name:'Image Processing',        pre:[35],     chain:'graphics', lv:4, tm:1 },
