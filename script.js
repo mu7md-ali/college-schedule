@@ -1045,10 +1045,10 @@ const SP_DATA = [
     { id:23,  name:'Systems Analysis',        pre:[10,22],  chain:'systems',  lv:2, tm:2 },
     // Level 3 Term 1
     { id:24,  name:'HCI',                     pre:[],       chain:'soft',     lv:3, tm:1 },
-    { id:25,  name:'Multimedia',              pre:[],       chain:'graphics', lv:3, tm:1 },
+    { id:25,  name:'Multimedia',              pre:[9],       chain:'graphics', lv:3, tm:1 },
     { id:26,  name:'Logic Programming',       pre:[9],      chain:'prog',     lv:3, tm:1 },
     { id:27,  name:'Algorithms',              pre:[21],     chain:'prog',     lv:3, tm:1 },
-    { id:28,  name:'Databases',               pre:[23],     chain:'systems',  lv:3, tm:1 },
+    { id:28,  name:'Databases',               pre:[10],     chain:'systems',  lv:3, tm:1 },
     { id:29,  name:'Software Engineering',    pre:[10,23],  chain:'systems',  lv:3, tm:1 },
     // Level 3 Term 2
     { id:30,  name:'Neural Networks',         pre:[26],     chain:'ai',       lv:3, tm:2 },
