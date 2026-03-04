@@ -1,0 +1,217 @@
+/* ============================================================
+   PATCHES — paste these at the END of style.css
+   ============================================================ */
+
+/* ── 1. Replace gold/yellow accent with warm amber-gold ──── */
+:root {
+    --accent:    #f5a623;
+    --gold:      #f5a623;
+    --border:    rgba(245,166,35,0.18);
+    --shadow-b:  0 0 25px rgba(245,166,35,0.3);
+}
+
+[data-theme="light"] {
+    --accent:    #d4881a;
+    --gold:      #d4881a;
+    --border:    rgba(212,136,26,0.35);
+    --shadow-b:  0 4px 20px rgba(212,136,26,0.25);
+}
+
+/* Fix any hardcoded #ffd700 references */
+.logo-icon { color: #f5a623; }
+.pn        { color: #f5a623; }
+.time-badge { color: #f5a623; }
+.ai-tag    { color: #00ffff !important; }
+.dev-name  { color: #f5a623; }
+.crescent  { box-shadow: inset -15px 0 0 0 #f5a623; filter: drop-shadow(0 0 20px rgba(245,166,35,0.6)); }
+.star      { background: #f5a623; box-shadow: 0 0 3px #f5a623; }
+
+/* ── 2. GROUP VIEW — card colors match section view ───────── */
+/* Lecture cards in group view */
+.mini-card.lec {
+    background: linear-gradient(135deg, rgba(245,166,35,0.15), rgba(245,166,35,0.05));
+    border: 1px solid rgba(245,166,35,0.45);
+    box-shadow: 0 2px 8px rgba(245,166,35,0.15);
+}
+.mini-card.lec:hover {
+    background: linear-gradient(135deg, rgba(245,166,35,0.25), rgba(245,166,35,0.1));
+    border-color: rgba(245,166,35,0.7);
+    box-shadow: 0 6px 20px rgba(245,166,35,0.3);
+}
+.mini-card.lec .mini-s { color: #f5a623; }
+
+/* Section (lab) cards in group view */
+.mini-card.lab {
+    background: linear-gradient(135deg, rgba(147,112,219,0.15), rgba(147,112,219,0.05));
+    border: 1px solid rgba(147,112,219,0.45);
+    box-shadow: 0 2px 8px rgba(147,112,219,0.15);
+}
+.mini-card.lab:hover {
+    background: linear-gradient(135deg, rgba(147,112,219,0.25), rgba(147,112,219,0.1));
+    border-color: rgba(147,112,219,0.7);
+    box-shadow: 0 6px 20px rgba(147,112,219,0.3);
+}
+.mini-card.lab .mini-s { color: #9370db; }
+
+/* Remove old generic mini-card (override) */
+.mini-card {
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    padding: 4px;
+    margin-bottom: 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+/* ── 3. ENGLISH SCHEDULE — consistent color palette ──────── */
+.english-schedule-header {
+    background: linear-gradient(135deg, rgba(245,166,35,0.12), rgba(147,112,219,0.08));
+    border-bottom-color: rgba(245,166,35,0.25);
+}
+
+.english-schedule-title {
+    background: linear-gradient(135deg, #f5a623, #9370db);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.schedule-table thead {
+    background: linear-gradient(135deg, rgba(245,166,35,0.15), rgba(245,166,35,0.05));
+}
+
+.schedule-table thead th {
+    color: #f5a623;
+    border-bottom-color: rgba(245,166,35,0.3);
+}
+
+.schedule-table tbody tr:hover {
+    background: rgba(245,166,35,0.06);
+}
+
+.schedule-table tbody td {
+    border-bottom-color: rgba(245,166,35,0.1);
+}
+
+.level-badge {
+    background: linear-gradient(135deg, rgba(147,112,219,0.2), rgba(147,112,219,0.1));
+    border-color: rgba(147,112,219,0.35);
+    color: #9370db;
+}
+
+.day-badge {
+    background: linear-gradient(135deg, rgba(0,212,255,0.2), rgba(0,212,255,0.1));
+    border-color: rgba(0,212,255,0.35);
+    color: #00d4ff;
+}
+
+.period-badge {
+    background: linear-gradient(135deg, rgba(245,166,35,0.2), rgba(245,166,35,0.1));
+    border-color: rgba(245,166,35,0.35);
+    color: #f5a623;
+}
+
+.location-badge {
+    background: linear-gradient(135deg, rgba(50,205,50,0.2), rgba(50,205,50,0.1));
+    border-color: rgba(50,205,50,0.35);
+    color: #32cd32;
+}
+
+.category-title {
+    color: #f5a623;
+}
+
+.schedule-category {
+    border-color: rgba(245,166,35,0.12);
+}
+
+/* ── 4. STUDY PLAN — amber-gold accent ───────────────────── */
+.sp-header { border-bottom-color: rgba(245,166,35,0.2); }
+.sp-title  { color: #f5a623; text-shadow: 0 0 18px rgba(245,166,35,0.6); }
+.sp-level-head {
+    color: #f5a623;
+    background: rgba(245,166,35,0.07);
+    border-bottom-color: rgba(245,166,35,0.25);
+    border-right-color: rgba(245,166,35,0.1);
+}
+.sp-level-head.lvl-border { border-left-color: rgba(245,166,35,0.2); }
+.sp-col-head.term1 { color: rgba(245,166,35,0.8); background: rgba(245,166,35,0.05); border-bottom-color: rgba(245,166,35,0.15); }
+.sp-card-pre {
+    font-size: 0.55rem;
+    color: rgba(255,255,255,0.35);
+    margin-top: 3px;
+    line-height: 1.2;
+    font-style: italic;
+}
+
+/* ── 5. MODAL — consistent borders ───────────────────────── */
+.modal-content { border-color: rgba(245,166,35,0.2); }
+.modal-header  { background: linear-gradient(135deg, rgba(245,166,35,0.1), rgba(147,112,219,0.06)); }
+.modal-title i { color: #f5a623; }
+.cal-table th  { color: #f5a623; border-bottom-color: rgba(245,166,35,0.3); }
+.cal-table td:first-child { color: #f5a623; background: rgba(245,166,35,0.08); }
+
+/* ── 6. TASKS SECTION — consistent accent ────────────────── */
+.tasks-title { color: #9370db; text-shadow: 0 0 10px rgba(147,112,219,0.4); }
+.btn-refresh-tasks { border-color: rgba(147,112,219,0.4); color: #9370db; background: rgba(147,112,219,0.1); }
+
+/* ── 7. HEADER — fix accent colors ───────────────────────── */
+.logo-box { border-color: rgba(245,166,35,0.3); box-shadow: 0 0 25px rgba(245,166,35,0.25); }
+.hlink:hover { border-color: #f5a623; }
+
+/* ── 8. TABLE CARD — amber glow ──────────────────────────── */
+.table-card {
+    border-color: rgba(245,166,35,0.2);
+    box-shadow: 
+        0 8px 32px rgba(0,0,0,0.3),
+        inset 0 1px 0 rgba(245,166,35,0.1),
+        0 0 40px rgba(245,166,35,0.08);
+}
+
+/* ── 9. LEC CARD — amber instead of gold ─────────────────── */
+.lec-card {
+    background: linear-gradient(135deg, rgba(245,166,35,0.15), rgba(245,166,35,0.05));
+    border-color: rgba(245,166,35,0.4);
+    box-shadow: 0 4px 15px rgba(245,166,35,0.2), inset 0 1px 0 rgba(245,166,35,0.1);
+}
+.lec-card:hover {
+    border-color: rgba(245,166,35,0.8);
+    box-shadow: 0 12px 32px rgba(245,166,35,0.35);
+}
+
+/* ── 10. LIGHT MODE FIXES ────────────────────────────────── */
+[data-theme="light"] .crescent { box-shadow: inset -15px 0 0 0 #d4881a; }
+[data-theme="light"] .star     { background: linear-gradient(135deg, #d4881a, #f5a623); box-shadow: 0 0 6px #d4881a; }
+[data-theme="light"] .pn       { color: #d4881a; }
+[data-theme="light"] .dev-name { color: #c47a15; }
+[data-theme="light"] .lec-card { background: linear-gradient(135deg, rgba(30,58,95,0.1), rgba(30,58,95,0.05)); border-color: rgba(30,58,95,0.3); }
+[data-theme="light"] .mini-card.lec { background: linear-gradient(135deg, rgba(212,136,26,0.15), rgba(212,136,26,0.05)); border-color: rgba(212,136,26,0.4); }
+[data-theme="light"] .mini-card.lec .mini-s { color: #c47a15; }
+[data-theme="light"] .sp-title { color: #b8720e; }
+[data-theme="light"] .sp-level-head { color: #b8720e; background: rgba(212,136,26,0.1); }
+[data-theme="light"] .english-schedule-title { background: linear-gradient(135deg, #d4881a, #7c3aed); -webkit-background-clip: text; background-clip: text; }
+[data-theme="light"] .category-title { color: #d4881a; }
+[data-theme="light"] .period-badge { border-color: rgba(212,136,26,0.4); color: #c47a15; background: linear-gradient(135deg, rgba(212,136,26,0.2), rgba(212,136,26,0.1)); }
+
+/* ── 11. SCROLLBAR — amber ───────────────────────────────── */
+.tbl-scroll::-webkit-scrollbar-thumb,
+.grp-scroll::-webkit-scrollbar-thumb,
+.english-schedule-content::-webkit-scrollbar-thumb,
+.students-names-content::-webkit-scrollbar-thumb,
+.sp-body::-webkit-scrollbar-thumb {
+    background: rgba(245,166,35,0.3);
+}
+.tbl-scroll::-webkit-scrollbar-thumb:hover,
+.grp-scroll::-webkit-scrollbar-thumb:hover { background: rgba(245,166,35,0.5); }
+
+/* ── 12. MAIN SELECT — amber focus ───────────────────────── */
+.main-select:hover, .main-select:focus { border-color: #f5a623; box-shadow: 0 0 20px rgba(245,166,35,0.25); }
+
+/* ── 13. NOTICE BOX icon ─────────────────────────────────── */
+.notice-box .notice-icon { background: linear-gradient(135deg, rgba(245,166,35,0.2), rgba(245,166,35,0.05)); border-color: rgba(245,166,35,0.3); }
+.notice-box .notice-icon i { color: #f5a623; }
+
+/* ── 14. TOAST ───────────────────────────────────────────── */
+.toast { border-color: rgba(245,166,35,0.3); }
+.toast.info { border-color: #f5a623; color: #f5a623; }
