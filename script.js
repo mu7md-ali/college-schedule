@@ -910,7 +910,7 @@ function daysFromToday(date) {
 function formatDate(str) {
     const d = parseDate(str);
     if (!d) return str;
-    return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'numeric', year: 'numeric' });
 }
 
 // ── Render ───────────────────────────────────────────
