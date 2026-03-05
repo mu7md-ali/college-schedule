@@ -798,8 +798,7 @@ document.addEventListener('DOMContentLoaded', () => { initDoubleTapDetection(); 
 
 // ============================================
 // ============================================
-// ============================================
-// TASKS FROM GOOGLE SHEETS — FIXED v2
+// TASKS FROM GOOGLE SHEETS — v3
 // ============================================
 
 const TASKS_SHEET_ID  = '12W7uul0LS0dZmMf7E3DU2TJRrf2BN06o';
@@ -808,7 +807,20 @@ const TASKS_SHEET_URL = `https://docs.google.com/spreadsheets/d/${TASKS_SHEET_ID
 let allTasks      = [];
 let currentFilter = 'all';
 
-// ── Fetch & parse ──────────────────────────────────────────────────────────
+// Card color map — matches CSS border-left colors per type
+const TYPE_COLORS = {
+    quiz      : { border: 'rgba(0,212,255,0.5)',   bg: 'rgba(0,212,255,0.08)',   accent: '#00d4ff' },
+    assignment: { border: 'rgba(50,205,50,0.5)',   bg: 'rgba(50,205,50,0.08)',   accent: '#32cd32' },
+    project   : { border: 'rgba(245,166,35,0.5)',  bg: 'rgba(245,166,35,0.08)',  accent: '#f5a623' },
+    submission: { border: 'rgba(255,80,130,0.5)',  bg: 'rgba(255,80,130,0.08)',  accent: '#ff5082' },
+    default   : { border: 'rgba(147,112,219,0.5)', bg: 'rgba(147,112,219,0.08)', accent: '#9370db' },
+};
+
+function getTypeColor(type) {
+    return TYPE_COLORS[(type || '').toLowerCase()] || TYPE_COLORS.default;
+}
+
+// ── Fetch ──────────────────────────────────────────────────────────────────
 async function loadTasksFromSheet() {
     const container = document.getElementById('tasksContainer');
     if (!container) return;
@@ -816,7 +828,7 @@ async function loadTasksFromSheet() {
     container.innerHTML = `
         <div class="tasks-loading">
             <i class="fas fa-spinner fa-spin"></i>
-            <span>جاري تحميل المهام...</span>
+            <span>Loading tasks...</span>
         </div>`;
 
     try {
@@ -830,27 +842,24 @@ async function loadTasksFromSheet() {
         container.innerHTML = `
             <div class="tasks-empty">
                 <i class="fas fa-wifi"></i>
-                <p>تعذّر تحميل المهام</p>
+                <p>Could not load tasks</p>
                 <button onclick="refreshTasks()" class="btn-retry-tasks">
-                    <i class="fas fa-redo"></i> إعادة المحاولة
+                    <i class="fas fa-redo"></i> Retry
                 </button>
             </div>`;
     }
 }
 
-// ── CSV Parser ──────────────────────────────────────────────────────────────
+// ── CSV Parser ─────────────────────────────────────────────────────────────
 function parseTasksCSV(csv) {
     const lines = csv.trim().split('\n');
     const tasks = [];
 
-    // Skip first 2 rows (English header + Arabic header)
     for (let i = 2; i < lines.length; i++) {
         const cols = splitCSVLine(lines[i].trim());
         if (!cols.length) continue;
-
         const name = stripQuotes(cols[0]);
         if (!name) continue;
-
         tasks.push({
             name   : name,
             subject: stripQuotes(cols[1] || ''),
@@ -859,25 +868,19 @@ function parseTasksCSV(csv) {
             notes  : stripQuotes(cols[4] || ''),
         });
     }
-
     return tasks;
 }
 
 function splitCSVLine(line) {
-    const cols     = [];
-    let   current  = '';
-    let   inQuotes = false;
-
+    const cols = [];
+    let current = '', inQuotes = false;
     for (let i = 0; i < line.length; i++) {
-        const ch   = line[i];
-        const next = line[i + 1];
-
+        const ch = line[i], next = line[i + 1];
         if (ch === '"') {
             if (inQuotes && next === '"') { current += '"'; i++; }
             else inQuotes = !inQuotes;
         } else if (ch === ',' && !inQuotes) {
-            cols.push(current);
-            current = '';
+            cols.push(current); current = '';
         } else {
             current += ch;
         }
@@ -890,58 +893,47 @@ function stripQuotes(str) {
     return str.replace(/^"|"$/g, '').trim();
 }
 
-// ── Date helpers — robust, handles multiple formats ─────────────────────────
+// ── Date helpers ───────────────────────────────────────────────────────────
 function parseDate(str) {
     if (!str || typeof str !== 'string') return null;
     const s = str.trim();
     if (!s) return null;
 
-    // Format 1: YYYY-MM-DD
+    // YYYY-MM-DD
     if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
         const [y, m, d] = s.split('-').map(Number);
         const dt = new Date(y, m - 1, d);
         return isNaN(dt.getTime()) ? null : dt;
     }
 
-    // Format 2: DD/MM/YYYY (شائع في الـ sheets العربية)
-    const slashParts = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-    if (slashParts) {
-        const d = Number(slashParts[1]);
-        const m = Number(slashParts[2]);
-        const y = Number(slashParts[3]);
-        // لو d > 12 يبقى أكيد هو اليوم
-        if (d > 12) {
-            const dt = new Date(y, m - 1, d);
-            return isNaN(dt.getTime()) ? null : dt;
-        }
-        // لو مش واضح نفترض DD/MM
+    // DD/MM/YYYY or D/M/YYYY
+    const slashMatch = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if (slashMatch) {
+        const [, d, m, y] = slashMatch.map(Number);
         const dt = new Date(y, m - 1, d);
         return isNaN(dt.getTime()) ? null : dt;
     }
 
-    // Format 3: D/M/YY or similar
-    const slashShort = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2})$/);
-    if (slashShort) {
-        const d = Number(slashShort[1]);
-        const m = Number(slashShort[2]);
-        const y = 2000 + Number(slashShort[3]);
-        const dt = new Date(y, m - 1, d);
+    // D/M/YY
+    const shortMatch = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2})$/);
+    if (shortMatch) {
+        const [, d, m, y] = shortMatch.map(Number);
+        const dt = new Date(2000 + y, m - 1, d);
         return isNaN(dt.getTime()) ? null : dt;
     }
 
-    // Format 4: DD-MM-YYYY
+    // DD-MM-YYYY
     if (/^\d{1,2}-\d{1,2}-\d{4}$/.test(s)) {
-        const parts = s.split('-').map(Number);
-        const dt = new Date(parts[2], parts[1] - 1, parts[0]);
+        const [d, m, y] = s.split('-').map(Number);
+        const dt = new Date(y, m - 1, d);
         return isNaN(dt.getTime()) ? null : dt;
     }
 
-    // Fallback: let browser parse but fix timezone
+    // Fallback — fix timezone shift
     const parsed = new Date(s);
     if (!isNaN(parsed.getTime())) {
         return new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate());
     }
-
     return null;
 }
 
@@ -952,35 +944,24 @@ function daysFromToday(date) {
     return Math.round((d - today) / 86400000);
 }
 
-function formatDate(str) {
-    const d = parseDate(str);
-    if (!d) return str;
-    return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-}
-
-// ── Escape HTML ──────────────────────────────────────────────────────────────
+// ── Helpers ────────────────────────────────────────────────────────────────
 function escapeHtml(str) {
     return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
-// ── Convert links & format notes ─────────────────────────────────────────────
-function linkifyAndFormat(text) {
+function linkify(text) {
     let safe = escapeHtml(text);
-    // URLs to clickable links
     safe = safe.replace(
         /(https?:\/\/[^\s<>"]+)/g,
-        '<a href="$1" target="_blank" rel="noopener" class="t-link">$1 <i class="fas fa-external-link-alt" style="font-size:.65rem"></i></a>'
+        '<a href="$1" target="_blank" rel="noopener" class="t-link">$1 <i class="fas fa-external-link-alt" style="font-size:.6rem"></i></a>'
     );
-    // Newlines to <br>
     safe = safe.replace(/\n/g, '<br>');
     return safe;
 }
 
-// ── Render task cards ────────────────────────────────────────────────────────
+// ── Render ─────────────────────────────────────────────────────────────────
 function renderTasks() {
     const container = document.getElementById('tasksContainer');
     if (!container) return;
@@ -993,7 +974,7 @@ function renderTasks() {
         container.innerHTML = `
             <div class="tasks-empty">
                 <i class="fas fa-check-circle"></i>
-                <p>لا توجد مهام!</p>
+                <p>No tasks found!</p>
             </div>`;
         return;
     }
@@ -1006,47 +987,46 @@ function buildTaskCard(task, idx) {
     const diff    = date ? daysFromToday(date) : null;
     const typeKey = (task.type || '').toLowerCase();
 
-    let badge   = '';
-    let urgency = '';
+    let badge = '', urgency = '';
     if (diff !== null) {
-        if      (diff < 0)   { badge = `<span class="t-badge overdue">متأخر</span>`;          urgency = 'is-overdue'; }
-        else if (diff === 0) { badge = `<span class="t-badge today">اليوم!</span>`;            urgency = 'is-today'; }
-        else if (diff <= 3)  { badge = `<span class="t-badge soon">خلال ${diff} أيام</span>`; urgency = 'is-soon'; }
+        if      (diff < 0)   { badge = `<span class="t-badge overdue">Overdue</span>`;      urgency = 'is-overdue'; }
+        else if (diff === 0) { badge = `<span class="t-badge today">Today!</span>`;         urgency = 'is-today'; }
+        else if (diff <= 3)  { badge = `<span class="t-badge soon">In ${diff}d</span>`;    urgency = 'is-soon'; }
     }
 
     let countdown = '';
     if (diff !== null) {
-        if      (diff < 0)   countdown = `<div class="t-countdown overdue"><i class="fas fa-exclamation-circle"></i> منذ ${Math.abs(diff)} يوم</div>`;
-        else if (diff === 0) countdown = `<div class="t-countdown today"><i class="fas fa-clock"></i> موعد التسليم اليوم!</div>`;
-        else if (diff === 1) countdown = `<div class="t-countdown soon"><i class="fas fa-hourglass-half"></i> يوم واحد متبقي</div>`;
-        else                 countdown = `<div class="t-countdown normal"><i class="fas fa-hourglass-start"></i> ${diff} أيام متبقية</div>`;
+        if      (diff < 0)   countdown = `<div class="t-countdown overdue"><i class="fas fa-exclamation-circle"></i> ${Math.abs(diff)} day${Math.abs(diff)!==1?'s':''} ago</div>`;
+        else if (diff === 0) countdown = `<div class="t-countdown today"><i class="fas fa-clock"></i> Due Today!</div>`;
+        else if (diff === 1) countdown = `<div class="t-countdown soon"><i class="fas fa-hourglass-half"></i> 1 day left</div>`;
+        else                 countdown = `<div class="t-countdown normal"><i class="fas fa-hourglass-start"></i> ${diff} days left</div>`;
     }
 
     const hasNotes = task.notes && task.notes.trim();
     const notesHint = hasNotes
-        ? `<div class="t-notes-hint"><i class="fas fa-sticky-note"></i> اضغط لعرض الملاحظات</div>`
+        ? `<div class="t-notes-hint"><i class="fas fa-sticky-note"></i> Click to view notes</div>`
         : '';
 
     return `
     <div class="t-card ${urgency}" data-type="${typeKey}" onclick="openTaskModal(${idx})" style="cursor:pointer">
         <div class="t-card-top">
-            <span class="t-type">${escapeHtml(task.type || 'مهمة')}</span>
+            <span class="t-type">${escapeHtml(task.type || 'Task')}</span>
             ${badge}
         </div>
         <div class="t-name">${escapeHtml(task.name)}</div>
         ${task.subject ? `<div class="t-meta"><i class="fas fa-book"></i> ${escapeHtml(task.subject)}</div>` : ''}
-        ${task.due     ? `<div class="t-meta"><i class="fas fa-calendar"></i> ${formatDate(task.due)}</div>` : ''}
         ${countdown}
         ${notesHint}
     </div>`;
 }
 
-// ── Task Detail Modal ────────────────────────────────────────────────────────
+// ── Task Modal ─────────────────────────────────────────────────────────────
 function openTaskModal(idx) {
     const task = allTasks[idx];
     if (!task) return;
 
-    // Create modal if not exists
+    const col = getTypeColor(task.type);
+
     if (!document.getElementById('taskDetailModal')) {
         const el = document.createElement('div');
         el.id = 'taskDetailModal';
@@ -1064,9 +1044,8 @@ function openTaskModal(idx) {
                 <div class="tdm-body">
                     <div class="tdm-name"></div>
                     <div class="tdm-meta-row"><i class="fas fa-book"></i> <span class="tdm-subject"></span></div>
-                    <div class="tdm-meta-row"><i class="fas fa-calendar"></i> <span class="tdm-date"></span></div>
                     <div class="tdm-divider"></div>
-                    <div class="tdm-notes-label"><i class="fas fa-sticky-note"></i> الملاحظات</div>
+                    <div class="tdm-notes-label"><i class="fas fa-sticky-note"></i> Notes</div>
                     <div class="tdm-notes"></div>
                 </div>
             </div>`;
@@ -1078,23 +1057,37 @@ function openTaskModal(idx) {
 
     let statusHtml = '';
     if (diff !== null) {
-        if      (diff < 0)   statusHtml = `<span class="t-badge overdue">متأخر بـ ${Math.abs(diff)} يوم</span>`;
-        else if (diff === 0) statusHtml = `<span class="t-badge today">اليوم!</span>`;
-        else if (diff <= 3)  statusHtml = `<span class="t-badge soon">خلال ${diff} أيام</span>`;
-        else                 statusHtml = `<span class="t-countdown normal" style="display:inline-flex"><i class="fas fa-hourglass-start"></i> ${diff} أيام متبقية</span>`;
+        if      (diff < 0)   statusHtml = `<span class="t-badge overdue">Overdue by ${Math.abs(diff)}d</span>`;
+        else if (diff === 0) statusHtml = `<span class="t-badge today">Today!</span>`;
+        else if (diff <= 3)  statusHtml = `<span class="t-badge soon">In ${diff}d</span>`;
+        else                 statusHtml = `<span class="t-countdown normal" style="display:inline-flex"><i class="fas fa-hourglass-start"></i> ${diff} days left</span>`;
     }
 
     const notesHtml = task.notes && task.notes.trim()
-        ? linkifyAndFormat(task.notes)
-        : '<span class="tdm-no-notes">لا توجد ملاحظات</span>';
+        ? linkify(task.notes)
+        : '<span class="tdm-no-notes">No notes.</span>';
 
-    const modal = document.getElementById('taskDetailModal');
-    modal.querySelector('.tdm-type-badge').textContent  = task.type || 'مهمة';
+    const modal  = document.getElementById('taskDetailModal');
+    const box    = modal.querySelector('.tdm-box');
+    const header = modal.querySelector('.tdm-header');
+
+    // Apply card color to modal
+    box.style.borderColor    = col.border;
+    box.style.borderLeftWidth = '4px';
+    box.style.borderLeftColor = col.accent;
+    header.style.background  = col.bg;
+
+    modal.querySelector('.tdm-type-badge').textContent  = task.type || 'Task';
+    modal.querySelector('.tdm-type-badge').style.background = col.bg;
+    modal.querySelector('.tdm-type-badge').style.borderColor = col.border;
+    modal.querySelector('.tdm-type-badge').style.color  = col.accent;
     modal.querySelector('.tdm-status-badge').innerHTML  = statusHtml;
     modal.querySelector('.tdm-name').textContent        = task.name;
     modal.querySelector('.tdm-subject').textContent     = task.subject || '—';
-    modal.querySelector('.tdm-date').textContent        = task.due ? formatDate(task.due) : '—';
     modal.querySelector('.tdm-notes').innerHTML         = notesHtml;
+
+    // Hide subject row if empty
+    modal.querySelector('.tdm-meta-row').style.display = task.subject ? 'flex' : 'none';
 
     modal.classList.add('active');
     document.body.style.overflow = 'hidden';
@@ -1106,7 +1099,7 @@ function closeTaskModal() {
     document.body.style.overflow = '';
 }
 
-// ── Filter ────────────────────────────────────────────────────────────────────
+// ── Filter / Refresh / Toggle ──────────────────────────────────────────────
 function filterTasks(type, el) {
     currentFilter = type;
     document.querySelectorAll('.task-filter-btn').forEach(b => b.classList.remove('active'));
@@ -1114,13 +1107,11 @@ function filterTasks(type, el) {
     renderTasks();
 }
 
-// ── Refresh ───────────────────────────────────────────────────────────────────
 function refreshTasks() {
     allTasks = [];
     loadTasksFromSheet();
 }
 
-// ── Toggle section ────────────────────────────────────────────────────────────
 function toggleTasksSection() {
     const s = document.getElementById('tasksSection');
     if (!s) return;
@@ -1151,14 +1142,14 @@ const SP_LABELS = {
 // pre = array of prerequisites (multi-support)
 const SP_DATA = [
     // Level 1 Term 1
-    { id:99,  name:'English Language',        pre:[],       chain:'lang',     lv:1, tm:1 },
+    { id:0,  name:'English Language',        pre:[],       chain:'lang',     lv:1, tm:1 },
     { id:2,   name:'Creative Thinking',       pre:[],       chain:'soft',     lv:1, tm:1 },
     { id:3,   name:'Calculus',                pre:[],       chain:'math',     lv:1, tm:1 },
     { id:4,   name:'Intro to CS',             pre:[],       chain:'prog',     lv:1, tm:1 },
     { id:5,   name:'Physics',                 pre:[],       chain:'science',  lv:1, tm:1 },
     { id:1,   name:'Electronics',             pre:[],       chain:'hardware', lv:1, tm:1 },
     // Level 1 Term 2
-    { id:6,   name:'Technical Writing',       pre:[99],     chain:'lang',     lv:1, tm:2 },
+    { id:6,   name:'Technical Writing',       pre:[0],     chain:'lang',     lv:1, tm:2 },
     { id:7,   name:'Discrete Math',           pre:[3],      chain:'math',     lv:1, tm:2 },
     { id:8,   name:'Linear Algebra',          pre:[3],      chain:'math',     lv:1, tm:2 },
     { id:9,   name:'Programming',             pre:[4],      chain:'prog',     lv:1, tm:2 },
